@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,23 +15,11 @@ class ClockPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final timeAsync = ref.watch(currentTimeProvider);
+    final time = ref.watch(clockProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: timeAsync.when(
-          data: (time) => _ClockContent(time: time),
-          loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.accent),
-          ),
-          error: (e, _) => Center(
-            child: Text(
-              'Ошибка: $e',
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ),
-      ),
+      backgroundColor: Colors.black,
+      body: _ClockContent(time: time),
     );
   }
 }
@@ -43,58 +33,66 @@ class _ClockContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final clockSize = constraints.maxWidth * 0.75;
+        final width = constraints.maxWidth;
+        final height = constraints.maxHeight;
+        final bottom = MediaQuery.of(context).padding.bottom;
 
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: IntrinsicHeight(
-              child: Column(
-                children: [
-                  const Spacer(flex: 2),
-                  Center(
-                    child: RepaintBoundary(
-                      child: SizedBox(
-                        width: clockSize,
-                        height: clockSize,
-                        child: AnalogClockFace(time: time),
+        // Adaptive sizing: on tall screens (19.5:9), cap clock at 60% height
+        final clockSize = math.min(width * 0.78, height * 0.55);
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: bottom + 16),
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: height),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: [
+                    const Spacer(flex: 2),
+                    Center(
+                      child: RepaintBoundary(
+                        child: SizedBox(
+                          width: clockSize,
+                          height: clockSize,
+                          child: AnalogClockFace(time: time),
+                        ),
                       ),
+                    ).animate().fadeIn(duration: 500.ms, curve: Curves.easeOut),
+                    SizedBox(height: height * 0.03),
+                    DigitalTimeDisplay(time: time)
+                        .animate()
+                        .fadeIn(
+                          duration: 400.ms,
+                          delay: 150.ms,
+                          curve: Curves.easeOut,
+                        )
+                        .slideY(
+                          begin: -0.05,
+                          duration: 400.ms,
+                          delay: 150.ms,
+                          curve: Curves.easeOut,
+                        ),
+                    SizedBox(height: height * 0.015),
+                    WeekdaysRow(currentDay: time.weekday).animate().fadeIn(
+                      duration: 400.ms,
+                      delay: 300.ms,
+                      curve: Curves.easeOut,
                     ),
-                  ).animate().fadeIn(duration: 500.ms, curve: Curves.easeOut),
-                  const SizedBox(height: 32),
-                  DigitalTimeDisplay(time: time)
-                      .animate()
-                      .fadeIn(
-                        duration: 400.ms,
-                        delay: 150.ms,
-                        curve: Curves.easeOut,
-                      )
-                      .slideY(
-                        begin: -0.05,
-                        duration: 400.ms,
-                        delay: 150.ms,
-                        curve: Curves.easeOut,
+                    SizedBox(height: height * 0.01),
+                    Text(
+                      AppDateUtils.formatFullDate(time),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: AppColors.textDim,
                       ),
-                  const SizedBox(height: 16),
-                  WeekdaysRow(currentDay: time.weekday).animate().fadeIn(
-                    duration: 400.ms,
-                    delay: 300.ms,
-                    curve: Curves.easeOut,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    AppDateUtils.formatFullDate(time),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textDim,
+                    ).animate().fadeIn(
+                      duration: 400.ms,
+                      delay: 400.ms,
+                      curve: Curves.easeOut,
                     ),
-                  ).animate().fadeIn(
-                    duration: 400.ms,
-                    delay: 400.ms,
-                    curve: Curves.easeOut,
-                  ),
-                  const Spacer(flex: 1),
-                ],
+                    const Spacer(flex: 1),
+                  ],
+                ),
               ),
             ),
           ),

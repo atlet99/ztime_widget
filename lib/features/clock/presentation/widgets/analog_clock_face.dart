@@ -45,6 +45,10 @@ class _ClockPainter extends CustomPainter {
 
   static final _handPaint = Paint()..strokeCap = StrokeCap.round;
 
+  static final _shadowPaint = Paint()
+    ..color = Colors.black.withValues(alpha: 0.4)
+    ..strokeCap = StrokeCap.round;
+
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
@@ -110,7 +114,9 @@ class _ClockPainter extends CustomPainter {
     for (var i = 0; i < 7; i++) {
       final angle = (i / 7) * 2 * math.pi - math.pi / 2;
       final textRadius = radius * 0.84;
-      final offset = Offset(
+
+      canvas.save();
+      canvas.translate(
         center.dx + textRadius * math.cos(angle),
         center.dy + textRadius * math.sin(angle),
       );
@@ -124,7 +130,9 @@ class _ClockPainter extends CustomPainter {
         ),
       );
       tp.layout();
-      tp.paint(canvas, offset - Offset(tp.width / 2, tp.height / 2));
+      tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2));
+
+      canvas.restore();
     }
   }
 
@@ -135,6 +143,25 @@ class _ClockPainter extends CustomPainter {
         (time.minute + time.second / 60) / 60 * 2 * math.pi - math.pi / 2;
     final secAngle = time.second / 60 * 2 * math.pi - math.pi / 2;
 
+    // Shadow imitations (offset by 2px, no MaskFilter — Impeller safe)
+    _drawHand(
+      canvas,
+      center + const Offset(1.5, 1.5),
+      hourAngle,
+      radius * 0.45,
+      4.0,
+      _shadowPaint.color,
+    );
+    _drawHand(
+      canvas,
+      center + const Offset(1, 1),
+      minAngle,
+      radius * 0.62,
+      2.5,
+      _shadowPaint.color,
+    );
+
+    // Actual hands
     _drawHand(
       canvas,
       center,
@@ -152,15 +179,7 @@ class _ClockPainter extends CustomPainter {
       AppColors.handMinute,
     );
 
-    // Glow behind second hand
-    _drawHand(
-      canvas,
-      center,
-      secAngle,
-      radius * 0.68,
-      6.0,
-      AppColors.handSecond.withValues(alpha: 0.12),
-    );
+    // Second hand (no shadow — too thin)
     _drawHand(
       canvas,
       center,

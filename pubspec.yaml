@@ -22,6 +22,9 @@ dependencies:
   # Animations
   flutter_animate: ^4.5.2
 
+  # Keep screen on
+  wakelock_plus: ^1.6.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
