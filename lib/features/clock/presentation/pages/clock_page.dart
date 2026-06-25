@@ -4,14 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/core/widget/widget_layout.dart';
 import 'package:ztime_widget/core/widget/widget_renderer.dart';
 import 'package:ztime_widget/features/clock/presentation/controllers/clock_controller.dart';
 import 'package:ztime_widget/features/clock/presentation/widgets/analog_clock_face.dart';
+import 'package:ztime_widget/features/clock/presentation/widgets/date_section.dart';
 import 'package:ztime_widget/features/clock/presentation/widgets/digital_time_display.dart';
-import 'package:ztime_widget/features/clock/presentation/widgets/weekdays_row.dart';
 
 class ClockPage extends ConsumerStatefulWidget {
   const ClockPage({super.key});
@@ -39,7 +38,6 @@ class _ClockPageState extends ConsumerState<ClockPage> {
 
     final timeLabel = AppDateUtils.formatTime(time, locale);
 
-    // Only render widget PNG when the minute actually changes (~1x/min)
     final currentMinute = time.minute;
     if (currentMinute != _lastRenderMinute) {
       _lastRenderMinute = currentMinute;
@@ -126,8 +124,7 @@ class _ClockContent extends StatelessWidget {
                           curve: Curves.easeOut,
                         ),
                     SizedBox(height: height * 0.015),
-                    // These two watch clockMinutesProvider (~1x/min rebuild)
-                    const _DateSection(),
+                    const DateSection(),
                     const Spacer(flex: 1),
                   ],
                 ),
@@ -136,48 +133,6 @@ class _ClockContent extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-/// Separate widget that watches clockMinutesProvider.
-/// Only rebuilds ~1x/min instead of ~1x/sec.
-class _DateSection extends ConsumerWidget {
-  const _DateSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final minuteTime = ref.watch(clockMinutesProvider);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final textScaler = MediaQuery.textScalerOf(context);
-    final clampedScaler = textScaler.clamp(maxScaleFactor: 1.4);
-
-    return Column(
-      children: [
-        WeekdaysRow(
-          currentDay: minuteTime.weekday,
-          locale: locale,
-        ).animate().fadeIn(
-          duration: 400.ms,
-          delay: 300.ms,
-          curve: Curves.easeOut,
-        ),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.01,
-        ),
-        Text(
-          AppDateUtils.formatFullDate(minuteTime, locale),
-          textScaler: clampedScaler,
-          style: const TextStyle(
-            fontSize: 16,
-            color: AppColors.textDim,
-          ),
-        ).animate().fadeIn(
-          duration: 400.ms,
-          delay: 400.ms,
-          curve: Curves.easeOut,
-        ),
-      ],
     );
   }
 }

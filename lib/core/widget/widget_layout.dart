@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
+import 'package:ztime_widget/core/widget/widget_constants.dart';
 
 class WidgetLayout extends StatelessWidget {
   const WidgetLayout({super.key, required this.renderKey});
@@ -20,8 +21,8 @@ class WidgetLayout extends StatelessWidget {
     return RepaintBoundary(
       key: renderKey,
       child: SizedBox(
-        width: 360,
-        height: 180,
+        width: WidgetDimensions.width,
+        height: WidgetDimensions.height,
         child: CustomPaint(
           painter: _WidgetPainter(
             dateStr: DateFormat('dd/MM/yyyy', locale).format(now),
@@ -51,11 +52,6 @@ class _WidgetPainter extends CustomPainter {
   final List<int> dates;
   final int todayIndex;
 
-  static const _bgColor = Color(0xFF1C1C1E);
-  static const _panelColor = Color(0xFF2C2C2E);
-  static const _textWhite = Color(0xFFFFFFFF);
-  static const _textGray = Color(0xFF8E8E93);
-
   @override
   void paint(Canvas canvas, Size size) {
     _drawBackground(canvas, size);
@@ -64,53 +60,56 @@ class _WidgetPainter extends CustomPainter {
   }
 
   void _drawBackground(Canvas canvas, Size size) {
-    final bgPaint = Paint()..color = _bgColor;
-    final rrect = RRect.fromLTRBR(0, 0, size.width, size.height, const Radius.circular(16));
+    final bgPaint = Paint()..color = WidgetColors.background;
+    final rrect = RRect.fromLTRBR(
+      0, 0, size.width, size.height,
+      WidgetColors.backgroundRadius,
+    );
     canvas.drawRRect(rrect, bgPaint);
   }
 
   void _drawDateTopRight(Canvas canvas, Size size) {
     final tp = TextPainter(textDirection: ui.TextDirection.ltr);
-
-    // Date line
     tp.text = TextSpan(
       text: '$dateStr\n$dayName',
       style: const TextStyle(
-        color: Color(0xCCFFFFFF),
+        color: WidgetColors.textDate,
         fontSize: 13,
         height: 1.3,
       ),
     );
     tp.layout();
-    tp.paint(canvas, Offset(size.width - tp.width - 16, 12));
+    tp.paint(
+      canvas,
+      Offset(
+        size.width - tp.width - WidgetDimensions.datePadding,
+        WidgetDimensions.dateTop,
+      ),
+    );
   }
 
   void _drawWeekdayPanel(Canvas canvas, Size size) {
-    const panelTop = 120.0;
-    const panelHeight = 52.0;
-    const panelMargin = 12.0;
-    const cornerRadius = Radius.circular(12);
-
     final panelRect = RRect.fromLTRBR(
-      panelMargin,
-      panelTop,
-      size.width - panelMargin,
-      panelTop + panelHeight,
-      cornerRadius,
+      WidgetDimensions.panelMargin,
+      WidgetDimensions.panelTop,
+      size.width - WidgetDimensions.panelMargin,
+      WidgetDimensions.panelTop + WidgetDimensions.panelHeight,
+      WidgetColors.panelRadius,
     );
 
-    final panelPaint = Paint()..color = _panelColor;
+    final panelPaint = Paint()..color = WidgetColors.panel;
     canvas.drawRRect(panelRect, panelPaint);
 
-    final cellWidth = (size.width - panelMargin * 2) / 7;
+    final cellWidth =
+        (size.width - WidgetDimensions.panelMargin * 2) / 7;
     final tp = TextPainter(textDirection: ui.TextDirection.ltr);
 
     for (var i = 0; i < 7; i++) {
       final isToday = i == todayIndex;
-      final color = isToday ? _textWhite : _textGray;
-      final cellCenterX = panelMargin + cellWidth * i + cellWidth / 2;
+      final color = isToday ? WidgetColors.textWhite : WidgetColors.textGray;
+      final cellCenterX =
+          WidgetDimensions.panelMargin + cellWidth * i + cellWidth / 2;
 
-      // Date number (top)
       tp.text = TextSpan(
         text: dates[i].toString(),
         style: TextStyle(
@@ -120,9 +119,9 @@ class _WidgetPainter extends CustomPainter {
         ),
       );
       tp.layout();
-      tp.paint(canvas, Offset(cellCenterX - tp.width / 2, panelTop + 6));
+      tp.paint(
+          canvas, Offset(cellCenterX - tp.width / 2, WidgetDimensions.panelTop + 6));
 
-      // Day abbreviation (bottom)
       tp.text = TextSpan(
         text: labels[i],
         style: TextStyle(
@@ -132,7 +131,8 @@ class _WidgetPainter extends CustomPainter {
         ),
       );
       tp.layout();
-      tp.paint(canvas, Offset(cellCenterX - tp.width / 2, panelTop + 24));
+      tp.paint(
+          canvas, Offset(cellCenterX - tp.width / 2, WidgetDimensions.panelTop + 24));
     }
   }
 

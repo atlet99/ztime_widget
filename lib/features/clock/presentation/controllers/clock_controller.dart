@@ -4,12 +4,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'clock_controller.g.dart';
 
-/// Ticks every 16ms for smooth second hand, but only notifies listeners
-/// when the actual second changes (~1x/sec instead of ~62x/sec).
+/// Ticks once per second for clock hands and digital display.
 @riverpod
 class ClockSeconds extends _$ClockSeconds {
   Timer? _timer;
-  int _lastSecond = -1;
 
   @override
   DateTime build() {
@@ -20,12 +18,8 @@ class ClockSeconds extends _$ClockSeconds {
 
   void _startTimer() {
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(milliseconds: 16), (_) {
-      final now = DateTime.now();
-      if (now.second != _lastSecond) {
-        _lastSecond = now.second;
-        state = now;
-      }
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      state = DateTime.now();
     });
   }
 
@@ -33,9 +27,7 @@ class ClockSeconds extends _$ClockSeconds {
 
   void resume() {
     if (_timer == null || !_timer!.isActive) {
-      final now = DateTime.now();
-      _lastSecond = now.second;
-      state = now;
+      state = DateTime.now();
       _startTimer();
     }
   }

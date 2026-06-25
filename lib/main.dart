@@ -8,6 +8,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:ztime_widget/app.dart';
+import 'package:ztime_widget/core/widget/widget_constants.dart';
 
 const _workTask = 'ztime_widget_refresh';
 
@@ -29,22 +30,19 @@ Future<void> _renderWidgetToPng() async {
     initializeDateFormatting('en', null),
   ]);
 
-  const size = Size(360, 180);
+  const size = Size(WidgetDimensions.width, WidgetDimensions.height);
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder, Offset.zero & size);
 
   final now = DateTime.now();
   const locale = 'ru';
 
-  // Colors
-  const bgColor = Color(0xFF1C1C1E);
-  const panelColor = Color(0xFF2C2C2E);
-  const textWhite = Color(0xFFFFFFFF);
-  const textGray = Color(0xFF8E8E93);
-
   // Background
-  final bgPaint = Paint()..color = bgColor;
-  final bgRRect = RRect.fromLTRBR(0, 0, size.width, size.height, const Radius.circular(16));
+  final bgPaint = Paint()..color = WidgetColors.background;
+  final bgRRect = RRect.fromLTRBR(
+    0, 0, size.width, size.height,
+    WidgetColors.backgroundRadius,
+  );
   canvas.drawRRect(bgRRect, bgPaint);
 
   // Date top-right
@@ -53,54 +51,57 @@ Future<void> _renderWidgetToPng() async {
   TextPainter(textDirection: ui.TextDirection.ltr)
     ..text = TextSpan(
       text: '$dateStr\n$dayName',
-      style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 13, height: 1.3),
+      style: const TextStyle(color: WidgetColors.textDate, fontSize: 13, height: 1.3),
     )
     ..layout()
-    ..paint(canvas, Offset(size.width - 16 - 80, 12));
+    ..paint(canvas, Offset(
+      size.width - WidgetDimensions.datePadding - 80,
+      WidgetDimensions.dateTop,
+    ));
 
   // Weekday panel
-  const panelTop = 120.0;
-  const panelHeight = 52.0;
-  const panelMargin = 12.0;
-  final panelPaint = Paint()..color = panelColor;
+  final panelPaint = Paint()..color = WidgetColors.panel;
   final panelRRect = RRect.fromLTRBR(
-    panelMargin, panelTop,
-    size.width - panelMargin, panelTop + panelHeight,
-    const Radius.circular(12),
+    WidgetDimensions.panelMargin, WidgetDimensions.panelTop,
+    size.width - WidgetDimensions.panelMargin,
+    WidgetDimensions.panelTop + WidgetDimensions.panelHeight,
+    WidgetColors.panelRadius,
   );
   canvas.drawRRect(panelRRect, panelPaint);
 
   final monday = now.subtract(Duration(days: now.weekday - 1));
   final dayFmt = DateFormat('EE', locale);
-  final cellWidth = (size.width - panelMargin * 2) / 7;
+  final cellWidth = (size.width - WidgetDimensions.panelMargin * 2) / 7;
   final todayIndex = now.weekday - 1;
   final tp = TextPainter(textDirection: ui.TextDirection.ltr);
 
   for (var i = 0; i < 7; i++) {
     final isToday = i == todayIndex;
-    final color = isToday ? textWhite : textGray;
-    final cellCenterX = panelMargin + cellWidth * i + cellWidth / 2;
+    final color = isToday ? WidgetColors.textWhite : WidgetColors.textGray;
+    final cellCenterX =
+        WidgetDimensions.panelMargin + cellWidth * i + cellWidth / 2;
     final day = monday.add(Duration(days: i));
 
-    // Date number
     tp.text = TextSpan(
       text: day.day.toString(),
       style: TextStyle(color: color, fontSize: 12, fontWeight: isToday ? FontWeight.w600 : FontWeight.normal),
     );
     tp.layout();
-    tp.paint(canvas, Offset(cellCenterX - tp.width / 2, panelTop + 6));
+    tp.paint(canvas, Offset(cellCenterX - tp.width / 2, WidgetDimensions.panelTop + 6));
 
-    // Day abbreviation
     tp.text = TextSpan(
       text: dayFmt.format(day),
       style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600),
     );
     tp.layout();
-    tp.paint(canvas, Offset(cellCenterX - tp.width / 2, panelTop + 24));
+    tp.paint(canvas, Offset(cellCenterX - tp.width / 2, WidgetDimensions.panelTop + 24));
   }
 
   final picture = recorder.endRecording();
-  final ui.Image image = await picture.toImage(360, 180);
+  final ui.Image image = await picture.toImage(
+    WidgetDimensions.width.toInt(),
+    WidgetDimensions.height.toInt(),
+  );
   final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
   final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
