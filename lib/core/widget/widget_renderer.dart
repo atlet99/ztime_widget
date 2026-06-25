@@ -7,14 +7,15 @@ import 'package:home_widget/home_widget.dart';
 class WidgetRenderer {
   WidgetRenderer._();
 
-  static Future<void> renderFrom(
-    RenderRepaintBoundary? boundary,
-  ) async {
+  static Future<void> renderFrom(RenderRepaintBoundary? boundary) async {
     if (boundary == null) return;
 
-    final ui.Image image = await boundary.toImage(pixelRatio: 2.0);
-    final ByteData? byteData =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+    // Canvas is already 1200×600 physical pixels — no need for device pixelRatio.
+    // Using device ratio (2x–4x) would produce a 4800×2400 image and risk OOM.
+    final ui.Image image = await boundary.toImage(pixelRatio: 1.0);
+    final ByteData? byteData = await image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
     // saveFile writes PNG to disk and stores the file path in SharedPreferences.

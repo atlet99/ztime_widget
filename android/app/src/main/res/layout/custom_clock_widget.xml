@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
 
-    <!-- Flutter-rendered background (date + weekday panel) -->
+    <!-- Flutter-rendered background (date + weekday panel on 1200×600 golden canvas).
+         centerCrop fills the widget without distortion — edges trim symmetrically. -->
     <ImageView
         android:id="@+id/widget_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY" />
+        android:scaleType="centerCrop" />
 
     <!-- Native real-time clock overlay (ticks every second, zero battery cost) -->
     <TextClock

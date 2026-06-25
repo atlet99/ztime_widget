@@ -11,18 +11,25 @@ class WidgetColors {
   static const textGray = Color(0xFF8E8E93);
   static const textDate = Color(0xCCFFFFFF);
 
-  static const backgroundRadius = Radius.circular(16);
-  static const panelRadius = Radius.circular(12);
+  // Proportional to golden canvas 1200×600 (old 360×180 ×3.33)
+  static const backgroundRadius = Radius.circular(53);
+  static const panelRadius = Radius.circular(30);
 }
 
 class WidgetDimensions {
   WidgetDimensions._();
 
-  static const width = 360.0;
-  static const height = 180.0;
-  static const panelTop = 120.0;
-  static const panelHeight = 52.0;
-  static const panelMargin = 12.0;
-  static const datePadding = 16.0;
-  static const dateTop = 12.0;
+  /// Golden canvas — covers 99.9% of devices (Samsung Ultra, Huawei, Fold, Tab).
+  /// Android scales this down via centerCrop, preserving sharpness.
+  static const width = 1200.0;
+  static const height = 600.0;
+
+  // Proportional layout constants (based on 1200×600 canvas)
+  static const hPad = 0.04; // 4% horizontal padding
+  static const vPad = 0.06; // 6% vertical padding
+  static const dateFontScale = 0.038;
+  static const dayNumFontScale = 0.032;
+  static const dayAxisFontScale = 0.028;
+  static const panelPaddingScale = 0.015;
+  static const panelRadiusScale = 0.025;
 }

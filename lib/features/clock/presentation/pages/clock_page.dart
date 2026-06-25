@@ -26,8 +26,9 @@ class _ClockPageState extends ConsumerState<ClockPage> {
 
   void _scheduleWidgetRender() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final boundary = _widgetKey.currentContext
-          ?.findRenderObject() as RenderRepaintBoundary?;
+      final boundary =
+          _widgetKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
       WidgetRenderer.renderFrom(boundary);
     });
   }
@@ -55,10 +56,7 @@ class _ClockPageState extends ConsumerState<ClockPage> {
             label: 'Текущее время: $timeLabel',
             liveRegion: true,
             excludeSemantics: true,
-            child: _ClockContent(
-              time: time,
-              locale: locale,
-            ),
+            child: _ClockContent(time: time, locale: locale),
           ),
           Positioned(
             top: top + 12,
@@ -78,10 +76,7 @@ class _ClockPageState extends ConsumerState<ClockPage> {
               },
             ),
           ),
-          Offstage(
-            offstage: false,
-            child: WidgetLayout(renderKey: _widgetKey),
-          ),
+          Offstage(offstage: false, child: WidgetLayout(renderKey: _widgetKey)),
         ],
       ),
     );
@@ -89,10 +84,7 @@ class _ClockPageState extends ConsumerState<ClockPage> {
 }
 
 class _ClockContent extends StatelessWidget {
-  const _ClockContent({
-    required this.time,
-    required this.locale,
-  });
+  const _ClockContent({required this.time, required this.locale});
 
   final DateTime time;
   final String locale;

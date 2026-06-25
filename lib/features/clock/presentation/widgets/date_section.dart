@@ -18,23 +18,13 @@ class DateSection extends ConsumerWidget {
 
     return Column(
       children: [
-        WeekdaysRow(
-          currentDay: minuteTime.weekday,
-          locale: locale,
-        ).animate().fadeIn(
-          duration: 400.ms,
-          delay: 300.ms,
-          curve: Curves.easeOut,
-        ),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.01,
-        ),
+        WeekdaysRow(currentDay: minuteTime.weekday, locale: locale)
+            .animate()
+            .fadeIn(duration: 400.ms, delay: 300.ms, curve: Curves.easeOut),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.01),
         Text(
           AppDateUtils.formatFullDate(minuteTime, locale),
-          style: const TextStyle(
-            fontSize: 16,
-            color: AppColors.textDim,
-          ),
+          style: const TextStyle(fontSize: 16, color: AppColors.textDim),
         ).animate().fadeIn(
           duration: 400.ms,
           delay: 400.ms,

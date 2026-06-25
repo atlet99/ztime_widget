@@ -30,79 +30,108 @@ Future<void> _renderWidgetToPng() async {
     initializeDateFormatting('en', null),
   ]);
 
-  const size = Size(WidgetDimensions.width, WidgetDimensions.height);
+  const w = WidgetDimensions.width;
+  const h = WidgetDimensions.height;
   final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder, Offset.zero & size);
+  final canvas = Canvas(recorder, Offset.zero & const Size(w, h));
 
   final now = DateTime.now();
   const locale = 'ru';
 
   // Background
-  final bgPaint = Paint()..color = WidgetColors.background;
-  final bgRRect = RRect.fromLTRBR(
-    0, 0, size.width, size.height,
-    WidgetColors.backgroundRadius,
+  canvas.drawRRect(
+    RRect.fromLTRBR(0, 0, w, h, WidgetColors.backgroundRadius),
+    Paint()..color = WidgetColors.background,
   );
-  canvas.drawRRect(bgRRect, bgPaint);
+
+  // Proportional values (mirror widget_layout.dart LayoutBuilder)
+  const hPad = w * WidgetDimensions.hPad;
+  const vPad = h * WidgetDimensions.vPad;
+  const dateFontSize = w * WidgetDimensions.dateFontScale;
+  const dayNumSize = w * WidgetDimensions.dayNumFontScale;
+  const dayAxisSize = w * WidgetDimensions.dayAxisFontScale;
+  const panelPad = w * WidgetDimensions.panelPaddingScale;
+  const panelRad = w * WidgetDimensions.panelRadiusScale;
 
   // Date top-right
-  final dateStr = DateFormat('dd/MM/yyyy', locale).format(now);
-  final dayName = DateFormat('EEEE', locale).format(now);
-  TextPainter(textDirection: ui.TextDirection.ltr)
-    ..text = TextSpan(
-      text: '$dateStr\n$dayName',
-      style: const TextStyle(color: WidgetColors.textDate, fontSize: 13, height: 1.3),
-    )
-    ..layout()
-    ..paint(canvas, Offset(
-      size.width - WidgetDimensions.datePadding - 80,
-      WidgetDimensions.dateTop,
-    ));
-
-  // Weekday panel
-  final panelPaint = Paint()..color = WidgetColors.panel;
-  final panelRRect = RRect.fromLTRBR(
-    WidgetDimensions.panelMargin, WidgetDimensions.panelTop,
-    size.width - WidgetDimensions.panelMargin,
-    WidgetDimensions.panelTop + WidgetDimensions.panelHeight,
-    WidgetColors.panelRadius,
+  final tp = TextPainter(textDirection: ui.TextDirection.ltr);
+  tp.text = TextSpan(
+    text:
+        '${DateFormat('dd/MM/yyyy', locale).format(now)}\n${DateFormat('EEEE', locale).format(now)}',
+    style: const TextStyle(
+      color: WidgetColors.textDate,
+      fontSize: dateFontSize,
+      height: 1.3,
+    ),
   );
-  canvas.drawRRect(panelRRect, panelPaint);
+  tp.layout();
+  tp.paint(canvas, Offset(w - hPad - tp.width, vPad));
 
+  // Weekday panel (positioned at bottom)
   final monday = now.subtract(Duration(days: now.weekday - 1));
   final dayFmt = DateFormat('EE', locale);
-  final cellWidth = (size.width - WidgetDimensions.panelMargin * 2) / 7;
   final todayIndex = now.weekday - 1;
-  final tp = TextPainter(textDirection: ui.TextDirection.ltr);
+  const cellWidth = (w - hPad * 2) / 7;
+
+  // Estimate panel height: num line + spacing + axis line + 2× padding
+  const panelLineHeight = dayNumSize * 1.3;
+  const panelSpacing = dayAxisSize * 0.3;
+  const panelAxisHeight = dayAxisSize * 1.3;
+  const panelHeight =
+      panelLineHeight + panelSpacing + panelAxisHeight + panelPad * 2;
+  const panelTop = h - vPad - panelHeight;
+
+  canvas.drawRRect(
+    RRect.fromLTRBR(
+      hPad,
+      panelTop,
+      w - hPad,
+      h - vPad,
+      const Radius.circular(panelRad),
+    ),
+    Paint()..color = WidgetColors.panel,
+  );
 
   for (var i = 0; i < 7; i++) {
     final isToday = i == todayIndex;
     final color = isToday ? WidgetColors.textWhite : WidgetColors.textGray;
-    final cellCenterX =
-        WidgetDimensions.panelMargin + cellWidth * i + cellWidth / 2;
+    final cx = hPad + cellWidth * i + cellWidth / 2;
     final day = monday.add(Duration(days: i));
 
     tp.text = TextSpan(
       text: day.day.toString(),
-      style: TextStyle(color: color, fontSize: 12, fontWeight: isToday ? FontWeight.w600 : FontWeight.normal),
+      style: TextStyle(
+        color: color,
+        fontSize: dayNumSize,
+        fontWeight: isToday ? FontWeight.w600 : FontWeight.normal,
+      ),
     );
     tp.layout();
-    tp.paint(canvas, Offset(cellCenterX - tp.width / 2, WidgetDimensions.panelTop + 6));
+    tp.paint(canvas, Offset(cx - tp.width / 2, panelTop + panelPad));
 
     tp.text = TextSpan(
       text: dayFmt.format(day),
-      style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600),
+      style: TextStyle(
+        color: color,
+        fontSize: dayAxisSize,
+        fontWeight: FontWeight.w600,
+      ),
     );
     tp.layout();
-    tp.paint(canvas, Offset(cellCenterX - tp.width / 2, WidgetDimensions.panelTop + 24));
+    tp.paint(
+      canvas,
+      Offset(
+        cx - tp.width / 2,
+        panelTop + panelPad + panelLineHeight + panelSpacing,
+      ),
+    );
   }
 
   final picture = recorder.endRecording();
-  final ui.Image image = await picture.toImage(
-    WidgetDimensions.width.toInt(),
-    WidgetDimensions.height.toInt(),
+  final ui.Image image = await picture.toImage(w.toInt(), h.toInt());
+  final ByteData? byteData = await image.toByteData(
+    format: ui.ImageByteFormat.png,
   );
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
   final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
   await HomeWidget.saveFile('widget_png', pngBytes, extension: 'png');
@@ -125,9 +154,7 @@ void main() async {
     'ztime-widget-id',
     _workTask,
     frequency: const Duration(minutes: 15),
-    constraints: Constraints(
-      networkType: NetworkType.notRequired,
-    ),
+    constraints: Constraints(networkType: NetworkType.notRequired),
   );
 
   runApp(const ProviderScope(child: ZTimeApp()));
