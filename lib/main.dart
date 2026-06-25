@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -6,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:ztime_widget/app.dart';
 
@@ -29,101 +29,87 @@ Future<void> _renderWidgetToPng() async {
     initializeDateFormatting('en', null),
   ]);
 
+  const size = Size(360, 180);
   final recorder = ui.PictureRecorder();
-  const size = Size(400, 400);
   final canvas = Canvas(recorder, Offset.zero & size);
 
   final now = DateTime.now();
-  final timeStr =
-      '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+  const locale = 'ru';
 
-  final bgPaint = Paint()..color = const Color(0xFF1A1A2E);
-  final borderPaint = Paint()
-    ..color = const Color(0xFF2D2D44)
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 2.0;
+  // Colors
+  const bgColor = Color(0xFF1C1C1E);
+  const panelColor = Color(0xFF2C2C2E);
+  const textWhite = Color(0xFFFFFFFF);
+  const textGray = Color(0xFF8E8E93);
 
-  final center = Offset(size.width / 2, size.height / 2);
-  final radius = size.width / 2;
+  // Background
+  final bgPaint = Paint()..color = bgColor;
+  final bgRRect = RRect.fromLTRBR(0, 0, size.width, size.height, const Radius.circular(16));
+  canvas.drawRRect(bgRRect, bgPaint);
 
-  canvas.drawCircle(center, radius, bgPaint);
-  canvas.drawCircle(center, radius, borderPaint);
+  // Date top-right
+  final dateStr = DateFormat('dd/MM/yyyy', locale).format(now);
+  final dayName = DateFormat('EEEE', locale).format(now);
+  TextPainter(textDirection: ui.TextDirection.ltr)
+    ..text = TextSpan(
+      text: '$dateStr\n$dayName',
+      style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 13, height: 1.3),
+    )
+    ..layout()
+    ..paint(canvas, Offset(size.width - 16 - 80, 12));
 
-  final markPaint = Paint()
-    ..color = const Color(0xFF666666)
-    ..strokeWidth = 1.5
-    ..strokeCap = StrokeCap.round;
+  // Weekday panel
+  const panelTop = 120.0;
+  const panelHeight = 52.0;
+  const panelMargin = 12.0;
+  final panelPaint = Paint()..color = panelColor;
+  final panelRRect = RRect.fromLTRBR(
+    panelMargin, panelTop,
+    size.width - panelMargin, panelTop + panelHeight,
+    const Radius.circular(12),
+  );
+  canvas.drawRRect(panelRRect, panelPaint);
 
-  for (var i = 0; i < 12; i++) {
-    final angle = (i / 12) * 2 * math.pi;
-    final outer = radius * 0.72;
-    final inner = radius * 0.64;
-    canvas.drawLine(
-      Offset(center.dx + inner * math.cos(angle),
-          center.dy + inner * math.sin(angle)),
-      Offset(center.dx + outer * math.cos(angle),
-          center.dy + outer * math.sin(angle)),
-      markPaint,
+  final monday = now.subtract(Duration(days: now.weekday - 1));
+  final dayFmt = DateFormat('EE', locale);
+  final cellWidth = (size.width - panelMargin * 2) / 7;
+  final todayIndex = now.weekday - 1;
+  final tp = TextPainter(textDirection: ui.TextDirection.ltr);
+
+  for (var i = 0; i < 7; i++) {
+    final isToday = i == todayIndex;
+    final color = isToday ? textWhite : textGray;
+    final cellCenterX = panelMargin + cellWidth * i + cellWidth / 2;
+    final day = monday.add(Duration(days: i));
+
+    // Date number
+    tp.text = TextSpan(
+      text: day.day.toString(),
+      style: TextStyle(color: color, fontSize: 12, fontWeight: isToday ? FontWeight.w600 : FontWeight.normal),
     );
+    tp.layout();
+    tp.paint(canvas, Offset(cellCenterX - tp.width / 2, panelTop + 6));
+
+    // Day abbreviation
+    tp.text = TextSpan(
+      text: dayFmt.format(day),
+      style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600),
+    );
+    tp.layout();
+    tp.paint(canvas, Offset(cellCenterX - tp.width / 2, panelTop + 24));
   }
 
-  final hourAngle =
-      ((now.hour % 12) + now.minute / 60) / 12 * 2 * math.pi - math.pi / 2;
-  final minAngle =
-      (now.minute + now.second / 60) / 60 * 2 * math.pi - math.pi / 2;
-  final secAngle = now.second / 60 * 2 * math.pi - math.pi / 2;
-
-  _drawHand(
-      canvas, center, hourAngle, radius * 0.45, 4.0, const Color(0xFFE0E0E0));
-  _drawHand(
-      canvas, center, minAngle, radius * 0.62, 2.5, const Color(0xFFBDBDBD));
-  _drawHand(
-      canvas, center, secAngle, radius * 0.68, 1.2, const Color(0xFF00BCD4));
-
-  final dotPaint = Paint()
-    ..color = const Color(0xFF00BCD4)
-    ..style = PaintingStyle.fill;
-  canvas.drawCircle(center, 4, dotPaint);
-
-  final timePainter = TextPainter(textDirection: TextDirection.ltr);
-  timePainter.text = TextSpan(
-    text: timeStr,
-    style: const TextStyle(
-      fontSize: 28,
-      fontWeight: FontWeight.w200,
-      color: Color(0xFFE0E0E0),
-    ),
-  );
-  timePainter.layout();
-  timePainter.paint(canvas,
-      Offset(center.dx - timePainter.width / 2, center.dy + radius * 0.15));
-
   final picture = recorder.endRecording();
-  final ui.Image image = await picture.toImage(400, 400);
-  final ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.png);
+  final ui.Image image = await picture.toImage(360, 180);
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
   final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
   await HomeWidget.saveFile('widget_png', pngBytes, extension: 'png');
   await HomeWidget.updateWidget(
-    qualifiedAndroidName:
-        'com.gosayram.ztime_widget.CustomClockWidgetProvider',
+    qualifiedAndroidName: 'com.gosayram.ztime_widget.CustomClockWidgetProvider',
   );
 
   image.dispose();
-}
-
-void _drawHand(Canvas canvas, Offset center, double angle, double length,
-    double width, Color color) {
-  final paint = Paint()
-    ..color = color
-    ..strokeWidth = width
-    ..strokeCap = StrokeCap.round;
-  final end = Offset(
-    center.dx + length * math.cos(angle),
-    center.dy + length * math.sin(angle),
-  );
-  canvas.drawLine(center, end, paint);
 }
 
 void main() async {

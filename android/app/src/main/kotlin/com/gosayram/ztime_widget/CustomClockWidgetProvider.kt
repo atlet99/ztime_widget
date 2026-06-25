@@ -18,7 +18,7 @@ class CustomClockWidgetProvider : HomeWidgetProvider() {
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.custom_clock_widget)
 
-            // home_widget.saveFile() stores the file path string, not Base64.
+            // Load Flutter-rendered background (date + weekday panel)
             val filePath = widgetData.getString("widget_png", null)
             if (filePath != null) {
                 try {
@@ -30,9 +30,12 @@ class CustomClockWidgetProvider : HomeWidgetProvider() {
                         }
                     }
                 } catch (_: Exception) {
-                    // Fallback: show empty widget
+                    // Fallback: empty widget
                 }
             }
+
+            // TextClock (#native_time) ticks natively — no Dart involvement needed.
+            // This is the key trick: Android draws hh:mm every second with zero battery cost.
 
             appWidgetManager.updateAppWidget(widgetId, views)
         }

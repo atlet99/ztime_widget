@@ -25,4 +25,11 @@ class AppDateUtils {
     final fmt = _get('E', locale);
     return List.generate(7, (i) => fmt.format(monday.add(Duration(days: i))));
   }
+
+  static List<String> getWeekdayLabelsShort(String locale) {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final fmt = _get('EE', locale);
+    return List.generate(7, (i) => fmt.format(monday.add(Duration(days: i))));
+  }
 }

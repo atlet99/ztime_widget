@@ -117,6 +117,9 @@ class HuaweiBatteryPage extends StatelessWidget {
       if (canResolve == true) {
         await intent.launch();
       }
-    } catch (_) {}
+    } on Exception catch (_) {
+      // canResolveActivity() can throw on some devices (API 33+ deprecated
+      // resolveActivity). Silently ignore — the intent will fail gracefully.
+    }
   }
 }

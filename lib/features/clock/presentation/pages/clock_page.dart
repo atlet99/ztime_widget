@@ -35,7 +35,6 @@ class _ClockPageState extends ConsumerState<ClockPage> {
   @override
   Widget build(BuildContext context) {
     final time = ref.watch(clockSecondsProvider);
-    final minuteTick = ref.watch(clockMinutesProvider);
     final locale = Localizations.localeOf(context).toLanguageTag();
 
     final timeLabel = AppDateUtils.formatTime(time, locale);
@@ -57,7 +56,6 @@ class _ClockPageState extends ConsumerState<ClockPage> {
             excludeSemantics: true,
             child: _ClockContent(
               time: time,
-              minuteTime: minuteTick,
               locale: locale,
             ),
           ),
@@ -74,12 +72,10 @@ class _ClockPageState extends ConsumerState<ClockPage> {
 class _ClockContent extends StatelessWidget {
   const _ClockContent({
     required this.time,
-    required this.minuteTime,
     required this.locale,
   });
 
   final DateTime time;
-  final DateTime minuteTime;
   final String locale;
 
   @override
@@ -90,7 +86,6 @@ class _ClockContent extends StatelessWidget {
         final height = constraints.maxHeight;
         final bottom = MediaQuery.of(context).padding.bottom;
         final textScaler = MediaQuery.textScalerOf(context);
-        final clampedScaler = textScaler.clamp(maxScaleFactor: 1.4);
 
         final clockSize = math.min(width * 0.78, height * 0.55);
 
@@ -131,27 +126,8 @@ class _ClockContent extends StatelessWidget {
                           curve: Curves.easeOut,
                         ),
                     SizedBox(height: height * 0.015),
-                    WeekdaysRow(
-                      currentDay: minuteTime.weekday,
-                      locale: locale,
-                    ).animate().fadeIn(
-                      duration: 400.ms,
-                      delay: 300.ms,
-                      curve: Curves.easeOut,
-                    ),
-                    SizedBox(height: height * 0.01),
-                    Text(
-                      AppDateUtils.formatFullDate(minuteTime, locale),
-                      textScaler: clampedScaler,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: AppColors.textDim,
-                      ),
-                    ).animate().fadeIn(
-                      duration: 400.ms,
-                      delay: 400.ms,
-                      curve: Curves.easeOut,
-                    ),
+                    // These two watch clockMinutesProvider (~1x/min rebuild)
+                    const _DateSection(),
                     const Spacer(flex: 1),
                   ],
                 ),
@@ -160,6 +136,48 @@ class _ClockContent extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Separate widget that watches clockMinutesProvider.
+/// Only rebuilds ~1x/min instead of ~1x/sec.
+class _DateSection extends ConsumerWidget {
+  const _DateSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final minuteTime = ref.watch(clockMinutesProvider);
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final textScaler = MediaQuery.textScalerOf(context);
+    final clampedScaler = textScaler.clamp(maxScaleFactor: 1.4);
+
+    return Column(
+      children: [
+        WeekdaysRow(
+          currentDay: minuteTime.weekday,
+          locale: locale,
+        ).animate().fadeIn(
+          duration: 400.ms,
+          delay: 300.ms,
+          curve: Curves.easeOut,
+        ),
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.01,
+        ),
+        Text(
+          AppDateUtils.formatFullDate(minuteTime, locale),
+          textScaler: clampedScaler,
+          style: const TextStyle(
+            fontSize: 16,
+            color: AppColors.textDim,
+          ),
+        ).animate().fadeIn(
+          duration: 400.ms,
+          delay: 400.ms,
+          curve: Curves.easeOut,
+        ),
+      ],
     );
   }
 }
