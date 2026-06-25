@@ -5,6 +5,9 @@ import 'package:ztime_widget/app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('ru', null);
+  await Future.wait([
+    initializeDateFormatting('ru', null),
+    initializeDateFormatting('en', null),
+  ]);
   runApp(const ProviderScope(child: ZTimeApp()));
 }

@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:ztime_widget/core/theme/app_colors.dart';
+import 'package:ztime_widget/core/utils/date_utils.dart';
 
 class WeekdaysRow extends StatelessWidget {
-  const WeekdaysRow({super.key, required this.currentDay});
+  const WeekdaysRow({
+    super.key,
+    required this.currentDay,
+    required this.locale,
+  });
 
   final int currentDay;
-
-  static const _days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  final String locale;
 
   @override
   Widget build(BuildContext context) {
+    final labels = AppDateUtils.getWeekdayLabels(locale);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(7, (i) {
@@ -17,7 +23,7 @@ class WeekdaysRow extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Text(
-            _days[i],
+            labels[i],
             style: TextStyle(
               fontSize: 14,
               fontWeight: isToday ? FontWeight.bold : FontWeight.normal,

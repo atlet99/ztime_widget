@@ -16,18 +16,20 @@ class ClockPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final time = ref.watch(clockProvider);
+    final locale = Localizations.localeOf(context).toLanguageTag();
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: _ClockContent(time: time),
+      body: _ClockContent(time: time, locale: locale),
     );
   }
 }
 
 class _ClockContent extends StatelessWidget {
-  const _ClockContent({required this.time});
+  const _ClockContent({required this.time, required this.locale});
 
   final DateTime time;
+  final String locale;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +39,6 @@ class _ClockContent extends StatelessWidget {
         final height = constraints.maxHeight;
         final bottom = MediaQuery.of(context).padding.bottom;
 
-        // Adaptive sizing: on tall screens (19.5:9), cap clock at 60% height
         final clockSize = math.min(width * 0.78, height * 0.55);
 
         return Padding(
@@ -54,7 +55,7 @@ class _ClockContent extends StatelessWidget {
                         child: SizedBox(
                           width: clockSize,
                           height: clockSize,
-                          child: AnalogClockFace(time: time),
+                          child: AnalogClockFace(time: time, locale: locale),
                         ),
                       ),
                     ).animate().fadeIn(duration: 500.ms, curve: Curves.easeOut),
@@ -73,14 +74,17 @@ class _ClockContent extends StatelessWidget {
                           curve: Curves.easeOut,
                         ),
                     SizedBox(height: height * 0.015),
-                    WeekdaysRow(currentDay: time.weekday).animate().fadeIn(
+                    WeekdaysRow(
+                      currentDay: time.weekday,
+                      locale: locale,
+                    ).animate().fadeIn(
                       duration: 400.ms,
                       delay: 300.ms,
                       curve: Curves.easeOut,
                     ),
                     SizedBox(height: height * 0.01),
                     Text(
-                      AppDateUtils.formatFullDate(time),
+                      AppDateUtils.formatFullDate(time, locale),
                       style: const TextStyle(
                         fontSize: 16,
                         color: AppColors.textDim,

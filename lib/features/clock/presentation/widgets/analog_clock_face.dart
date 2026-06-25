@@ -2,27 +2,28 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:ztime_widget/core/theme/app_colors.dart';
+import 'package:ztime_widget/core/utils/date_utils.dart';
 
 class AnalogClockFace extends StatelessWidget {
-  const AnalogClockFace({super.key, required this.time});
+  const AnalogClockFace({super.key, required this.time, required this.locale});
 
   final DateTime time;
+  final String locale;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _ClockPainter(time: time),
+      painter: _ClockPainter(time: time, locale: locale),
       size: Size.infinite,
     );
   }
 }
 
 class _ClockPainter extends CustomPainter {
-  _ClockPainter({required this.time});
+  _ClockPainter({required this.time, required this.locale});
 
   final DateTime time;
-
-  static const _weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  final String locale;
 
   static final _bgPaint = Paint()
     ..color = AppColors.clockBg
@@ -107,6 +108,7 @@ class _ClockPainter extends CustomPainter {
   }
 
   void _drawWeekdays(Canvas canvas, Offset center, double radius) {
+    final labels = AppDateUtils.getWeekdayLabels(locale);
     final tp = TextPainter(textDirection: TextDirection.ltr);
     final today = time.weekday - 1;
     final fontSize = radius * 0.09;
@@ -122,7 +124,7 @@ class _ClockPainter extends CustomPainter {
       );
 
       tp.text = TextSpan(
-        text: _weekdays[i],
+        text: labels[i],
         style: TextStyle(
           color: i == today ? AppColors.accent : AppColors.textDim,
           fontSize: fontSize,
@@ -143,7 +145,7 @@ class _ClockPainter extends CustomPainter {
         (time.minute + time.second / 60) / 60 * 2 * math.pi - math.pi / 2;
     final secAngle = time.second / 60 * 2 * math.pi - math.pi / 2;
 
-    // Shadow imitations (offset by 2px, no MaskFilter — Impeller safe)
+    // Shadow imitations (offset, no MaskFilter — Impeller safe)
     _drawHand(
       canvas,
       center + const Offset(1.5, 1.5),
@@ -178,8 +180,6 @@ class _ClockPainter extends CustomPainter {
       2.5,
       AppColors.handMinute,
     );
-
-    // Second hand (no shadow — too thin)
     _drawHand(
       canvas,
       center,
