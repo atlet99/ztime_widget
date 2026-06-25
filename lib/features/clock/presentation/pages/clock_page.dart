@@ -11,6 +11,7 @@ import 'package:ztime_widget/features/clock/presentation/controllers/clock_contr
 import 'package:ztime_widget/features/clock/presentation/widgets/analog_clock_face.dart';
 import 'package:ztime_widget/features/clock/presentation/widgets/date_section.dart';
 import 'package:ztime_widget/features/clock/presentation/widgets/digital_time_display.dart';
+import 'package:ztime_widget/features/settings/presentation/pages/huawei_battery_page.dart';
 
 class ClockPage extends ConsumerStatefulWidget {
   const ClockPage({super.key});
@@ -44,6 +45,8 @@ class _ClockPageState extends ConsumerState<ClockPage> {
       _scheduleWidgetRender();
     }
 
+    final top = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -55,6 +58,24 @@ class _ClockPageState extends ConsumerState<ClockPage> {
             child: _ClockContent(
               time: time,
               locale: locale,
+            ),
+          ),
+          Positioned(
+            top: top + 12,
+            left: 16,
+            child: IconButton(
+              icon: const Icon(
+                Icons.settings,
+                color: Color(0x66FFFFFF),
+                size: 22,
+              ),
+              onPressed: () {
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const HuaweiBatteryPage(),
+                  ),
+                );
+              },
             ),
           ),
           Offstage(
