@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ztime_widget/core/utils/date_utils.dart';
+import 'package:ztime_widget/core/theme/app_colors.dart';
 
 class DigitalTimeDisplay extends StatelessWidget {
   const DigitalTimeDisplay({super.key, required this.time});
@@ -8,43 +8,31 @@ class DigitalTimeDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final now = AppDateUtils.formatTime(time);
-    final parts = now.split(':');
+    final hours = time.hour.toString().padLeft(2, '0');
+    final minutes = time.minute.toString().padLeft(2, '0');
+
+    const digitStyle = TextStyle(
+      fontSize: 72,
+      fontWeight: FontWeight.w200,
+      color: AppColors.textPrimary,
+      letterSpacing: 2,
+      fontFeatures: [FontFeature.tabularFigures()],
+    );
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
-        Text(
-          parts[0],
-          style: const TextStyle(
-            fontSize: 72,
-            fontWeight: FontWeight.w200,
-            color: Colors.white,
-            letterSpacing: 2,
-          ),
-        ),
+        Text(hours, style: digitStyle),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
             ':',
-            style: TextStyle(
-              fontSize: 72,
-              fontWeight: FontWeight.w200,
-              color: Colors.white.withValues(alpha: 0.5),
-            ),
+            style: digitStyle.copyWith(color: AppColors.textDim),
           ),
         ),
-        Text(
-          parts[1],
-          style: const TextStyle(
-            fontSize: 72,
-            fontWeight: FontWeight.w200,
-            color: Colors.white,
-            letterSpacing: 2,
-          ),
-        ),
+        Text(minutes, style: digitStyle),
       ],
     );
   }

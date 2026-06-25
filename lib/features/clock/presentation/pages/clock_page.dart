@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/features/clock/presentation/controllers/clock_controller.dart';
 import 'package:ztime_widget/features/clock/presentation/widgets/analog_clock_face.dart';
@@ -19,7 +20,7 @@ class ClockPage extends ConsumerWidget {
         child: timeAsync.when(
           data: (time) => _ClockContent(time: time),
           loading: () => const Center(
-            child: CircularProgressIndicator(color: Color(0xFF6C63FF)),
+            child: CircularProgressIndicator(color: AppColors.accent),
           ),
           error: (e, _) => Center(
             child: Text(
@@ -51,7 +52,6 @@ class _ClockContent extends StatelessWidget {
               child: Column(
                 children: [
                   const Spacer(flex: 2),
-                  // Analog clock
                   Center(
                     child: RepaintBoundary(
                       child: SizedBox(
@@ -62,7 +62,6 @@ class _ClockContent extends StatelessWidget {
                     ),
                   ).animate().fadeIn(duration: 500.ms, curve: Curves.easeOut),
                   const SizedBox(height: 32),
-                  // Digital time
                   DigitalTimeDisplay(time: time)
                       .animate()
                       .fadeIn(
@@ -77,19 +76,17 @@ class _ClockContent extends StatelessWidget {
                         curve: Curves.easeOut,
                       ),
                   const SizedBox(height: 16),
-                  // Weekdays
                   WeekdaysRow(currentDay: time.weekday).animate().fadeIn(
                     duration: 400.ms,
                     delay: 300.ms,
                     curve: Curves.easeOut,
                   ),
                   const SizedBox(height: 12),
-                  // Full date
                   Text(
                     AppDateUtils.formatFullDate(time),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: AppColors.textDim,
                     ),
                   ).animate().fadeIn(
                     duration: 400.ms,

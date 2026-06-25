@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ztime_widget/core/theme/app_colors.dart';
 
 class WeekdaysRow extends StatelessWidget {
   const WeekdaysRow({super.key, required this.currentDay});
@@ -20,9 +21,7 @@ class WeekdaysRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-              color: isToday
-                  ? const Color(0xFF6C63FF)
-                  : Colors.white.withValues(alpha: 0.4),
+              color: isToday ? AppColors.accent : AppColors.textDim,
             ),
           ),
         );
