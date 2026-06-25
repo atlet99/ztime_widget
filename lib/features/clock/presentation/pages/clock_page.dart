@@ -22,8 +22,9 @@ class ClockPage extends ConsumerStatefulWidget {
 
 class _ClockPageState extends ConsumerState<ClockPage> {
   final _widgetKey = GlobalKey();
+  int _lastRenderMinute = -1;
 
-  void _renderWidget() {
+  void _scheduleWidgetRender() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final boundary = _widgetKey.currentContext
           ?.findRenderObject() as RenderRepaintBoundary?;
@@ -39,7 +40,12 @@ class _ClockPageState extends ConsumerState<ClockPage> {
 
     final timeLabel = AppDateUtils.formatTime(time, locale);
 
-    _renderWidget();
+    // Only render widget PNG when the minute actually changes (~1x/min)
+    final currentMinute = time.minute;
+    if (currentMinute != _lastRenderMinute) {
+      _lastRenderMinute = currentMinute;
+      _scheduleWidgetRender();
+    }
 
     return Scaffold(
       backgroundColor: Colors.black,

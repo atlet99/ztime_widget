@@ -59,19 +59,26 @@ Future<void> _renderWidgetToPng() async {
     final outer = radius * 0.72;
     final inner = radius * 0.64;
     canvas.drawLine(
-      Offset(center.dx + inner * math.cos(angle), center.dy + inner * math.sin(angle)),
-      Offset(center.dx + outer * math.cos(angle), center.dy + outer * math.sin(angle)),
+      Offset(center.dx + inner * math.cos(angle),
+          center.dy + inner * math.sin(angle)),
+      Offset(center.dx + outer * math.cos(angle),
+          center.dy + outer * math.sin(angle)),
       markPaint,
     );
   }
 
-  final hourAngle = ((now.hour % 12) + now.minute / 60) / 12 * 2 * math.pi - math.pi / 2;
-  final minAngle = (now.minute + now.second / 60) / 60 * 2 * math.pi - math.pi / 2;
+  final hourAngle =
+      ((now.hour % 12) + now.minute / 60) / 12 * 2 * math.pi - math.pi / 2;
+  final minAngle =
+      (now.minute + now.second / 60) / 60 * 2 * math.pi - math.pi / 2;
   final secAngle = now.second / 60 * 2 * math.pi - math.pi / 2;
 
-  _drawHand(canvas, center, hourAngle, radius * 0.45, 4.0, const Color(0xFFE0E0E0));
-  _drawHand(canvas, center, minAngle, radius * 0.62, 2.5, const Color(0xFFBDBDBD));
-  _drawHand(canvas, center, secAngle, radius * 0.68, 1.2, const Color(0xFF00BCD4));
+  _drawHand(
+      canvas, center, hourAngle, radius * 0.45, 4.0, const Color(0xFFE0E0E0));
+  _drawHand(
+      canvas, center, minAngle, radius * 0.62, 2.5, const Color(0xFFBDBDBD));
+  _drawHand(
+      canvas, center, secAngle, radius * 0.68, 1.2, const Color(0xFF00BCD4));
 
   final dotPaint = Paint()
     ..color = const Color(0xFF00BCD4)
@@ -88,8 +95,8 @@ Future<void> _renderWidgetToPng() async {
     ),
   );
   timePainter.layout();
-  timePainter.paint(
-      canvas, Offset(center.dx - timePainter.width / 2, center.dy + radius * 0.15));
+  timePainter.paint(canvas,
+      Offset(center.dx - timePainter.width / 2, center.dy + radius * 0.15));
 
   final picture = recorder.endRecording();
   final ui.Image image = await picture.toImage(400, 400);
@@ -97,7 +104,7 @@ Future<void> _renderWidgetToPng() async {
       await image.toByteData(format: ui.ImageByteFormat.png);
   final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-  await HomeWidget.saveWidgetData('widget_png', pngBytes);
+  await HomeWidget.saveFile('widget_png', pngBytes, extension: 'png');
   await HomeWidget.updateWidget(
     qualifiedAndroidName:
         'com.gosayram.ztime_widget.CustomClockWidgetProvider',

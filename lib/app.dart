@@ -27,7 +27,7 @@ class _ZTimeAppState extends ConsumerState<ZTimeApp>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    WakelockPlus.disable();
+    _disableWakelock();
     super.dispose();
   }
 
@@ -43,10 +43,11 @@ class _ZTimeAppState extends ConsumerState<ZTimeApp>
       case AppLifecycleState.hidden:
         seconds.pause();
         minutes.pause();
-        WakelockPlus.disable();
+        _disableWakelock();
       case AppLifecycleState.resumed:
         seconds.resume();
         minutes.resume();
+        _enterImmersive();
         _enableWakelock();
     }
   }
@@ -62,7 +63,17 @@ class _ZTimeAppState extends ConsumerState<ZTimeApp>
   }
 
   void _enableWakelock() {
-    WakelockPlus.enable();
+    // WakelockPlus throws PlatformException if activity is null (e.g. during
+    // early lifecycle transitions). Guard with try/catch.
+    try {
+      WakelockPlus.enable();
+    } on PlatformException catch (_) {}
+  }
+
+  void _disableWakelock() {
+    try {
+      WakelockPlus.disable();
+    } on PlatformException catch (_) {}
   }
 
   @override

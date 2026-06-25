@@ -2,8 +2,8 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:ztime_widget/core/theme/app_colors.dart';
+import 'package:ztime_widget/core/utils/date_utils.dart';
 
 class WidgetLayout extends StatelessWidget {
   const WidgetLayout({super.key, required this.renderKey});
@@ -14,10 +14,10 @@ class WidgetLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final locale = Localizations.localeOf(context).toLanguageTag();
-    final timeStr = DateFormat.Hm(locale).format(now);
-    final dateStr = DateFormat.yMMMMd(locale).format(now);
+    final timeStr = AppDateUtils.formatTime(now, locale);
+    final dateStr = AppDateUtils.formatFullDate(now, locale);
     final parts = timeStr.split(':');
-    final labels = _getWeekdayLabels(locale);
+    final labels = AppDateUtils.getWeekdayLabels(locale);
     final today = now.weekday - 1;
 
     return RepaintBoundary(
@@ -33,20 +33,13 @@ class WidgetLayout extends StatelessWidget {
           painter: _WidgetPainter(
             hour: parts[0],
             minute: parts[1],
-            date: '$dateStr (${DateFormat.EEEE(locale).format(now)})',
+            date: dateStr,
             labels: labels,
             todayIndex: today,
           ),
         ),
       ),
     );
-  }
-
-  static List<String> _getWeekdayLabels(String locale) {
-    final now = DateTime.now();
-    final monday = now.subtract(Duration(days: now.weekday - 1));
-    final fmt = DateFormat.E(locale);
-    return List.generate(7, (i) => fmt.format(monday.add(Duration(days: i))));
   }
 }
 

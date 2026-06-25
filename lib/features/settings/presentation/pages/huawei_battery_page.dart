@@ -107,11 +107,16 @@ class HuaweiBatteryPage extends StatelessWidget {
     );
   }
 
-  void _openBatterySettings() {
+  Future<void> _openBatterySettings() async {
     const intent = AndroidIntent(
       action: 'android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS',
       flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
     );
-    intent.launch().catchError((_) {});
+    try {
+      final canResolve = await intent.canResolveActivity();
+      if (canResolve == true) {
+        await intent.launch();
+      }
+    } catch (_) {}
   }
 }

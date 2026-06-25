@@ -17,7 +17,9 @@ class WidgetRenderer {
         await image.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-    await HomeWidget.saveWidgetData('widget_png', pngBytes);
+    // saveFile writes PNG to disk and stores the file path in SharedPreferences.
+    // saveWidgetData does NOT accept Uint8List — it would throw error code -10.
+    await HomeWidget.saveFile('widget_png', pngBytes, extension: 'png');
     await HomeWidget.updateWidget(
       qualifiedAndroidName:
           'com.gosayram.ztime_widget.CustomClockWidgetProvider',

@@ -8,15 +8,18 @@ part of 'clock_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Ticks every 16ms for smooth second hand and digital display.
+/// Ticks every 16ms for smooth second hand, but only notifies listeners
+/// when the actual second changes (~1x/sec instead of ~62x/sec).
 
 @ProviderFor(ClockSeconds)
 final clockSecondsProvider = ClockSecondsProvider._();
 
-/// Ticks every 16ms for smooth second hand and digital display.
+/// Ticks every 16ms for smooth second hand, but only notifies listeners
+/// when the actual second changes (~1x/sec instead of ~62x/sec).
 final class ClockSecondsProvider
     extends $NotifierProvider<ClockSeconds, DateTime> {
-  /// Ticks every 16ms for smooth second hand and digital display.
+  /// Ticks every 16ms for smooth second hand, but only notifies listeners
+  /// when the actual second changes (~1x/sec instead of ~62x/sec).
   ClockSecondsProvider._()
     : super(
         from: null,
@@ -44,9 +47,10 @@ final class ClockSecondsProvider
   }
 }
 
-String _$clockSecondsHash() => r'84e0b5f071147f3182fa6687c772b2b0d1726ce7';
+String _$clockSecondsHash() => r'66c5a816091c06df80ffe511ba7683549b0972d1';
 
-/// Ticks every 16ms for smooth second hand and digital display.
+/// Ticks every 16ms for smooth second hand, but only notifies listeners
+/// when the actual second changes (~1x/sec instead of ~62x/sec).
 
 abstract class _$ClockSeconds extends $Notifier<DateTime> {
   DateTime build();
