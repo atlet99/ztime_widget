@@ -19,21 +19,24 @@ class DigitalTimeDisplay extends StatelessWidget {
       fontFeatures: [FontFeature.tabularFigures()],
     );
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        Text(hours, style: digitStyle),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-            ':',
-            style: digitStyle.copyWith(color: AppColors.textDim),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Text(hours, style: digitStyle),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              ':',
+              style: digitStyle.copyWith(color: AppColors.textDim),
+            ),
           ),
-        ),
-        Text(minutes, style: digitStyle),
-      ],
+          Text(minutes, style: digitStyle),
+        ],
+      ),
     );
   }
 }

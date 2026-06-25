@@ -5,25 +5,40 @@ import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
 
 class AnalogClockFace extends StatelessWidget {
-  const AnalogClockFace({super.key, required this.time, required this.locale});
+  const AnalogClockFace({
+    super.key,
+    required this.time,
+    required this.locale,
+    this.textScaler = TextScaler.noScaling,
+  });
 
   final DateTime time;
   final String locale;
+  final TextScaler textScaler;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _ClockPainter(time: time, locale: locale),
+      painter: _ClockPainter(
+        time: time,
+        locale: locale,
+        textScaler: textScaler,
+      ),
       size: Size.infinite,
     );
   }
 }
 
 class _ClockPainter extends CustomPainter {
-  _ClockPainter({required this.time, required this.locale});
+  _ClockPainter({
+    required this.time,
+    required this.locale,
+    required this.textScaler,
+  });
 
   final DateTime time;
   final String locale;
+  final TextScaler textScaler;
 
   static final _bgPaint = Paint()
     ..color = AppColors.clockBg
@@ -111,11 +126,13 @@ class _ClockPainter extends CustomPainter {
     final labels = AppDateUtils.getWeekdayLabels(locale);
     final tp = TextPainter(textDirection: TextDirection.ltr);
     final today = time.weekday - 1;
-    final fontSize = radius * 0.09;
+    final baseFontSize = radius * 0.09;
 
     for (var i = 0; i < 7; i++) {
       final angle = (i / 7) * 2 * math.pi - math.pi / 2;
-      final textRadius = radius * 0.84;
+      // Pull text inward when font is scaled up to prevent overflow
+      final scaleFactor = textScaler.scale(1.0);
+      final textRadius = radius * (scaleFactor > 1.2 ? 0.78 : 0.84);
 
       canvas.save();
       canvas.translate(
@@ -127,10 +144,11 @@ class _ClockPainter extends CustomPainter {
         text: labels[i],
         style: TextStyle(
           color: i == today ? AppColors.accent : AppColors.textDim,
-          fontSize: fontSize,
+          fontSize: baseFontSize,
           fontWeight: i == today ? FontWeight.bold : FontWeight.normal,
         ),
       );
+      tp.textScaler = textScaler;
       tp.layout();
       tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2));
 

@@ -18,9 +18,16 @@ class ClockPage extends ConsumerWidget {
     final time = ref.watch(clockProvider);
     final locale = Localizations.localeOf(context).toLanguageTag();
 
+    final timeLabel = AppDateUtils.formatTime(time, locale);
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: _ClockContent(time: time, locale: locale),
+      body: Semantics(
+        label: 'Текущее время: $timeLabel',
+        liveRegion: true,
+        excludeSemantics: true,
+        child: _ClockContent(time: time, locale: locale),
+      ),
     );
   }
 }
@@ -38,6 +45,8 @@ class _ClockContent extends StatelessWidget {
         final width = constraints.maxWidth;
         final height = constraints.maxHeight;
         final bottom = MediaQuery.of(context).padding.bottom;
+        final textScaler = MediaQuery.textScalerOf(context);
+        final clampedScaler = textScaler.clamp(maxScaleFactor: 1.4);
 
         final clockSize = math.min(width * 0.78, height * 0.55);
 
@@ -55,7 +64,11 @@ class _ClockContent extends StatelessWidget {
                         child: SizedBox(
                           width: clockSize,
                           height: clockSize,
-                          child: AnalogClockFace(time: time, locale: locale),
+                          child: AnalogClockFace(
+                            time: time,
+                            locale: locale,
+                            textScaler: textScaler,
+                          ),
                         ),
                       ),
                     ).animate().fadeIn(duration: 500.ms, curve: Curves.easeOut),
@@ -85,6 +98,7 @@ class _ClockContent extends StatelessWidget {
                     SizedBox(height: height * 0.01),
                     Text(
                       AppDateUtils.formatFullDate(time, locale),
+                      textScaler: clampedScaler,
                       style: const TextStyle(
                         fontSize: 16,
                         color: AppColors.textDim,
