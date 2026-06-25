@@ -1,41 +1,79 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
+import 'package:ztime_widget/core/widget/widget_layout.dart';
+import 'package:ztime_widget/core/widget/widget_renderer.dart';
 import 'package:ztime_widget/features/clock/presentation/controllers/clock_controller.dart';
 import 'package:ztime_widget/features/clock/presentation/widgets/analog_clock_face.dart';
 import 'package:ztime_widget/features/clock/presentation/widgets/digital_time_display.dart';
 import 'package:ztime_widget/features/clock/presentation/widgets/weekdays_row.dart';
 
-class ClockPage extends ConsumerWidget {
+class ClockPage extends ConsumerStatefulWidget {
   const ClockPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final time = ref.watch(clockProvider);
+  ConsumerState<ClockPage> createState() => _ClockPageState();
+}
+
+class _ClockPageState extends ConsumerState<ClockPage> {
+  final _widgetKey = GlobalKey();
+
+  void _renderWidget() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final boundary = _widgetKey.currentContext
+          ?.findRenderObject() as RenderRepaintBoundary?;
+      WidgetRenderer.renderFrom(boundary);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final time = ref.watch(clockSecondsProvider);
+    final minuteTick = ref.watch(clockMinutesProvider);
     final locale = Localizations.localeOf(context).toLanguageTag();
 
     final timeLabel = AppDateUtils.formatTime(time, locale);
 
+    _renderWidget();
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Semantics(
-        label: 'Текущее время: $timeLabel',
-        liveRegion: true,
-        excludeSemantics: true,
-        child: _ClockContent(time: time, locale: locale),
+      body: Stack(
+        children: [
+          Semantics(
+            label: 'Текущее время: $timeLabel',
+            liveRegion: true,
+            excludeSemantics: true,
+            child: _ClockContent(
+              time: time,
+              minuteTime: minuteTick,
+              locale: locale,
+            ),
+          ),
+          Offstage(
+            offstage: false,
+            child: WidgetLayout(renderKey: _widgetKey),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _ClockContent extends StatelessWidget {
-  const _ClockContent({required this.time, required this.locale});
+  const _ClockContent({
+    required this.time,
+    required this.minuteTime,
+    required this.locale,
+  });
 
   final DateTime time;
+  final DateTime minuteTime;
   final String locale;
 
   @override
@@ -88,7 +126,7 @@ class _ClockContent extends StatelessWidget {
                         ),
                     SizedBox(height: height * 0.015),
                     WeekdaysRow(
-                      currentDay: time.weekday,
+                      currentDay: minuteTime.weekday,
                       locale: locale,
                     ).animate().fadeIn(
                       duration: 400.ms,
@@ -97,7 +135,7 @@ class _ClockContent extends StatelessWidget {
                     ),
                     SizedBox(height: height * 0.01),
                     Text(
-                      AppDateUtils.formatFullDate(time, locale),
+                      AppDateUtils.formatFullDate(minuteTime, locale),
                       textScaler: clampedScaler,
                       style: const TextStyle(
                         fontSize: 16,

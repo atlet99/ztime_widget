@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ZTime</string>
+    <string name="widget_description">ZTime Widget — custom clock with analog face and Russian localization</string>
+</resources>

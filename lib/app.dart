@@ -33,20 +33,21 @@ class _ZTimeAppState extends ConsumerState<ZTimeApp>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final clock = ref.read(clockProvider.notifier);
+    final seconds = ref.read(clockSecondsProvider.notifier);
+    final minutes = ref.read(clockMinutesProvider.notifier);
 
     switch (state) {
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
-        clock.pause();
+      case AppLifecycleState.hidden:
+        seconds.pause();
+        minutes.pause();
         WakelockPlus.disable();
       case AppLifecycleState.resumed:
-        clock.resume();
+        seconds.resume();
+        minutes.resume();
         _enableWakelock();
-      case AppLifecycleState.hidden:
-        clock.pause();
-        WakelockPlus.disable();
     }
   }
 

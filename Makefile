@@ -1,4 +1,4 @@
-.PHONY: help get gen clean format fix analyze test check-all fix-all build build-apk build-appbundle run release
+.PHONY: help get gen clean format fix analyze test check-all fix-all build build-split build-debug build-aab run release
 
 APP_NAME := ztime_widget
 
@@ -31,16 +31,18 @@ check-all: format analyze test ## Format + Analyze + Test
 
 fix-all: format fix analyze ## Format + Fix + Analyze
 
-build: ## Build release APK
-	flutter build apk --release
+build: build-split ## Alias for build-split
 
-build-apk: ## Build debug APK
+build-split: ## Build split APKs per ABI (arm64, arm, x86_64)
+	flutter build apk --split-per-abi --release
+
+build-debug: ## Build debug APK (universal)
 	flutter build apk --debug
 
-build-appbundle: ## Build release AAB (for Play Store)
+build-aab: ## Build release AAB (for Play Store)
 	flutter build appbundle --release
 
 run: ## Run on connected device
 	flutter run
 
-release: check-all build ## Full check + release build
+release: check-all build-split ## Full check + split release build
