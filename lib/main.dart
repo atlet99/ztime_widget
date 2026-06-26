@@ -76,7 +76,7 @@ Future<void> _renderWidgetToPng() async {
   }
 
   // Dark overlay for text readability
-  final overlayPaint = Paint()..color = const Color(0x8C1C1C1E); // 55% alpha
+  final overlayPaint = Paint()..color = const Color(0x8C1C1C1E);
   canvas.drawRect(const Rect.fromLTWH(0, 0, w, h), overlayPaint);
 
   // Top highlight line — glass reflection
@@ -91,51 +91,54 @@ Future<void> _renderWidgetToPng() async {
     );
   canvas.drawRect(const Rect.fromLTWH(0, 0, w, 1.5), highlightPaint);
 
-  // Layout metrics — matching widget_layout.dart
-  const edgePad = w * 0.04;
-  final timeSize = h * 0.38;
-  final timeTop = h * 0.08;
-  final dateLeft = w * 0.62;
-  final dateFontSize = w * 0.042;
-  final dayNameSize = w * 0.036;
-  final calNumSize = w * 0.04;
-  final calLetterSize = w * 0.028;
-  final cardH = h * 0.28;
-  final cardRadius = w * 0.015;
-  final calTop = h * 0.68;
+  // Safe area — 6.5% horizontal, 5.5% vertical
+  final safePadX = w * 0.065;
+  final safePadY = h * 0.055;
+  final contentW = w - safePadX * 2;
+
+  // Date typography (time is handled by native TextClock)
+  final dateFontSize = contentW * 0.042;
+  final dayNameSize = contentW * 0.032;
+
+  // Calendar strip
+  final calHeight = h * 0.18;
+  final calTop = h - safePadY - calHeight;
+  final calNumSize = contentW * 0.038;
+  final calLetterSize = contentW * 0.026;
+  final calCardRadius = 12.0;
+  final pillRadius = 8.0;
 
   final tp = TextPainter(textDirection: ui.TextDirection.ltr);
 
-  // Zone B: Date + day name — right of time
+  // Date — top-right, Regular weight 400, opacity 0.85
   final dateStr = DateFormat('dd/MM/yyyy', locale).format(now);
-  final dayName = DateFormat('EEEE', locale).format(now);
-  final dateY = timeTop + timeSize * 0.35;
-
   tp.text = TextSpan(
     text: dateStr,
     style: TextStyle(
-      color: Colors.white,
+      color: Colors.white.withValues(alpha: 0.85),
       fontSize: dateFontSize,
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w400,
       height: 1.2,
     ),
   );
   tp.layout();
-  tp.paint(canvas, Offset(dateLeft, dateY));
+  tp.paint(canvas, Offset(w - safePadX - tp.width, safePadY));
 
+  // Day name — opacity 0.70, Regular weight
+  final dayName = DateFormat('EEEE', locale).format(now);
   tp.text = TextSpan(
     text: dayName,
     style: TextStyle(
-      color: Colors.white.withValues(alpha: 0.75),
+      color: Colors.white.withValues(alpha: 0.70),
       fontSize: dayNameSize,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w400,
       height: 1.2,
     ),
   );
   tp.layout();
-  tp.paint(canvas, Offset(dateLeft, dateY + dateFontSize * 1.2 + 4));
+  tp.paint(canvas, Offset(w - safePadX - tp.width, safePadY + dateFontSize * 1.2 + 2));
 
-  // Zone C: Calendar strip with glass cards
+  // Calendar strip
   final monday = now.subtract(Duration(days: now.weekday - 1));
   final shortLabels = <String>[];
   final dayFmt = DateFormat('EE', locale);
@@ -143,70 +146,88 @@ Future<void> _renderWidgetToPng() async {
     shortLabels.add(dayFmt.format(monday.add(Duration(days: i))));
   }
   final todayIndex = now.weekday - 1;
-  const calWidth = w - edgePad * 2;
-  const cellWidth = calWidth / 7;
+  final calWidth = contentW;
+  final cellWidth = calWidth / 7;
 
   final cardPaint = Paint();
-  final cardBorderPaint = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.0;
 
   for (var i = 0; i < 7; i++) {
     final isToday = i == todayIndex;
-    final cx = edgePad + cellWidth * i;
+    final cx = safePadX + cellWidth * i;
     final dayNum = monday.add(Duration(days: i)).day;
 
-    // Glass card
+    // Glass card — #2C2C2E background
     final cardRect = RRect.fromLTRBR(
-      cx + 3,
+      cx + 2,
       calTop,
-      cx + cellWidth - 3,
-      calTop + cardH,
-      Radius.circular(cardRadius),
+      cx + cellWidth - 2,
+      calTop + calHeight,
+      Radius.circular(calCardRadius),
     );
-    cardPaint.color = isToday
-        ? const Color(0x40FFFFFF) // 25% white
-        : const Color(0x14FFFFFF); // 8% white
-    cardBorderPaint.color = isToday
-        ? const Color(0x80FFFFFF) // 50% white
-        : const Color(0x1FFFFFFF); // 12% white
+    cardPaint.color = const Color(0x1A2C2C2E);
     canvas.drawRRect(cardRect, cardPaint);
-    canvas.drawRRect(cardRect, cardBorderPaint);
 
-    // Day number
-    tp.text = TextSpan(
-      text: dayNum.toString(),
-      style: TextStyle(
-        color: isToday
-            ? Colors.white
-            : Colors.white.withValues(alpha: 0.9),
-        fontSize: calNumSize,
-        fontWeight: FontWeight.w700,
-        height: 1.1,
-      ),
-    );
-    tp.layout();
+    final dayText = dayNum.toString();
+
+    if (isToday) {
+      // Active day: white pill, black text
+      tp.text = TextSpan(
+        text: dayText,
+        style: TextStyle(
+          color: WidgetColors.textActive,
+          fontSize: calNumSize,
+          fontWeight: FontWeight.w500,
+          height: 1.1,
+        ),
+      );
+      tp.layout();
+
+      final pillW = tp.width + 12;
+      final pillH = tp.height + 6;
+      final pillRect = RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset(cx + cellWidth / 2, calTop + calHeight * 0.35),
+          width: pillW,
+          height: pillH,
+        ),
+        Radius.circular(pillRadius),
+      );
+      canvas.drawRRect(pillRect, Paint()..color = Colors.white);
+    } else {
+      // Inactive: opacity 0.55
+      tp.text = TextSpan(
+        text: dayText,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.55),
+          fontSize: calNumSize,
+          fontWeight: FontWeight.w500,
+          height: 1.1,
+        ),
+      );
+      tp.layout();
+    }
+
     tp.paint(
       canvas,
-      Offset(cx + cellWidth / 2 - tp.width / 2, calTop + cardH * 0.22),
+      Offset(cx + cellWidth / 2 - tp.width / 2, calTop + calHeight * 0.25),
     );
 
-    // Day letter
+    // Day letters — opacity 0.35 Regular, active 0.70
     tp.text = TextSpan(
       text: shortLabels[i],
       style: TextStyle(
         color: isToday
-            ? Colors.white.withValues(alpha: 0.9)
-            : Colors.white.withValues(alpha: 0.5),
+            ? Colors.white.withValues(alpha: 0.70)
+            : Colors.white.withValues(alpha: 0.35),
         fontSize: calLetterSize,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w400,
         height: 1.1,
       ),
     );
     tp.layout();
     tp.paint(
       canvas,
-      Offset(cx + cellWidth / 2 - tp.width / 2, calTop + cardH * 0.58),
+      Offset(cx + cellWidth / 2 - tp.width / 2, calTop + calHeight * 0.65),
     );
   }
 
