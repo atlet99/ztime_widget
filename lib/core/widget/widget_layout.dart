@@ -31,7 +31,8 @@ class WidgetLayout extends StatelessWidget {
             final topDateSize = w * 0.035;
             final calNumSize = w * 0.035;
             final calDaySize = w * 0.025;
-            final calCircleRadius = calNumSize * 0.85;
+            final calPillW = calNumSize * 2.2;
+            final calPillH = calNumSize * 1.8;
             final bottomRowSize = w * 0.03;
             final bottomDateSize = w * 0.028;
 
@@ -42,11 +43,11 @@ class WidgetLayout extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    // 1. Top-right date
+                    // 1. Top-right date (0.85 alpha)
                     Text(
                       '${DateFormat('dd/MM/yyyy', locale).format(now)}\n${DateFormat('EEEE', locale).format(now)}',
                       style: TextStyle(
-                        color: WidgetColors.textDate,
+                        color: WidgetColors.textActive,
                         fontSize: topDateSize,
                         height: 1.3,
                       ),
@@ -62,22 +63,22 @@ class WidgetLayout extends StatelessWidget {
                         final dayNum = monday.add(Duration(days: i)).day;
                         final isToday = i == today;
                         return SizedBox(
-                          width: calCircleRadius * 2.8,
+                          width: calPillW * 1.4,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Number with optional white circle
+                              // Number with pill highlight for today
                               SizedBox(
-                                width: calCircleRadius * 2,
-                                height: calCircleRadius * 2,
+                                width: calPillW,
+                                height: calPillH,
                                 child: Center(
                                   child: isToday
                                       ? Container(
-                                          width: calCircleRadius * 2,
-                                          height: calCircleRadius * 2,
-                                          decoration: const BoxDecoration(
-                                            color: WidgetColors.textWhite,
-                                            shape: BoxShape.circle,
+                                          width: calPillW,
+                                          height: calPillH,
+                                          decoration: BoxDecoration(
+                                            color: WidgetColors.textTime,
+                                            borderRadius: BorderRadius.circular(8),
                                           ),
                                           child: Center(
                                             child: Text(
@@ -93,7 +94,7 @@ class WidgetLayout extends StatelessWidget {
                                       : Text(
                                           dayNum.toString(),
                                           style: TextStyle(
-                                            color: WidgetColors.textWhite,
+                                            color: WidgetColors.textTime,
                                             fontSize: calNumSize,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -105,8 +106,8 @@ class WidgetLayout extends StatelessWidget {
                                 shortLabels[i],
                                 style: TextStyle(
                                   color: isToday
-                                      ? WidgetColors.textWhite
-                                      : WidgetColors.textWhite70,
+                                      ? WidgetColors.textActive
+                                      : WidgetColors.textInactive,
                                   fontSize: calDaySize,
                                 ),
                               ),
@@ -116,16 +117,18 @@ class WidgetLayout extends StatelessWidget {
                       }),
                     ),
 
-                    // 3. Empty zone for native TextClock — equal spacers center it
-                    const Spacer(),
-                    const Spacer(),
+                    // 3. Empty zone for native TextClock
+                    // Optical center: top spacer smaller, bottom larger
+                    // Shifts empty zone ~3% above mathematical center
+                    const Spacer(flex: 3),
+                    const Spacer(flex: 4),
 
-                    // 4. Bottom weekday abbreviations
+                    // 4. Bottom weekday abbreviations (0.40 alpha)
                     Text(
                       shortLabels.join('  '),
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: WidgetColors.textWhite70,
+                        color: WidgetColors.textRow,
                         fontSize: bottomRowSize,
                         letterSpacing: 2.0,
                       ),
@@ -133,12 +136,12 @@ class WidgetLayout extends StatelessWidget {
 
                     SizedBox(height: h * 0.03),
 
-                    // 5. Full date
+                    // 5. Full date (0.30 alpha)
                     Text(
                       DateFormat('d MMMM yyyy г. (EEEE)', locale).format(now),
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: WidgetColors.textDim,
+                        color: WidgetColors.textFullDate,
                         fontSize: bottomDateSize,
                       ),
                     ),

@@ -1,23 +1,25 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
 
 /// Shared constants for widget rendering.
-/// Used by both WidgetLayout (in-app) and main.dart (background WorkManager task).
+/// Used by both WidgetLayout (widget PNG) and ClockFace (in-app display).
 class WidgetColors {
   WidgetColors._();
 
+  // Background
   static const background = Color(0xFF1C1C1E);
-  static const textWhite = Color(0xFFFFFFFF);
-  static const textWhite70 = Color(0xB3FFFFFF);
-  static const textGray = Color(0xFF8E8E93);
-  static const textDim = Color(0x80FFFFFF);
-  static const textDate = Color(0xCCFFFFFF);
+
+  // Alpha channel hierarchy (Master Plan Block 3)
+  static const textTime = Color(0xFFFFFFFF); // 1.0 — time digits
+  static const textActive = Color(0xD9FFFFFF); // 0.85 — date top, active day
+  static const textInactive = Color(0x80FFFFFF); // 0.50 — inactive mini-cal days
+  static const textRow = Color(0x66FFFFFF); // 0.40 — bottom weekday row
+  static const textFullDate = Color(0x4DFFFFFF); // 0.30 — full date bottom
 }
 
 class WidgetDimensions {
   WidgetDimensions._();
 
-  /// Golden canvas — covers 99.9% of devices (Samsung Ultra, Huawei, Fold, Tab).
-  /// Android scales this down via centerCrop, preserving sharpness.
+  /// Golden canvas — covers 99.9% of devices.
   static const width = 1200.0;
   static const height = 600.0;
 }

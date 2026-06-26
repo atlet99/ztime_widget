@@ -2,14 +2,15 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="@drawable/widget_background">
 
     <!-- Flutter-rendered background (date + mini-calendar + weekday row + full date) -->
     <ImageView
         android:id="@+id/widget_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:filter="true" />
 
     <!-- Native real-time clock overlay — dots, not colons! -->
     <TextClock

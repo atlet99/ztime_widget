@@ -38,7 +38,7 @@ Future<void> _renderWidgetToPng() async {
   final now = DateTime.now();
   const locale = 'ru';
 
-  // Flat background — no rounded corners (Android launcher handles clipping)
+  // Flat background
   canvas.drawColor(WidgetColors.background, BlendMode.src);
 
   // Proportional values (mirror widget_layout.dart exactly)
@@ -47,21 +47,17 @@ Future<void> _renderWidgetToPng() async {
   const topDateSize = w * 0.035;
   const calNumSize = w * 0.035;
   const calDaySize = w * 0.025;
-  const calCircleRadius = calNumSize * 0.85;
+  const calPillW = calNumSize * 2.2;
+  const calPillH = calNumSize * 1.8;
   const bottomRowSize = w * 0.03;
   const bottomDateSize = w * 0.028;
 
   final tp = TextPainter(textDirection: ui.TextDirection.ltr);
 
-  // 1. Top-right date
+  // 1. Top-right date (0.85 alpha)
   tp.text = TextSpan(
-    text:
-        '${DateFormat('dd/MM/yyyy', locale).format(now)}\n${DateFormat('EEEE', locale).format(now)}',
-    style: const TextStyle(
-      color: WidgetColors.textDate,
-      fontSize: topDateSize,
-      height: 1.3,
-    ),
+    text: '${DateFormat('dd/MM/yyyy', locale).format(now)}\n${DateFormat('EEEE', locale).format(now)}',
+    style: const TextStyle(color: WidgetColors.textActive, fontSize: topDateSize, height: 1.3),
   );
   tp.layout();
   tp.paint(canvas, Offset(w - hPad - tp.width, vPad));
@@ -82,82 +78,64 @@ Future<void> _renderWidgetToPng() async {
     final isToday = i == todayIndex;
     final cx = hPad + cellWidth * i + cellWidth / 2;
     final dayNum = monday.add(Duration(days: i)).day;
-    const cy = calTop + calCircleRadius;
 
     if (isToday) {
-      // White circle behind today's number
-      final circlePaint = Paint()..color = WidgetColors.textWhite;
-      canvas.drawCircle(Offset(cx, cy), calCircleRadius, circlePaint);
+      // White pill behind today's number
+      final pillPaint = Paint()..color = WidgetColors.textTime;
+      final pillRect = RRect.fromLTRBR(
+        cx - calPillW / 2,
+        calTop,
+        cx + calPillW / 2,
+        calTop + calPillH,
+        const Radius.circular(8),
+      );
+      canvas.drawRRect(pillRect, pillPaint);
     }
 
     // Day number
     tp.text = TextSpan(
       text: dayNum.toString(),
       style: TextStyle(
-        color: isToday ? WidgetColors.background : WidgetColors.textWhite,
+        color: isToday ? WidgetColors.background : WidgetColors.textTime,
         fontSize: calNumSize,
         fontWeight: FontWeight.bold,
       ),
     );
     tp.layout();
-    tp.paint(
-      canvas,
-      Offset(cx - tp.width / 2, calTop + (calCircleRadius * 2 - tp.height) / 2),
-    );
+    tp.paint(canvas, Offset(cx - tp.width / 2, calTop + (calPillH - tp.height) / 2));
 
     // Day abbreviation
-    final dayColor = isToday
-        ? WidgetColors.textWhite
-        : WidgetColors.textWhite70;
+    final dayColor = isToday ? WidgetColors.textActive : WidgetColors.textInactive;
     tp.text = TextSpan(
       text: shortLabels[i],
       style: TextStyle(color: dayColor, fontSize: calDaySize),
     );
     tp.layout();
-    tp.paint(
-      canvas,
-      Offset(
-        cx - tp.width / 2,
-        calTop + calCircleRadius * 2 + calDaySize * 0.2,
-      ),
-    );
+    tp.paint(canvas, Offset(cx - tp.width / 2, calTop + calPillH + calDaySize * 0.2));
   }
 
   // 3–4. Bottom section
-  const bottomY =
-      h - vPad - bottomDateSize * 1.3 - h * 0.03 - bottomRowSize * 1.3;
+  const bottomY = h - vPad - bottomDateSize * 1.3 - h * 0.03 - bottomRowSize * 1.3;
 
-  // Weekday abbreviations
+  // Weekday abbreviations (0.40 alpha)
   tp.text = TextSpan(
     text: shortLabels.join('  '),
-    style: const TextStyle(
-      color: WidgetColors.textWhite70,
-      fontSize: bottomRowSize,
-      letterSpacing: 2.0,
-    ),
+    style: const TextStyle(color: WidgetColors.textRow, fontSize: bottomRowSize, letterSpacing: 2.0),
   );
   tp.layout();
   tp.paint(canvas, Offset((w - tp.width) / 2, bottomY));
 
-  // Full date
+  // Full date (0.30 alpha)
   tp.text = TextSpan(
     text: DateFormat('d MMMM yyyy г. (EEEE)', locale).format(now),
-    style: const TextStyle(
-      color: WidgetColors.textDim,
-      fontSize: bottomDateSize,
-    ),
+    style: const TextStyle(color: WidgetColors.textFullDate, fontSize: bottomDateSize),
   );
   tp.layout();
-  tp.paint(
-    canvas,
-    Offset((w - tp.width) / 2, bottomY + bottomRowSize * 1.3 + h * 0.03),
-  );
+  tp.paint(canvas, Offset((w - tp.width) / 2, bottomY + bottomRowSize * 1.3 + h * 0.03));
 
   final picture = recorder.endRecording();
   final ui.Image image = await picture.toImage(w.toInt(), h.toInt());
-  final ByteData? byteData = await image.toByteData(
-    format: ui.ImageByteFormat.png,
-  );
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
   final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
   await HomeWidget.saveFile('widget_png', pngBytes, extension: 'png');
