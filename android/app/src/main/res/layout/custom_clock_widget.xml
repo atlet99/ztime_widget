@@ -26,7 +26,7 @@
         android:format24Hour="HH:mm"
         android:textColor="#FFFFFF"
         android:textSize="110sp"
-        android:fontFamily="sans-serif-thin"
+        android:fontFamily="@font/roboto_thin"
         android:letterSpacing="0.08" />
 
 </FrameLayout>
