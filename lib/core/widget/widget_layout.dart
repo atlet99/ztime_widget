@@ -12,7 +12,7 @@ class WidgetLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final locale = Localizations.localeOf(context).toLanguageTag();
-    final labels = AppDateUtils.getWeekdayLabelsShort(locale);
+    final shortLabels = AppDateUtils.getWeekdayLabelsShort(locale);
     final today = now.weekday - 1;
     final monday = now.subtract(Duration(days: now.weekday - 1));
 
@@ -26,13 +26,13 @@ class WidgetLayout extends StatelessWidget {
             final w = constraints.maxWidth;
             final h = constraints.maxHeight;
 
-            final hPad = w * WidgetDimensions.hPad;
-            final vPad = h * WidgetDimensions.vPad;
-            final dateFontSize = w * WidgetDimensions.dateFontScale;
-            final dayNumSize = w * WidgetDimensions.dayNumFontScale;
-            final dayAxisSize = w * WidgetDimensions.dayAxisFontScale;
-            final panelPad = w * WidgetDimensions.panelPaddingScale;
-            final panelRad = w * WidgetDimensions.panelRadiusScale;
+            final hPad = w * 0.05;
+            final vPad = h * 0.05;
+            final topDateSize = w * 0.035;
+            final calNumSize = w * 0.035;
+            final calDaySize = w * 0.025;
+            final bottomRowSize = w * 0.03;
+            final bottomDateSize = w * 0.028;
 
             return Container(
               color: WidgetColors.background,
@@ -41,57 +41,80 @@ class WidgetLayout extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    // 1. Top-right date
                     Text(
                       '${DateFormat('dd/MM/yyyy', locale).format(now)}\n${DateFormat('EEEE', locale).format(now)}',
                       style: TextStyle(
                         color: WidgetColors.textDate,
-                        fontSize: dateFontSize,
+                        fontSize: topDateSize,
                         height: 1.3,
                       ),
                       textAlign: TextAlign.right,
                     ),
-                    const Spacer(),
-                    // Empty slot for native Android TextClock
-                    const Spacer(),
-                    Container(
-                      padding: EdgeInsets.all(panelPad),
-                      decoration: BoxDecoration(
-                        color: WidgetColors.panel,
-                        borderRadius: BorderRadius.circular(panelRad),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(7, (i) {
-                          final dayNum = monday.add(Duration(days: i)).day;
-                          final isToday = i == today;
-                          final color = isToday
-                              ? WidgetColors.textWhite
-                              : WidgetColors.textGray;
-                          return Column(
+
+                    SizedBox(height: h * 0.06),
+
+                    // 2. Mini-calendar (center)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(7, (i) {
+                        final dayNum = monday.add(Duration(days: i)).day;
+                        final isToday = i == today;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 dayNum.toString(),
                                 style: TextStyle(
-                                  color: color,
-                                  fontSize: dayNumSize,
-                                  fontWeight: isToday
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
+                                  color: isToday
+                                      ? WidgetColors.background
+                                      : WidgetColors.textWhite,
+                                  fontSize: calNumSize,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: dayAxisSize * 0.3),
+                              SizedBox(height: calDaySize * 0.2),
                               Text(
-                                labels[i],
+                                shortLabels[i],
                                 style: TextStyle(
-                                  color: color,
-                                  fontSize: dayAxisSize,
-                                  fontWeight: FontWeight.w600,
+                                  color: isToday
+                                      ? WidgetColors.background
+                                      : WidgetColors.textWhite70,
+                                  fontSize: calDaySize,
                                 ),
                               ),
                             ],
-                          );
-                        }),
+                          ),
+                        );
+                      }),
+                    ),
+
+                    // 3. Empty slot for native TextClock
+                    const Spacer(flex: 2),
+                    const Spacer(flex: 3),
+
+                    // 4. Bottom weekday abbreviations
+                    Text(
+                      shortLabels.join('  '),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: WidgetColors.textWhite70,
+                        fontSize: bottomRowSize,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+
+                    SizedBox(height: h * 0.03),
+
+                    // 5. Full date
+                    Text(
+                      DateFormat('d MMMM yyyy г. (EEEE)', locale).format(now),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: WidgetColors.textDim,
+                        fontSize: bottomDateSize,
                       ),
                     ),
                   ],

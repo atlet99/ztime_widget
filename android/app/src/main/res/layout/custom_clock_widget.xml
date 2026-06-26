@@ -4,25 +4,24 @@
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
-    <!-- Flutter-rendered background (date + weekday panel on 1200×600 golden canvas).
-         centerCrop fills the widget without distortion — edges trim symmetrically. -->
+    <!-- Flutter-rendered background (date + mini-calendar + weekday row + full date) -->
     <ImageView
         android:id="@+id/widget_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop" />
 
-    <!-- Native real-time clock overlay (ticks every second, zero battery cost) -->
+    <!-- Native real-time clock overlay — dots, not colons! -->
     <TextClock
         android:id="@+id/native_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:format12Hour="hh:mm"
-        android:format24Hour="HH:mm"
+        android:format12Hour="hh.mm"
+        android:format24Hour="HH.mm"
         android:textColor="#FFFFFF"
-        android:textSize="64sp"
+        android:textSize="110sp"
         android:fontFamily="sans-serif-thin"
-        android:letterSpacing="0.05" />
+        android:letterSpacing="0.02" />
 </FrameLayout>
