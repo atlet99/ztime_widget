@@ -16,19 +16,35 @@ class ZTimeApp extends ConsumerStatefulWidget {
 
 class _ZTimeAppState extends ConsumerState<ZTimeApp>
     with WidgetsBindingObserver {
+  static const _channel = MethodChannel(
+    'com.gosayram.ztime_widget/date_change',
+  );
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _enterImmersive();
     _enableWakelock();
+    _setupDateChannel();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _channel.setMethodCallHandler(null);
     _disableWakelock();
     super.dispose();
+  }
+
+  /// Listen for day-change signals from Kotlin BroadcastReceiver.
+  void _setupDateChannel() {
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'onDayChanged') {
+        // Force clock rebuild → triggers widget PNG re-render in ClockPage
+        ref.read(clockSecondsProvider.notifier).resume();
+      }
+    });
   }
 
   @override
@@ -63,8 +79,6 @@ class _ZTimeAppState extends ConsumerState<ZTimeApp>
   }
 
   void _enableWakelock() {
-    // WakelockPlus throws PlatformException if activity is null (e.g. during
-    // early lifecycle transitions). Guard with try/catch.
     try {
       WakelockPlus.enable();
     } on PlatformException catch (_) {}

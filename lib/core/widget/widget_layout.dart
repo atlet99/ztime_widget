@@ -3,6 +3,11 @@ import 'package:intl/intl.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/core/widget/widget_constants.dart';
 
+/// Widget background for home screen PNG.
+/// 3-zone layout:
+///   Zone A (top-left): EMPTY — TextClock overlays here via ConstraintLayout
+///   Zone B (top-right): Date + day name
+///   Zone C (bottom third): Calendar strip with pill highlight
 class WidgetLayout extends StatelessWidget {
   const WidgetLayout({super.key, required this.renderKey});
 
@@ -26,127 +31,129 @@ class WidgetLayout extends StatelessWidget {
             final w = constraints.maxWidth;
             final h = constraints.maxHeight;
 
-            final hPad = w * 0.05;
-            final vPad = h * 0.05;
-            final topDateSize = w * 0.035;
-            final calNumSize = w * 0.035;
-            final calDaySize = w * 0.025;
-            final calPillW = calNumSize * 2.2;
-            final calPillH = calNumSize * 1.8;
-            final bottomRowSize = w * 0.03;
-            final bottomDateSize = w * 0.028;
+            // Mirrored padding — same 5% that XML TextClock uses
+            final edgePad = w * 0.05;
+            final topPad = h * 0.08;
+
+            // Zone B: date (top-right)
+            final dateFontSize = w * 0.038;
+            final dayNameSize = w * 0.032;
+
+            // Zone C: calendar strip (bottom third)
+            final calNumSize = w * 0.04;
+            final calLetterSize = w * 0.028;
+            final pillH = calNumSize * 2.0;
+            final calTop = h * 0.62;
 
             return Container(
               color: WidgetColors.background,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    // 1. Top-right date (0.85 alpha)
-                    Text(
-                      '${DateFormat('dd/MM/yyyy', locale).format(now)}\n${DateFormat('EEEE', locale).format(now)}',
-                      style: TextStyle(
-                        color: WidgetColors.textActive,
-                        fontSize: topDateSize,
-                        height: 1.3,
-                      ),
-                      textAlign: TextAlign.right,
+              child: Stack(
+                children: [
+                  // Zone B: Date top-right
+                  Positioned(
+                    top: topPad,
+                    right: edgePad,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          DateFormat('dd/MM/yyyy', locale).format(now),
+                          style: TextStyle(
+                            color: WidgetColors.textDate,
+                            fontSize: dateFontSize,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          DateFormat('EEEE', locale).format(now),
+                          style: TextStyle(
+                            color: WidgetColors.textDayName,
+                            fontSize: dayNameSize,
+                            height: 1.2,
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
 
-                    SizedBox(height: h * 0.06),
+                  // Zone C: Calendar strip (bottom third, full width)
+                  Positioned(
+                    top: calTop,
+                    left: 0,
+                    right: 0,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: edgePad),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(7, (i) {
+                          final dayNum = monday.add(Duration(days: i)).day;
+                          final isToday = i == today;
+                          final numColor = isToday
+                              ? WidgetColors.background
+                              : WidgetColors.textCalNum;
+                          final letterColor = isToday
+                              ? WidgetColors.background
+                              : WidgetColors.textCalLetter;
 
-                    // 2. Mini-calendar (center)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(7, (i) {
-                        final dayNum = monday.add(Duration(days: i)).day;
-                        final isToday = i == today;
-                        return SizedBox(
-                          width: calPillW * 1.4,
-                          child: Column(
+                          return Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Number with pill highlight for today
-                              SizedBox(
-                                width: calPillW,
-                                height: calPillH,
-                                child: Center(
-                                  child: isToday
-                                      ? Container(
-                                          width: calPillW,
-                                          height: calPillH,
-                                          decoration: BoxDecoration(
-                                            color: WidgetColors.textTime,
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              dayNum.toString(),
-                                              style: TextStyle(
-                                                color: WidgetColors.background,
-                                                fontSize: calNumSize,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                      : Text(
+                              // Pill for active day, plain text for others
+                              isToday
+                                  ? Container(
+                                      height: pillH,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: WidgetColors.textActive,
+                                        borderRadius: BorderRadius.circular(
+                                          100,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
                                           dayNum.toString(),
                                           style: TextStyle(
-                                            color: WidgetColors.textTime,
+                                            color: numColor,
                                             fontSize: calNumSize,
-                                            fontWeight: FontWeight.bold,
+                                            fontWeight: FontWeight.w600,
+                                            height: 1.1,
                                           ),
                                         ),
-                                ),
-                              ),
-                              SizedBox(height: calDaySize * 0.2),
+                                      ),
+                                    )
+                                  : SizedBox(
+                                      height: pillH,
+                                      child: Center(
+                                        child: Text(
+                                          dayNum.toString(),
+                                          style: TextStyle(
+                                            color: numColor,
+                                            fontSize: calNumSize,
+                                            fontWeight: FontWeight.w500,
+                                            height: 1.1,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                              const SizedBox(height: 4),
                               Text(
                                 shortLabels[i],
                                 style: TextStyle(
-                                  color: isToday
-                                      ? WidgetColors.textActive
-                                      : WidgetColors.textInactive,
-                                  fontSize: calDaySize,
+                                  color: letterColor,
+                                  fontSize: calLetterSize,
+                                  height: 1.1,
                                 ),
                               ),
                             ],
-                          ),
-                        );
-                      }),
-                    ),
-
-                    // 3. Empty zone for native TextClock
-                    // Optical center: top spacer smaller, bottom larger
-                    // Shifts empty zone ~3% above mathematical center
-                    const Spacer(flex: 3),
-                    const Spacer(flex: 4),
-
-                    // 4. Bottom weekday abbreviations (0.40 alpha)
-                    Text(
-                      shortLabels.join('  '),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: WidgetColors.textRow,
-                        fontSize: bottomRowSize,
-                        letterSpacing: 2.0,
+                          );
+                        }),
                       ),
                     ),
-
-                    SizedBox(height: h * 0.03),
-
-                    // 5. Full date (0.30 alpha)
-                    Text(
-                      DateFormat('d MMMM yyyy г. (EEEE)', locale).format(now),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: WidgetColors.textFullDate,
-                        fontSize: bottomDateSize,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },

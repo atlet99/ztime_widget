@@ -4,8 +4,8 @@ import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/core/widget/widget_constants.dart';
 
 /// In-app full-screen clock face.
-/// Mirrors the widget design but adapts to the phone's aspect ratio (19.5:9).
-/// Uses Riverpod for dynamic time (no TextClock — that's for the widget only).
+/// 3-zone edge-anchored layout matching the widget design.
+/// Time is rendered by Flutter (Riverpod 1s tick), not TextClock.
 class ClockFace extends StatelessWidget {
   const ClockFace({super.key, required this.time, required this.locale});
 
@@ -20,120 +20,42 @@ class ClockFace extends StatelessWidget {
         final h = constraints.maxHeight;
         final padding = MediaQuery.of(context).padding;
 
-        // Clamp max width so it doesn't stretch on tablets
+        // Clamp max width for tablets
         final maxW = w < 480 ? w : 400.0;
         final sidePad = (w - maxW) / 2;
 
-        // Proportional sizes
-        final topDateSize = maxW * 0.04;
+        // Mirrored padding — same 5% that widget uses
+        final edgePad = maxW * 0.05;
+        final topPad = padding.top + 16.0;
+
+        // Zone A: time (top-left)
+        final timeSize = maxW * 0.18;
+
+        // Zone B: date (top-right)
+        final dateFontSize = maxW * 0.04;
+        final dayNameSize = maxW * 0.034;
+
+        // Zone C: calendar strip (bottom third)
         final calNumSize = maxW * 0.045;
-        final calDaySize = maxW * 0.032;
-        final calPillW = calNumSize * 2.2;
-        final calPillH = calNumSize * 1.8;
-        final timeSize = maxW * 0.22;
-        final bottomRowSize = maxW * 0.038;
-        final bottomDateSize = maxW * 0.035;
+        final calLetterSize = maxW * 0.032;
+        final pillH = calNumSize * 2.0;
 
         final shortLabels = AppDateUtils.getWeekdayLabelsShort(locale);
         final today = time.weekday - 1;
         final monday = time.subtract(Duration(days: time.weekday - 1));
 
         return Padding(
-          padding: EdgeInsets.only(
-            top: padding.top + 16,
-            bottom: padding.bottom + 16,
-          ),
-          child: Column(
+          padding: EdgeInsets.symmetric(horizontal: sidePad),
+          child: Stack(
             children: [
-              // 1. Top-right date (0.85 alpha)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: sidePad + 24),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    '${DateFormat('dd/MM/yyyy', locale).format(time)}\n${DateFormat('EEEE', locale).format(time)}',
-                    style: TextStyle(
-                      color: WidgetColors.textActive,
-                      fontSize: topDateSize,
-                      height: 1.3,
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-              ),
-
-              SizedBox(height: h * 0.03),
-
-              // 2. Mini-calendar
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: sidePad),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(7, (i) {
-                    final dayNum = monday.add(Duration(days: i)).day;
-                    final isToday = i == today;
-                    return SizedBox(
-                      width: calPillW * 1.4,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: calPillW,
-                            height: calPillH,
-                            child: Center(
-                              child: isToday
-                                  ? Container(
-                                      width: calPillW,
-                                      height: calPillH,
-                                      decoration: BoxDecoration(
-                                        color: WidgetColors.textTime,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          dayNum.toString(),
-                                          style: TextStyle(
-                                            color: WidgetColors.background,
-                                            fontSize: calNumSize,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : Text(
-                                      dayNum.toString(),
-                                      style: TextStyle(
-                                        color: WidgetColors.textTime,
-                                        fontSize: calNumSize,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                          SizedBox(height: calDaySize * 0.2),
-                          Text(
-                            shortLabels[i],
-                            style: TextStyle(
-                              color: isToday
-                                  ? WidgetColors.textActive
-                                  : WidgetColors.textInactive,
-                              fontSize: calDaySize,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                ),
-              ),
-
-              // 3. Giant time — optical center (top flex:3, bottom flex:4)
-              const Spacer(flex: 3),
-              Center(
+              // Zone A: Time (top-left) — dynamic, rendered by Flutter
+              Positioned(
+                top: topPad,
+                left: edgePad,
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    '${time.hour.toString().padLeft(2, '0')}.${time.minute.toString().padLeft(2, '0')}',
+                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
                     style: TextStyle(
                       color: WidgetColors.textTime,
                       fontSize: timeSize,
@@ -144,38 +66,108 @@ class ClockFace extends StatelessWidget {
                   ),
                 ),
               ),
-              const Spacer(flex: 4),
 
-              // 4. Bottom weekday abbreviations (0.40 alpha)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: sidePad),
-                child: Text(
-                  shortLabels.join('  '),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: WidgetColors.textRow,
-                    fontSize: bottomRowSize,
-                    letterSpacing: 2.0,
-                  ),
+              // Zone B: Date (top-right)
+              Positioned(
+                top: topPad,
+                right: edgePad,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      DateFormat('dd/MM/yyyy', locale).format(time),
+                      style: TextStyle(
+                        color: WidgetColors.textDate,
+                        fontSize: dateFontSize,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      DateFormat('EEEE', locale).format(time),
+                      style: TextStyle(
+                        color: WidgetColors.textDayName,
+                        fontSize: dayNameSize,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
-              SizedBox(height: h * 0.015),
+              // Zone C: Calendar strip (bottom third, full width)
+              Positioned(
+                top: h * 0.62,
+                left: 0,
+                right: 0,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: edgePad),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(7, (i) {
+                      final dayNum = monday.add(Duration(days: i)).day;
+                      final isToday = i == today;
+                      final numColor = isToday
+                          ? WidgetColors.background
+                          : WidgetColors.textCalNum;
+                      final letterColor = isToday
+                          ? WidgetColors.background
+                          : WidgetColors.textCalLetter;
 
-              // 5. Full date (0.30 alpha)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: sidePad),
-                child: Text(
-                  DateFormat('d MMMM yyyy г. (EEEE)', locale).format(time),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: WidgetColors.textFullDate,
-                    fontSize: bottomDateSize,
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          isToday
+                              ? Container(
+                                  height: pillH,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: WidgetColors.textActive,
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      dayNum.toString(),
+                                      style: TextStyle(
+                                        color: numColor,
+                                        fontSize: calNumSize,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1.1,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : SizedBox(
+                                  height: pillH,
+                                  child: Center(
+                                    child: Text(
+                                      dayNum.toString(),
+                                      style: TextStyle(
+                                        color: numColor,
+                                        fontSize: calNumSize,
+                                        fontWeight: FontWeight.w500,
+                                        height: 1.1,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                          const SizedBox(height: 4),
+                          Text(
+                            shortLabels[i],
+                            style: TextStyle(
+                              color: letterColor,
+                              fontSize: calLetterSize,
+                              height: 1.1,
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
                   ),
                 ),
               ),
-
-              SizedBox(height: padding.bottom),
             ],
           ),
         );

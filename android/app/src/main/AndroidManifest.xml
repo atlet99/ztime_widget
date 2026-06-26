@@ -34,6 +34,17 @@
                 android:resource="@xml/custom_clock_widget_info" />
         </receiver>
 
+        <!-- Date change receiver — listens for ACTION_TIME_TICK (once per minute).
+             Detects day changes and stores flag in SharedPreferences.
+             Minimal battery impact: receiver does <1ms work per tick. -->
+        <receiver
+            android:name=".DateChangeReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_TICK" />
+            </intent-filter>
+        </receiver>
+
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

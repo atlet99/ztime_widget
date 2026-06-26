@@ -8,12 +8,19 @@ class WidgetColors {
   // Background
   static const background = Color(0xFF1C1C1E);
 
-  // Alpha channel hierarchy (Master Plan Block 3)
+  // Alpha channel hierarchy (Edge-Anchored Layout spec)
   static const textTime = Color(0xFFFFFFFF); // 1.0 — time digits
-  static const textActive = Color(0xD9FFFFFF); // 0.85 — date top, active day
-  static const textInactive = Color(0x80FFFFFF); // 0.50 — inactive mini-cal days
-  static const textRow = Color(0x66FFFFFF); // 0.40 — bottom weekday row
-  static const textFullDate = Color(0x4DFFFFFF); // 0.30 — full date bottom
+  static const textDate = Color(0xE6FFFFFF); // 0.90 — date top-right
+  static const textDayName = Color(0x99FFFFFF); // 0.60 — day name under date
+  static const textCalNum = Color(
+    0x80FFFFFF,
+  ); // 0.50 — inactive calendar numbers
+  static const textCalLetter = Color(
+    0x59FFFFFF,
+  ); // 0.35 — inactive calendar letters
+  static const textActive = Color(
+    0xFFFFFFFF,
+  ); // 1.0 — active day (white pill, black text)
 }
 
 class WidgetDimensions {
