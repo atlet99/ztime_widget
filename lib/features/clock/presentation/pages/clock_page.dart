@@ -17,7 +17,8 @@ class ClockPage extends ConsumerStatefulWidget {
 
 class _ClockPageState extends ConsumerState<ClockPage> {
   final _widgetKey = GlobalKey();
-  int _lastRenderMinute = -1;
+  String _lastRenderDate = '';
+  String _lastRenderLocale = '';
 
   void _scheduleWidgetRender() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -28,16 +29,23 @@ class _ClockPageState extends ConsumerState<ClockPage> {
     });
   }
 
+  /// Force re-render of widget PNG (called on resume when date/locale changed).
+  void _forceWidgetRender(String date, String locale) {
+    _lastRenderDate = date;
+    _lastRenderLocale = locale;
+    _scheduleWidgetRender();
+  }
+
   @override
   Widget build(BuildContext context) {
     final time = ref.watch(clockSecondsProvider);
     final locale = Localizations.localeOf(context).toLanguageTag();
     final timeLabel = AppDateUtils.formatTime(time, locale);
 
-    final currentMinute = time.minute;
-    if (currentMinute != _lastRenderMinute) {
-      _lastRenderMinute = currentMinute;
-      _scheduleWidgetRender();
+    // Use Case 2+3+4: Re-render widget if date or locale changed (midnight, timezone, language switch)
+    final currentDate = '${time.year}-${time.month}-${time.day}';
+    if (currentDate != _lastRenderDate || locale != _lastRenderLocale) {
+      _forceWidgetRender(currentDate, locale);
     }
 
     final top = MediaQuery.of(context).padding.top;
@@ -46,7 +54,6 @@ class _ClockPageState extends ConsumerState<ClockPage> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Screen A: In-app clock face (full-screen, adaptive, dynamic time)
           Semantics(
             label: 'Текущее время: $timeLabel',
             liveRegion: true,
@@ -54,7 +61,6 @@ class _ClockPageState extends ConsumerState<ClockPage> {
             child: ClockFace(time: time, locale: locale),
           ),
 
-          // Settings button
           Positioned(
             top: top + 12,
             left: 16,
@@ -74,9 +80,7 @@ class _ClockPageState extends ConsumerState<ClockPage> {
             ),
           ),
 
-          // Screen B: Widget layout (invisible, only used for PNG rendering)
-          // Visibility with maintainSize keeps it laid out but invisible,
-          // so RepaintBoundary can still capture it to PNG.
+          // Widget layout (invisible, only used for PNG rendering)
           Visibility(
             visible: false,
             maintainSize: true,
