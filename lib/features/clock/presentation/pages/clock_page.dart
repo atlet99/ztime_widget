@@ -29,7 +29,10 @@ class _ClockPageState extends ConsumerState<ClockPage> {
   }
 
   void _scheduleWidgetRender(GlassStyle glassStyle) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Wait for new glass texture to load before capturing
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      if (!mounted) return;
       final boundary =
           _widgetKey.currentContext?.findRenderObject()
               as RenderRepaintBoundary?;

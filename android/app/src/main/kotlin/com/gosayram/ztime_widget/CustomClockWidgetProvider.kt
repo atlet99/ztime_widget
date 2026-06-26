@@ -23,13 +23,21 @@ class CustomClockWidgetProvider : HomeWidgetProvider() {
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.custom_clock_widget)
 
-            // Rule 4: Dynamic font size based on widget width
+            // Dynamic font size + margins based on widget size
             try {
                 val options = appWidgetManager.getAppWidgetOptions(widgetId)
                 val minW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 400)
+                val minH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 200)
+
+                // fontSize = 15% of width
                 val fontSizePx = (minW * 0.15f).coerceIn(40f, 120f)
 
-                // setTextSize via reflection (API 31+ native, reflection for older)
+                // marginStart = 5% of width (shifted left)
+                val marginStartPx = (minW * 0.05f).toInt()
+                // marginTop = 5.5% of height (safe area)
+                val marginTopPx = (minH * 0.055f).toInt()
+
+                // setTextSize via reflection (API 31+)
                 val setTextSize = RemoteViews::class.java.getMethod(
                     "setTextSize",
                     Int::class.javaPrimitiveType,
@@ -37,11 +45,27 @@ class CustomClockWidgetProvider : HomeWidgetProvider() {
                     Float::class.javaPrimitiveType
                 )
                 setTextSize.invoke(views, R.id.native_time, TypedValue.COMPLEX_UNIT_PX, fontSizePx)
+
+                // setViewLayoutMargin via reflection (API 31+)
+                try {
+                    val setViewLayoutMargin = RemoteViews::class.java.getMethod(
+                        "setViewLayoutMargin",
+                        Int::class.javaPrimitiveType,
+                        Int::class.javaPrimitiveType,
+                        Float::class.javaPrimitiveType,
+                        Int::class.javaPrimitiveType
+                    )
+                    val absolute = 1
+                    setViewLayoutMargin.invoke(views, R.id.native_time, 0, marginStartPx.toFloat(), absolute)
+                    setViewLayoutMargin.invoke(views, R.id.native_time, 1, marginTopPx.toFloat(), absolute)
+                } catch (_: Exception) {
+                    // API < 31, margins from XML defaults
+                }
             } catch (e: Exception) {
                 Log.w("ZTimeWidget", "Dynamic sizing failed, using XML defaults", e)
             }
 
-            // Calendar tap → open system calendar (on the whole widget area)
+            // Calendar tap → open system calendar
             try {
                 val calendarIntent = Intent(Intent.ACTION_VIEW).apply {
                     data = CalendarContract.CONTENT_URI

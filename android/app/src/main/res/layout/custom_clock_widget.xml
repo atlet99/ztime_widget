@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_background">
 
-    <!-- Flutter-rendered background + calendar tap zone -->
     <ImageView
         android:id="@+id/widget_image"
         android:layout_width="match_parent"
@@ -12,20 +11,21 @@
         android:scaleType="fitXY"
         android:filter="true" />
 
-    <!-- Native real-time clock — Thin/Ultralight, letterSpacing 0.09.
-         Size set dynamically by Kotlin provider. -->
+    <!-- Time: sans-serif-medium bold, margins set dynamically by Kotlin.
+         Fallback: marginStart=50dp, marginTop=12dp. -->
     <TextClock
         android:id="@+id/native_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|start"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="35dp"
         android:layout_marginTop="12dp"
         android:format12Hour="hh:mm"
         android:format24Hour="HH:mm"
         android:textColor="#FFFFFF"
         android:textSize="72sp"
-        android:fontFamily="sans-serif-thin"
-        android:letterSpacing="0.09" />
+        android:fontFamily="sans-serif-medium"
+        android:textStyle="bold"
+        android:letterSpacing="0.06" />
 
 </FrameLayout>

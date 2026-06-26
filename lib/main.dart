@@ -97,20 +97,24 @@ Future<void> _renderWidgetToPng() async {
   final contentW = w - safePadX * 2;
 
   // Date typography (time is handled by native TextClock)
-  final dateFontSize = contentW * 0.042;
-  final dayNameSize = contentW * 0.032;
+  final dateFontSize = contentW * 0.065;
+  final dayNameSize = contentW * 0.045;
 
-  // Calendar strip
-  final calHeight = h * 0.18;
+  // Calendar strip — tight to time, minimal gap
+  final calHeight = h * 0.32;
   final calTop = h - safePadY - calHeight;
-  final calNumSize = contentW * 0.038;
-  final calLetterSize = contentW * 0.026;
+  final calNumSize = contentW * 0.063; // +20% bigger numbers
+  final calLetterSize = contentW * 0.030;
   final calCardRadius = 12.0;
   final pillRadius = 8.0;
+  final cellPad = 9.0;
+
+  // Align date with TextClock baseline — slightly lower
+  final dateTop = h * 0.18;
 
   final tp = TextPainter(textDirection: ui.TextDirection.ltr);
 
-  // Date — top-right, Regular weight 400, opacity 0.85
+  // Date — top-right, aligned with TextClock
   final dateStr = DateFormat('dd/MM/yyyy', locale).format(now);
   tp.text = TextSpan(
     text: dateStr,
@@ -118,13 +122,13 @@ Future<void> _renderWidgetToPng() async {
       color: Colors.white.withValues(alpha: 0.85),
       fontSize: dateFontSize,
       fontWeight: FontWeight.w400,
-      height: 1.2,
+      height: 1.1,
     ),
   );
   tp.layout();
-  tp.paint(canvas, Offset(w - safePadX - tp.width, safePadY));
+  tp.paint(canvas, Offset(w - safePadX - w * 0.05 - tp.width, dateTop));
 
-  // Day name — opacity 0.70, Regular weight
+  // Day name — opacity 0.70, bigger
   final dayName = DateFormat('EEEE', locale).format(now);
   tp.text = TextSpan(
     text: dayName,
@@ -132,11 +136,11 @@ Future<void> _renderWidgetToPng() async {
       color: Colors.white.withValues(alpha: 0.70),
       fontSize: dayNameSize,
       fontWeight: FontWeight.w400,
-      height: 1.2,
+      height: 1.1,
     ),
   );
   tp.layout();
-  tp.paint(canvas, Offset(w - safePadX - tp.width, safePadY + dateFontSize * 1.2 + 2));
+  tp.paint(canvas, Offset(w - safePadX - w * 0.05 - tp.width, dateTop + dateFontSize * 1.1 + 4));
 
   // Calendar strip
   final monday = now.subtract(Duration(days: now.weekday - 1));
@@ -156,11 +160,11 @@ Future<void> _renderWidgetToPng() async {
     final cx = safePadX + cellWidth * i;
     final dayNum = monday.add(Duration(days: i)).day;
 
-    // Glass card — #2C2C2E background
+    // Glass card — #2C2C2E background, with cellPad each side
     final cardRect = RRect.fromLTRBR(
-      cx + 2,
+      cx + cellPad,
       calTop,
-      cx + cellWidth - 2,
+      cx + cellWidth - cellPad,
       calTop + calHeight,
       Radius.circular(calCardRadius),
     );
@@ -176,17 +180,17 @@ Future<void> _renderWidgetToPng() async {
         style: TextStyle(
           color: WidgetColors.textActive,
           fontSize: calNumSize,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w400,
           height: 1.1,
         ),
       );
       tp.layout();
 
-      final pillW = tp.width + 12;
-      final pillH = tp.height + 6;
+      final pillW = tp.width + 16;
+      final pillH = tp.height + 8;
       final pillRect = RRect.fromRectAndRadius(
         Rect.fromCenter(
-          center: Offset(cx + cellWidth / 2, calTop + calHeight * 0.35),
+          center: Offset(cx + cellWidth / 2, calTop + calHeight * 0.33),
           width: pillW,
           height: pillH,
         ),
@@ -194,13 +198,12 @@ Future<void> _renderWidgetToPng() async {
       );
       canvas.drawRRect(pillRect, Paint()..color = Colors.white);
     } else {
-      // Inactive: opacity 0.55
       tp.text = TextSpan(
         text: dayText,
         style: TextStyle(
           color: Colors.white.withValues(alpha: 0.55),
           fontSize: calNumSize,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w400,
           height: 1.1,
         ),
       );
@@ -209,7 +212,7 @@ Future<void> _renderWidgetToPng() async {
 
     tp.paint(
       canvas,
-      Offset(cx + cellWidth / 2 - tp.width / 2, calTop + calHeight * 0.25),
+      Offset(cx + cellWidth / 2 - tp.width / 2, calTop + calHeight * 0.22),
     );
 
     // Day letters — opacity 0.35 Regular, active 0.70

@@ -6,10 +6,6 @@ import 'package:ztime_widget/core/widget/widget_constants.dart';
 
 /// Widget background for home screen PNG.
 /// Time is rendered by native Android TextClock — PNG only has date + calendar.
-/// Layout:
-///   Top:       Date (top-right, right-aligned)
-///   Bottom:    Calendar strip, fixed height, anchored to bottom
-///   Safe area: 6.5% horizontal, 5.5% vertical
 class WidgetLayout extends StatelessWidget {
   const WidgetLayout({
     super.key,
@@ -38,21 +34,24 @@ class WidgetLayout extends StatelessWidget {
             final w = constraints.maxWidth;
             final h = constraints.maxHeight;
 
-            // Safe area
             final safePadX = w * 0.065;
             final safePadY = h * 0.055;
             final contentW = w - safePadX * 2;
 
             // Date typography
-            final dateFontSize = contentW * 0.042;
-            final dayNameSize = contentW * 0.032;
+            final dateFontSize = contentW * 0.065;
+            final dayNameSize = contentW * 0.045;
 
-            // Calendar strip
-            final calHeight = h * 0.18;
-            final calNumSize = contentW * 0.038;
-            final calLetterSize = contentW * 0.026;
+            // Calendar strip — tight to time, minimal gap
+            final calHeight = h * 0.32;
+            final calNumSize = contentW * 0.063; // +20% bigger numbers
+            final calLetterSize = contentW * 0.030;
             final calCardRadius = 12.0;
             final pillRadius = 8.0;
+            final cellPad = 9.0;
+
+            // Date aligned with TextClock baseline — slightly lower
+            final dateTop = h * 0.18;
 
             return Stack(
               children: [
@@ -94,10 +93,10 @@ class WidgetLayout extends StatelessWidget {
                   ),
                 ),
 
-                // Date — top-right, no time (native TextClock handles it)
+                // Date — shifted 10% left
                 Positioned(
-                  top: safePadY,
-                  right: safePadX,
+                  top: dateTop,
+                  right: safePadX + w * 0.05,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisSize: MainAxisSize.min,
@@ -108,24 +107,24 @@ class WidgetLayout extends StatelessWidget {
                           color: Colors.white.withValues(alpha: 0.85),
                           fontSize: dateFontSize,
                           fontWeight: FontWeight.w400,
-                          height: 1.2,
+                          height: 1.1,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Text(
                         DateFormat('EEEE', locale).format(now),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.70),
                           fontSize: dayNameSize,
                           fontWeight: FontWeight.w400,
-                          height: 1.2,
+                          height: 1.1,
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                // Bottom bar — Calendar strip, fixed height, anchored bottom
+                // Calendar strip — bottom, tight to time area
                 Positioned(
                   bottom: safePadY,
                   left: safePadX,
@@ -139,7 +138,7 @@ class WidgetLayout extends StatelessWidget {
 
                         return Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 2),
+                            padding: EdgeInsets.symmetric(horizontal: cellPad),
                             child: Container(
                               decoration: BoxDecoration(
                                 color: const Color(0x1A2C2C2E),
@@ -153,8 +152,8 @@ class WidgetLayout extends StatelessWidget {
                                       ? IntrinsicWidth(
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 2,
+                                              horizontal: 8,
+                                              vertical: 3,
                                             ),
                                             decoration: BoxDecoration(
                                               color: Colors.white,
@@ -167,7 +166,7 @@ class WidgetLayout extends StatelessWidget {
                                               style: TextStyle(
                                                 color: WidgetColors.textActive,
                                                 fontSize: calNumSize,
-                                                fontWeight: FontWeight.w500,
+                                                fontWeight: FontWeight.w400,
                                                 height: 1.1,
                                               ),
                                             ),
@@ -180,11 +179,11 @@ class WidgetLayout extends StatelessWidget {
                                             color: Colors.white
                                                 .withValues(alpha: 0.55),
                                             fontSize: calNumSize,
-                                            fontWeight: FontWeight.w500,
+                                            fontWeight: FontWeight.w400,
                                             height: 1.1,
                                           ),
                                         ),
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: 4),
                                   Text(
                                     shortLabels[i],
                                     textAlign: TextAlign.center,
