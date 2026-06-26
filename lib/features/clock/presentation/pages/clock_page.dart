@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
+import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/core/widget/widget_layout.dart';
 import 'package:ztime_widget/core/widget/widget_renderer.dart';
 import 'package:ztime_widget/features/clock/presentation/controllers/clock_controller.dart';
@@ -19,8 +20,15 @@ class _ClockPageState extends ConsumerState<ClockPage> {
   final _widgetKey = GlobalKey();
   String _lastRenderDate = '';
   String _lastRenderLocale = '';
+  String _lastRenderGlass = '';
 
-  void _scheduleWidgetRender() {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(glassStyleProvider.notifier).load();
+  }
+
+  void _scheduleWidgetRender(GlassStyle glassStyle) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final boundary =
           _widgetKey.currentContext?.findRenderObject()
@@ -29,23 +37,32 @@ class _ClockPageState extends ConsumerState<ClockPage> {
     });
   }
 
-  /// Force re-render of widget PNG (called on resume when date/locale changed).
-  void _forceWidgetRender(String date, String locale) {
+  /// Force re-render of widget PNG (called on resume when date/locale/glass changed).
+  void _forceWidgetRender(
+    String date,
+    String locale,
+    String glass,
+  ) {
     _lastRenderDate = date;
     _lastRenderLocale = locale;
-    _scheduleWidgetRender();
+    _lastRenderGlass = glass;
+    _scheduleWidgetRender(ref.read(glassStyleProvider));
   }
 
   @override
   Widget build(BuildContext context) {
     final time = ref.watch(clockSecondsProvider);
     final locale = Localizations.localeOf(context).toLanguageTag();
+    final glassStyle = ref.watch(glassStyleProvider);
     final timeLabel = AppDateUtils.formatTime(time, locale);
 
-    // Use Case 2+3+4: Re-render widget if date or locale changed (midnight, timezone, language switch)
+    // Use Case 2+3+4+5: Re-render widget if date, locale, or glass style changed
     final currentDate = '${time.year}-${time.month}-${time.day}';
-    if (currentDate != _lastRenderDate || locale != _lastRenderLocale) {
-      _forceWidgetRender(currentDate, locale);
+    final currentGlass = glassStyle.assetKey;
+    if (currentDate != _lastRenderDate ||
+        locale != _lastRenderLocale ||
+        currentGlass != _lastRenderGlass) {
+      _forceWidgetRender(currentDate, locale, currentGlass);
     }
 
     final top = MediaQuery.of(context).padding.top;
@@ -58,7 +75,7 @@ class _ClockPageState extends ConsumerState<ClockPage> {
             label: 'Текущее время: $timeLabel',
             liveRegion: true,
             excludeSemantics: true,
-            child: ClockFace(time: time, locale: locale),
+            child: ClockFace(time: time, locale: locale, glassStyle: glassStyle),
           ),
 
           Positioned(
@@ -86,7 +103,10 @@ class _ClockPageState extends ConsumerState<ClockPage> {
             maintainSize: true,
             maintainAnimation: true,
             maintainState: true,
-            child: WidgetLayout(renderKey: _widgetKey),
+            child: WidgetLayout(
+              renderKey: _widgetKey,
+              glassStyle: glassStyle,
+            ),
           ),
         ],
       ),

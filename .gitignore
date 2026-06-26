@@ -39,3 +39,6 @@ coverage/
 
 # Symbols
 app.*.symbols
+
+#Kotlin
+.kotlin

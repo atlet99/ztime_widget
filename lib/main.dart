@@ -2,12 +2,15 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:ztime_widget/app.dart';
+import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/core/widget/widget_constants.dart';
 
 const _workTask = 'ztime_widget_refresh';
@@ -23,12 +26,32 @@ void callbackDispatcher() {
   });
 }
 
+Future<GlassStyle> _loadGlassStyle() async {
+  final prefs = await SharedPreferences.getInstance();
+  final index = prefs.getInt('glass_style') ?? 0;
+  if (index < GlassStyle.values.length) return GlassStyle.values[index];
+  return GlassStyle.coldGlass;
+}
+
+Future<ui.Image> _loadAssetImage(String assetPath) async {
+  final data = await rootBundle.load(assetPath);
+  final codec = await ui.instantiateImageCodec(
+    data.buffer.asUint8List(),
+    targetWidth: WidgetDimensions.width.toInt(),
+    targetHeight: WidgetDimensions.height.toInt(),
+  );
+  final frame = await codec.getNextFrame();
+  return frame.image;
+}
+
 Future<void> _renderWidgetToPng() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Future.wait([
     initializeDateFormatting('ru', null),
     initializeDateFormatting('en', null),
   ]);
+
+  final glassStyle = await _loadGlassStyle();
 
   const w = WidgetDimensions.width;
   const h = WidgetDimensions.height;
@@ -38,68 +61,79 @@ Future<void> _renderWidgetToPng() async {
   final now = DateTime.now();
   const locale = 'ru';
 
-  // Flat background
-  canvas.drawColor(WidgetColors.background, BlendMode.src);
+  // Load and paint glass texture background
+  try {
+    final bgImage = await _loadAssetImage(glassStyle.widgetPath);
+    canvas.drawImageRect(
+      bgImage,
+      Rect.fromLTWH(0, 0, bgImage.width.toDouble(), bgImage.height.toDouble()),
+      const Rect.fromLTWH(0, 0, w, h),
+      Paint()..filterQuality = FilterQuality.high,
+    );
+    bgImage.dispose();
+  } catch (_) {
+    canvas.drawColor(WidgetColors.background, BlendMode.src);
+  }
 
-  // Layout metrics — must match widget_layout.dart exactly
+  // Dark overlay for text readability
+  final overlayPaint = Paint()..color = const Color(0x8C1C1C1E); // 55% alpha
+  canvas.drawRect(const Rect.fromLTWH(0, 0, w, h), overlayPaint);
+
+  // Top highlight line — glass reflection
+  final highlightPaint = Paint()
+    ..shader = ui.Gradient.linear(
+      const Offset(0, 0),
+      const Offset(0, 1.5),
+      [
+        Colors.white.withValues(alpha: 0.35),
+        Colors.white.withValues(alpha: 0.0),
+      ],
+    );
+  canvas.drawRect(const Rect.fromLTWH(0, 0, w, 1.5), highlightPaint);
+
+  // Layout metrics — matching widget_layout.dart
   const edgePad = w * 0.04;
-  const topPad = h * 0.08;
-  const timePanelW = w * 0.55;
-  const timePanelH = h * 0.52;
-  const dateFontSize = w * 0.04;
-  const dayNameSize = w * 0.036;
-  const calNumSize = w * 0.036;
-  const calLetterSize = w * 0.026;
-  const cardH = h * 0.18;
-  const cardRadius = 14.4; // w * 0.012
-  const calTop = h * 0.72;
+  final timeSize = h * 0.38;
+  final timeTop = h * 0.08;
+  final dateLeft = w * 0.62;
+  final dateFontSize = w * 0.042;
+  final dayNameSize = w * 0.036;
+  final calNumSize = w * 0.04;
+  final calLetterSize = w * 0.028;
+  final cardH = h * 0.28;
+  final cardRadius = w * 0.015;
+  final calTop = h * 0.68;
 
   final tp = TextPainter(textDirection: ui.TextDirection.ltr);
 
-  // Zone A: Frosted glass panel behind time
-  final panelPaint = Paint()..color = WidgetColors.glassPanel;
-  final panelBorderPaint = Paint()
-    ..color = WidgetColors.glassBorder
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.0;
-  final panelRect = RRect.fromLTRBR(
-    edgePad - w * 0.01,
-    topPad - h * 0.02,
-    edgePad - w * 0.01 + timePanelW,
-    topPad - h * 0.02 + timePanelH,
-    Radius.circular(w * 0.02),
-  );
-  canvas.drawRRect(panelRect, panelPaint);
-  canvas.drawRRect(panelRect, panelBorderPaint);
-
-  // Zone B: Date top-right
+  // Zone B: Date + day name — right of time
   final dateStr = DateFormat('dd/MM/yyyy', locale).format(now);
   final dayName = DateFormat('EEEE', locale).format(now);
-  final dateY = topPad + h * 0.06;
+  final dateY = timeTop + timeSize * 0.35;
 
   tp.text = TextSpan(
     text: dateStr,
-    style: const TextStyle(
-      color: WidgetColors.textDate,
+    style: TextStyle(
+      color: Colors.white,
       fontSize: dateFontSize,
       fontWeight: FontWeight.w700,
       height: 1.2,
     ),
   );
   tp.layout();
-  tp.paint(canvas, Offset(w - edgePad - tp.width, dateY));
+  tp.paint(canvas, Offset(dateLeft, dateY));
 
   tp.text = TextSpan(
     text: dayName,
-    style: const TextStyle(
-      color: WidgetColors.textDayName,
+    style: TextStyle(
+      color: Colors.white.withValues(alpha: 0.75),
       fontSize: dayNameSize,
       fontWeight: FontWeight.w600,
       height: 1.2,
     ),
   );
   tp.layout();
-  tp.paint(canvas, Offset(w - edgePad - tp.width, dateY + dateFontSize * 1.2 + 2));
+  tp.paint(canvas, Offset(dateLeft, dateY + dateFontSize * 1.2 + 4));
 
   // Zone C: Calendar strip with glass cards
   final monday = now.subtract(Duration(days: now.weekday - 1));
@@ -131,20 +165,21 @@ Future<void> _renderWidgetToPng() async {
       Radius.circular(cardRadius),
     );
     cardPaint.color = isToday
-        ? WidgetColors.glassCardActive
-        : WidgetColors.glassCard;
-    cardBorderPaint.color = WidgetColors.glassBorder;
+        ? const Color(0x40FFFFFF) // 25% white
+        : const Color(0x14FFFFFF); // 8% white
+    cardBorderPaint.color = isToday
+        ? const Color(0x80FFFFFF) // 50% white
+        : const Color(0x1FFFFFFF); // 12% white
     canvas.drawRRect(cardRect, cardPaint);
     canvas.drawRRect(cardRect, cardBorderPaint);
 
     // Day number
-    final numColor = isToday
-        ? WidgetColors.textActive
-        : WidgetColors.textCalNum;
     tp.text = TextSpan(
       text: dayNum.toString(),
       style: TextStyle(
-        color: numColor,
+        color: isToday
+            ? Colors.white
+            : Colors.white.withValues(alpha: 0.9),
         fontSize: calNumSize,
         fontWeight: FontWeight.w700,
         height: 1.1,
@@ -157,13 +192,12 @@ Future<void> _renderWidgetToPng() async {
     );
 
     // Day letter
-    final letterColor = isToday
-        ? WidgetColors.textActive
-        : WidgetColors.textCalLetter;
     tp.text = TextSpan(
       text: shortLabels[i],
       style: TextStyle(
-        color: letterColor,
+        color: isToday
+            ? Colors.white.withValues(alpha: 0.9)
+            : Colors.white.withValues(alpha: 0.5),
         fontSize: calLetterSize,
         fontWeight: FontWeight.w600,
         height: 1.1,
@@ -198,8 +232,7 @@ void main() async {
     initializeDateFormatting('en', null),
   ]);
 
-  // Generate widget PNG immediately on startup so the widget has content
-  // before ClockPage starts its minute-by-minute renders.
+  // Generate widget PNG immediately on startup
   await _renderWidgetToPng();
 
   await Workmanager().initialize(callbackDispatcher);
