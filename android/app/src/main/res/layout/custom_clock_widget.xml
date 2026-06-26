@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background">
@@ -8,29 +7,26 @@
     <!-- Flutter-rendered background (date top-right + calendar bottom) -->
     <ImageView
         android:id="@+id/widget_image"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:filter="true"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:filter="true" />
 
-    <!-- Native real-time clock — anchored top-left with mirrored padding -->
+    <!-- Native real-time clock — top-left, fixed dp margins.
+         15dp ≈ 5% of 294dp (4x2 widget width).
+         TextClock is wrap_content so it sits exactly in the empty zone of the PNG. -->
     <TextClock
         android:id="@+id/native_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5%"
-        android:layout_marginTop="8%"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="12dp"
         android:format12Hour="hh:mm"
         android:format24Hour="HH:mm"
         android:textColor="#FFFFFF"
         android:textSize="110sp"
         android:fontFamily="sans-serif-thin"
-        android:letterSpacing="0.08"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:letterSpacing="0.08" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>
