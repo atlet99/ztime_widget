@@ -41,6 +41,16 @@ Future<void> _renderWidgetToPng() async {
   // Flat background
   canvas.drawColor(WidgetColors.background, BlendMode.src);
 
+  // Inner vignette — subtle depth simulation (matches widget_layout.dart)
+  final vignettePaint = Paint()
+    ..shader = ui.Gradient.radial(
+      const Offset(w / 2, h / 2),
+      w * 0.75,
+      [const Color(0x00000000), const Color(0x18000000)],
+      [0.0, 1.0],
+    );
+  canvas.drawRect(const Rect.fromLTWH(0, 0, w, h), vignettePaint);
+
   // Mirrored padding — same 5% that XML TextClock uses
   const edgePad = w * 0.05;
   const topPad = h * 0.08;

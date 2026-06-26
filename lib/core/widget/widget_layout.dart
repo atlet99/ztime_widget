@@ -49,6 +49,25 @@ class WidgetLayout extends StatelessWidget {
               color: WidgetColors.background,
               child: Stack(
                 children: [
+                  // Inner vignette — subtle depth simulation (frosted glass illusion)
+                  // Transparent center, very slightly darker edges.
+                  // Creates "cut-out window" effect without actual transparency.
+                  const Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment.center,
+                          radius: 0.75,
+                          colors: [
+                            Colors.transparent, // center — base color shows
+                            Color(0x18000000), // edges — ~9% black overlay
+                          ],
+                          stops: [0.0, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+
                   // Zone B: Date top-right
                   Positioned(
                     top: topPad,
