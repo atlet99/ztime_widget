@@ -11,8 +11,6 @@ class WidgetColors {
   static const textGray = Color(0xFF8E8E93);
   static const textDim = Color(0x80FFFFFF);
   static const textDate = Color(0xCCFFFFFF);
-
-  static const backgroundRadius = Radius.circular(53);
 }
 
 class WidgetDimensions {
