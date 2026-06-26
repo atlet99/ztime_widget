@@ -182,6 +182,10 @@ void main() async {
     initializeDateFormatting('en', null),
   ]);
 
+  // Generate widget PNG immediately on startup so the widget has content
+  // before ClockPage starts its minute-by-minute renders.
+  await _renderWidgetToPng();
+
   await Workmanager().initialize(callbackDispatcher);
   await Workmanager().registerPeriodicTask(
     'ztime-widget-id',
