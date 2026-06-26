@@ -4,10 +4,10 @@ import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/core/widget/widget_constants.dart';
 
 /// Widget background for home screen PNG.
-/// 3-zone layout:
-///   Zone A (top-left): EMPTY — TextClock overlays here via ConstraintLayout
-///   Zone B (top-right): Date + day name
-///   Zone C (bottom third): Calendar strip with pill highlight
+/// Glassmorphism style matching iOS reference:
+///   Zone A (top-left): Glass panel + bold time digits
+///   Zone B (top-right): Date + day name (bold)
+///   Zone C (bottom): Calendar strip with rounded glass cards
 class WidgetLayout extends StatelessWidget {
   const WidgetLayout({super.key, required this.renderKey});
 
@@ -31,38 +31,45 @@ class WidgetLayout extends StatelessWidget {
             final w = constraints.maxWidth;
             final h = constraints.maxHeight;
 
-            // Mirrored padding — same 5% that XML TextClock uses
-            final edgePad = w * 0.05;
+            // Layout metrics
+            final edgePad = w * 0.04;
             final topPad = h * 0.08;
 
-            // Zone B: date (top-right)
-            final dateFontSize = w * 0.038;
-            final dayNameSize = w * 0.032;
+            // Zone A: time
+            final timePanelW = w * 0.55;
+            final timePanelH = h * 0.52;
 
-            // Zone C: calendar strip (bottom third)
-            final calNumSize = w * 0.04;
-            final calLetterSize = w * 0.028;
-            final pillH = calNumSize * 2.0;
-            final calTop = h * 0.62;
+            // Zone B: date
+            final dateFontSize = w * 0.04;
+            final dayNameSize = w * 0.036;
+
+            // Zone C: calendar cards
+            final calNumSize = w * 0.036;
+            final calLetterSize = w * 0.026;
+            final cardH = h * 0.18;
+            final cardRadius = w * 0.012;
+            final calTop = h * 0.72;
 
             return Container(
               color: WidgetColors.background,
               child: Stack(
                 children: [
-                  // Inner vignette — subtle depth simulation (frosted glass illusion)
-                  // Transparent center, very slightly darker edges.
-                  // Creates "cut-out window" effect without actual transparency.
-                  const Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                          center: Alignment.center,
-                          radius: 0.75,
-                          colors: [
-                            Colors.transparent, // center — base color shows
-                            Color(0x18000000), // edges — ~9% black overlay
-                          ],
-                          stops: [0.0, 1.0],
+                  // Zone A: Frosted glass panel behind time
+                  Positioned(
+                    top: topPad - h * 0.02,
+                    left: edgePad - w * 0.01,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(w * 0.02),
+                      child: Container(
+                        width: timePanelW,
+                        height: timePanelH,
+                        decoration: BoxDecoration(
+                          color: WidgetColors.glassPanel,
+                          borderRadius: BorderRadius.circular(w * 0.02),
+                          border: Border.all(
+                            color: WidgetColors.glassBorder,
+                            width: 1.0,
+                          ),
                         ),
                       ),
                     ),
@@ -70,7 +77,7 @@ class WidgetLayout extends StatelessWidget {
 
                   // Zone B: Date top-right
                   Positioned(
-                    top: topPad,
+                    top: topPad + h * 0.06,
                     right: edgePad,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -80,6 +87,7 @@ class WidgetLayout extends StatelessWidget {
                           style: TextStyle(
                             color: WidgetColors.textDate,
                             fontSize: dateFontSize,
+                            fontWeight: FontWeight.w700,
                             height: 1.2,
                           ),
                         ),
@@ -89,6 +97,7 @@ class WidgetLayout extends StatelessWidget {
                           style: TextStyle(
                             color: WidgetColors.textDayName,
                             fontSize: dayNameSize,
+                            fontWeight: FontWeight.w600,
                             height: 1.2,
                           ),
                         ),
@@ -96,7 +105,7 @@ class WidgetLayout extends StatelessWidget {
                     ),
                   ),
 
-                  // Zone C: Calendar strip (bottom third, full width)
+                  // Zone C: Calendar strip with glass cards
                   Positioned(
                     top: calTop,
                     left: 0,
@@ -108,65 +117,48 @@ class WidgetLayout extends StatelessWidget {
                         children: List.generate(7, (i) {
                           final dayNum = monday.add(Duration(days: i)).day;
                           final isToday = i == today;
-                          final numColor = isToday
-                              ? WidgetColors.background
-                              : WidgetColors.textCalNum;
-                          final letterColor = isToday
-                              ? WidgetColors.background
-                              : WidgetColors.textCalLetter;
 
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Pill for active day, plain text for others
-                              isToday
-                                  ? Container(
-                                      height: pillH,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: WidgetColors.textActive,
-                                        borderRadius: BorderRadius.circular(
-                                          100,
-                                        ),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          dayNum.toString(),
-                                          style: TextStyle(
-                                            color: numColor,
-                                            fontSize: calNumSize,
-                                            fontWeight: FontWeight.w600,
-                                            height: 1.1,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : SizedBox(
-                                      height: pillH,
-                                      child: Center(
-                                        child: Text(
-                                          dayNum.toString(),
-                                          style: TextStyle(
-                                            color: numColor,
-                                            fontSize: calNumSize,
-                                            fontWeight: FontWeight.w500,
-                                            height: 1.1,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                              const SizedBox(height: 4),
-                              Text(
-                                shortLabels[i],
-                                style: TextStyle(
-                                  color: letterColor,
-                                  fontSize: calLetterSize,
-                                  height: 1.1,
-                                ),
+                          return Container(
+                            width: (w - edgePad * 2) / 7 - 6,
+                            height: cardH,
+                            decoration: BoxDecoration(
+                              color: isToday
+                                  ? WidgetColors.glassCardActive
+                                  : WidgetColors.glassCard,
+                              borderRadius: BorderRadius.circular(cardRadius),
+                              border: Border.all(
+                                color: WidgetColors.glassBorder,
+                                width: 1.0,
                               ),
-                            ],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  dayNum.toString(),
+                                  style: TextStyle(
+                                    color: isToday
+                                        ? WidgetColors.textActive
+                                        : WidgetColors.textCalNum,
+                                    fontSize: calNumSize,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.1,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  shortLabels[i],
+                                  style: TextStyle(
+                                    color: isToday
+                                        ? WidgetColors.textActive
+                                        : WidgetColors.textCalLetter,
+                                    fontSize: calLetterSize,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.1,
+                                  ),
+                                ),
+                              ],
+                            ),
                           );
                         }),
                       ),

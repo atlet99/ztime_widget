@@ -41,62 +41,67 @@ Future<void> _renderWidgetToPng() async {
   // Flat background
   canvas.drawColor(WidgetColors.background, BlendMode.src);
 
-  // Inner vignette — subtle depth simulation (matches widget_layout.dart)
-  final vignettePaint = Paint()
-    ..shader = ui.Gradient.radial(
-      const Offset(w / 2, h / 2),
-      w * 0.75,
-      [const Color(0x00000000), const Color(0x18000000)],
-      [0.0, 1.0],
-    );
-  canvas.drawRect(const Rect.fromLTWH(0, 0, w, h), vignettePaint);
-
-  // Mirrored padding — same 5% that XML TextClock uses
-  const edgePad = w * 0.05;
+  // Layout metrics — must match widget_layout.dart exactly
+  const edgePad = w * 0.04;
   const topPad = h * 0.08;
-
-  // Zone B: date (top-right)
-  const dateFontSize = w * 0.038;
-  const dayNameSize = w * 0.032;
-
-  // Zone C: calendar strip (bottom third)
-  const calNumSize = w * 0.04;
-  const calLetterSize = w * 0.028;
-  const pillH = calNumSize * 2.0;
-  const calTop = h * 0.62;
+  const timePanelW = w * 0.55;
+  const timePanelH = h * 0.52;
+  const dateFontSize = w * 0.04;
+  const dayNameSize = w * 0.036;
+  const calNumSize = w * 0.036;
+  const calLetterSize = w * 0.026;
+  const cardH = h * 0.18;
+  const cardRadius = 14.4; // w * 0.012
+  const calTop = h * 0.72;
 
   final tp = TextPainter(textDirection: ui.TextDirection.ltr);
+
+  // Zone A: Frosted glass panel behind time
+  final panelPaint = Paint()..color = WidgetColors.glassPanel;
+  final panelBorderPaint = Paint()
+    ..color = WidgetColors.glassBorder
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.0;
+  final panelRect = RRect.fromLTRBR(
+    edgePad - w * 0.01,
+    topPad - h * 0.02,
+    edgePad - w * 0.01 + timePanelW,
+    topPad - h * 0.02 + timePanelH,
+    Radius.circular(w * 0.02),
+  );
+  canvas.drawRRect(panelRect, panelPaint);
+  canvas.drawRRect(panelRect, panelBorderPaint);
 
   // Zone B: Date top-right
   final dateStr = DateFormat('dd/MM/yyyy', locale).format(now);
   final dayName = DateFormat('EEEE', locale).format(now);
+  final dateY = topPad + h * 0.06;
 
   tp.text = TextSpan(
     text: dateStr,
     style: const TextStyle(
       color: WidgetColors.textDate,
       fontSize: dateFontSize,
+      fontWeight: FontWeight.w700,
       height: 1.2,
     ),
   );
   tp.layout();
-  tp.paint(canvas, Offset(w - edgePad - tp.width, topPad));
+  tp.paint(canvas, Offset(w - edgePad - tp.width, dateY));
 
   tp.text = TextSpan(
     text: dayName,
     style: const TextStyle(
       color: WidgetColors.textDayName,
       fontSize: dayNameSize,
+      fontWeight: FontWeight.w600,
       height: 1.2,
     ),
   );
   tp.layout();
-  tp.paint(
-    canvas,
-    Offset(w - edgePad - tp.width, topPad + dateFontSize * 1.2 + 2),
-  );
+  tp.paint(canvas, Offset(w - edgePad - tp.width, dateY + dateFontSize * 1.2 + 2));
 
-  // Zone C: Calendar strip
+  // Zone C: Calendar strip with glass cards
   final monday = now.subtract(Duration(days: now.weekday - 1));
   final shortLabels = <String>[];
   final dayFmt = DateFormat('EE', locale);
@@ -107,57 +112,68 @@ Future<void> _renderWidgetToPng() async {
   const calWidth = w - edgePad * 2;
   const cellWidth = calWidth / 7;
 
+  final cardPaint = Paint();
+  final cardBorderPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.0;
+
   for (var i = 0; i < 7; i++) {
     final isToday = i == todayIndex;
-    final cx = edgePad + cellWidth * i + cellWidth / 2;
+    final cx = edgePad + cellWidth * i;
     final dayNum = monday.add(Duration(days: i)).day;
 
-    if (isToday) {
-      // White pill
-      final pillPaint = Paint()..color = WidgetColors.textActive;
-      final pillRect = RRect.fromLTRBR(
-        cx - cellWidth / 2 + 4,
-        calTop,
-        cx + cellWidth / 2 - 4,
-        calTop + pillH,
-        const Radius.circular(100),
-      );
-      canvas.drawRRect(pillRect, pillPaint);
-    }
+    // Glass card
+    final cardRect = RRect.fromLTRBR(
+      cx + 3,
+      calTop,
+      cx + cellWidth - 3,
+      calTop + cardH,
+      Radius.circular(cardRadius),
+    );
+    cardPaint.color = isToday
+        ? WidgetColors.glassCardActive
+        : WidgetColors.glassCard;
+    cardBorderPaint.color = WidgetColors.glassBorder;
+    canvas.drawRRect(cardRect, cardPaint);
+    canvas.drawRRect(cardRect, cardBorderPaint);
 
     // Day number
     final numColor = isToday
-        ? WidgetColors.background
+        ? WidgetColors.textActive
         : WidgetColors.textCalNum;
     tp.text = TextSpan(
       text: dayNum.toString(),
       style: TextStyle(
         color: numColor,
         fontSize: calNumSize,
-        fontWeight: isToday ? FontWeight.w600 : FontWeight.w500,
+        fontWeight: FontWeight.w700,
         height: 1.1,
       ),
     );
     tp.layout();
     tp.paint(
       canvas,
-      Offset(cx - tp.width / 2, calTop + (pillH - tp.height) / 2),
+      Offset(cx + cellWidth / 2 - tp.width / 2, calTop + cardH * 0.22),
     );
 
     // Day letter
     final letterColor = isToday
-        ? WidgetColors.background
+        ? WidgetColors.textActive
         : WidgetColors.textCalLetter;
     tp.text = TextSpan(
       text: shortLabels[i],
       style: TextStyle(
         color: letterColor,
         fontSize: calLetterSize,
+        fontWeight: FontWeight.w600,
         height: 1.1,
       ),
     );
     tp.layout();
-    tp.paint(canvas, Offset(cx - tp.width / 2, calTop + pillH + 4));
+    tp.paint(
+      canvas,
+      Offset(cx + cellWidth / 2 - tp.width / 2, calTop + cardH * 0.58),
+    );
   }
 
   final picture = recorder.endRecording();
