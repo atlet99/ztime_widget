@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ztime_widget/core/constants/pref_keys.dart';
 
 enum GlassStyle {
   coldGlass('cold_glass', 'hol_stek'),
@@ -20,7 +21,7 @@ class GlassStyleNotifier extends Notifier<GlassStyle> {
 
   void load() async {
     final prefs = await SharedPreferences.getInstance();
-    final index = prefs.getInt('glass_style') ?? 0;
+    final index = prefs.getInt(PrefKeys.glassStyle) ?? 0;
     if (index < GlassStyle.values.length) {
       state = GlassStyle.values[index];
     }
@@ -29,7 +30,7 @@ class GlassStyleNotifier extends Notifier<GlassStyle> {
   void setStyle(GlassStyle style) async {
     state = style;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('glass_style', style.index);
+    await prefs.setInt(PrefKeys.glassStyle, style.index);
   }
 }
 

@@ -48,4 +48,8 @@ class TranslationsRu extends Translations with BaseTranslations<AppLocale, Trans
 	@override String get batteryOptDesc => 'Для корректной работы виджета на Huawei Nova 5T необходимо отключить оптимизацию батареи для ZTime.';
 	@override String get openBatterySettings => 'Открыть настройки батареи';
 	@override String timeCurrent({required Object time}) => 'Текущее время: ${time}';
+	@override String get about => 'О приложении';
+	@override String get aboutDesc => 'ZTime Widget — пользовательский виджет часов для Android.';
+	@override String version({required Object version}) => 'Версия ${version}';
+	@override String get viewOnGithub => 'Открыть на GitHub';
 }

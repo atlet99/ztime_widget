@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ztime_widget/core/constants/pref_keys.dart';
 
 /// Shared constants for widget rendering.
 /// Used by both WidgetLayout (widget PNG) and ClockFace (in-app display).
@@ -7,6 +8,7 @@ class WidgetColors {
   WidgetColors._();
 
   static const background = Color(0xFF1C1C1E);
+  static const darkOverlay = Color(0x8C1C1C1E);
   static const glassPanel = Color(0x26FFFFFF);
   static const glassCard = Color(0x14FFFFFF);
   static const glassCardActive = Color(0xE6FFFFFF);
@@ -24,12 +26,22 @@ class WidgetDimensions {
   WidgetDimensions._();
 
   static const baseWidth = 1200.0;
+  static const defaultWidgetW = 400;
+  static const defaultWidgetH = 200;
+  static const minHeight = 400.0;
+  static const maxHeight = 1800.0;
+  static const defaultCanvasHeight = 600.0;
+
+  static const calCardRadius = 12.0;
+  static const pillRadius = 8.0;
+  static const cellPad = 9.0;
+  static const highlightLineHeight = 1.5;
 
   /// Compute canvas height matching widget aspect ratio.
   static Future<double> computeHeight() async {
     final prefs = await SharedPreferences.getInstance();
-    final widgetW = prefs.getInt('widget_width') ?? 400;
-    final widgetH = prefs.getInt('widget_height') ?? 200;
+    final widgetW = prefs.getInt(PrefKeys.widgetWidth) ?? 400;
+    final widgetH = prefs.getInt(PrefKeys.widgetHeight) ?? 200;
     final aspect = widgetW / widgetH;
     return (baseWidth / aspect).clamp(400.0, 1800.0);
   }

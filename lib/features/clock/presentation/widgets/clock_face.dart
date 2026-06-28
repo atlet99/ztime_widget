@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:ztime_widget/core/constants/formats.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/core/widget/widget_constants.dart';
@@ -47,8 +48,8 @@ class ClockFace extends StatelessWidget {
         final calHeight = h * 0.15;
         final calNumSize = maxW * 0.038;
         final calLetterSize = maxW * 0.026;
-        const calCardRadius = 12.0;
-        const pillRadius = 8.0;
+        const calCardRadius = WidgetDimensions.calCardRadius;
+        const pillRadius = WidgetDimensions.pillRadius;
 
         final shortLabels = AppDateUtils.getWeekdayLabelsShort(locale);
         final today = time.weekday - 1;
@@ -68,7 +69,7 @@ class ClockFace extends StatelessWidget {
             // Dark overlay
             const Positioned.fill(
               child: DecoratedBox(
-                decoration: BoxDecoration(color: Color(0x8C1C1C1E)),
+                decoration: BoxDecoration(color: WidgetColors.darkOverlay),
               ),
             ),
 
@@ -120,7 +121,7 @@ class ClockFace extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        DateFormat('dd/MM/yyyy', locale).format(time),
+                        DateFormat(AppFormats.dateShort, locale).format(time),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.85),
                           fontSize: dateFontSize,
@@ -130,7 +131,7 @@ class ClockFace extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        DateFormat('EEEE', locale).format(time),
+                        DateFormat(AppFormats.weekdayFull, locale).format(time),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.70),
                           fontSize: dayNameSize,
@@ -161,7 +162,7 @@ class ClockFace extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 2),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(0x1A2C2C2E),
+                            color: WidgetColors.calendarBg,
                             borderRadius: BorderRadius.circular(calCardRadius),
                           ),
                           child: Column(

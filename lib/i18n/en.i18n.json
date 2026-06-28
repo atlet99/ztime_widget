@@ -13,5 +13,9 @@
   "batteryOptimization": "Battery Optimization",
   "batteryOptDesc": "For the widget to work correctly on Huawei Nova 5T, disable battery optimization for ZTime.",
   "openBatterySettings": "Open Battery Settings",
-  "timeCurrent": "Current time: $time"
+  "timeCurrent": "Current time: $time",
+  "about": "About",
+  "aboutDesc": "ZTime Widget — custom clock widget for Android.",
+  "version": "Version $version",
+  "viewOnGithub": "View on GitHub"
 }

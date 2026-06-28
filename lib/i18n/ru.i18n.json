@@ -13,5 +13,9 @@
   "batteryOptimization": "Оптимизация батареи",
   "batteryOptDesc": "Для корректной работы виджета на Huawei Nova 5T необходимо отключить оптимизацию батареи для ZTime.",
   "openBatterySettings": "Открыть настройки батареи",
-  "timeCurrent": "Текущее время: $time"
+  "timeCurrent": "Текущее время: $time",
+  "about": "О приложении",
+  "aboutDesc": "ZTime Widget — пользовательский виджет часов для Android.",
+  "version": "Версия $version",
+  "viewOnGithub": "Открыть на GitHub"
 }

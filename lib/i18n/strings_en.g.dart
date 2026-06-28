@@ -80,4 +80,16 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Current time: $time'
 	String timeCurrent({required Object time}) => 'Current time: ${time}';
+
+	/// en: 'About'
+	String get about => 'About';
+
+	/// en: 'ZTime Widget — custom clock widget for Android.'
+	String get aboutDesc => 'ZTime Widget — custom clock widget for Android.';
+
+	/// en: 'Version $version'
+	String version({required Object version}) => 'Version ${version}';
+
+	/// en: 'View on GitHub'
+	String get viewOnGithub => 'View on GitHub';
 }

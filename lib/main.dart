@@ -9,16 +9,19 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:ztime_widget/app.dart';
+import 'package:ztime_widget/core/constants/android_constants.dart';
+import 'package:ztime_widget/core/constants/durations.dart';
+import 'package:ztime_widget/core/constants/formats.dart';
+import 'package:ztime_widget/core/constants/home_widget_keys.dart';
+import 'package:ztime_widget/core/constants/pref_keys.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/core/widget/widget_constants.dart';
 import 'package:ztime_widget/i18n/strings.g.dart';
 
-const _workTask = 'ztime_widget_refresh';
-
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    if (task == _workTask) {
+    if (task == HomeWidgetKeys.workTask) {
       await _renderWidgetToPng();
       return true;
     }
@@ -28,7 +31,7 @@ void callbackDispatcher() {
 
 Future<GlassStyle> _loadGlassStyle() async {
   final prefs = await SharedPreferences.getInstance();
-  final index = prefs.getInt('glass_style') ?? 0;
+  final index = prefs.getInt(PrefKeys.glassStyle) ?? 0;
   if (index < GlassStyle.values.length) return GlassStyle.values[index];
   return GlassStyle.coldGlass;
 }
@@ -37,7 +40,7 @@ Future<GlassStyle> _loadGlassStyle() async {
 /// Returns the language code string.
 Future<String> _loadLocaleCode() async {
   final prefs = await SharedPreferences.getInstance();
-  final index = prefs.getInt('app_locale') ?? 0;
+  final index = prefs.getInt(PrefKeys.appLocale) ?? 0;
   final localeEnum =
       AppLocale.values[index.clamp(0, AppLocale.values.length - 1)];
   return localeEnum.languageCode;
@@ -69,12 +72,17 @@ Future<void> _renderWidgetToPng() async {
   final locale = await _loadLocaleCode();
 
   final prefs = await SharedPreferences.getInstance();
-  final widgetW = prefs.getInt('widget_width') ?? 400;
-  final widgetH = prefs.getInt('widget_height') ?? 200;
+  final widgetW =
+      prefs.getInt(PrefKeys.widgetWidth) ?? WidgetDimensions.defaultWidgetW;
+  final widgetH =
+      prefs.getInt(PrefKeys.widgetHeight) ?? WidgetDimensions.defaultWidgetH;
 
   final aspect = widgetW / widgetH;
-  const w = 1200.0;
-  final h = (w / aspect).clamp(400.0, 1800.0);
+  const w = WidgetDimensions.baseWidth;
+  final h = (w / aspect).clamp(
+    WidgetDimensions.minHeight,
+    WidgetDimensions.maxHeight,
+  );
 
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder, Offset.zero & Size(w, h));
@@ -100,19 +108,31 @@ Future<void> _renderWidgetToPng() async {
   }
 
   // Dark overlay
-  final overlayPaint = Paint()..color = const Color(0x8C1C1C1E);
+  final overlayPaint = Paint()..color = WidgetColors.darkOverlay;
   canvas.drawRect(Rect.fromLTWH(0, 0, w, h), overlayPaint);
 
   // Top highlight line
   final highlightPaint = Paint()
-    ..shader = ui.Gradient.linear(const Offset(0, 0), const Offset(0, 1.5), [
-      Colors.white.withValues(alpha: 0.35),
-      Colors.white.withValues(alpha: 0.0),
-    ]);
-  canvas.drawRect(const Rect.fromLTWH(0, 0, 1200.0, 1.5), highlightPaint);
+    ..shader = ui.Gradient.linear(
+      const Offset(0, 0),
+      const Offset(0, WidgetDimensions.highlightLineHeight),
+      [
+        Colors.white.withValues(alpha: 0.35),
+        Colors.white.withValues(alpha: 0.0),
+      ],
+    );
+  canvas.drawRect(
+    const Rect.fromLTWH(
+      0,
+      0,
+      WidgetDimensions.baseWidth,
+      WidgetDimensions.highlightLineHeight,
+    ),
+    highlightPaint,
+  );
 
   // All proportions are percentage-based — adapts to any aspect ratio
-  const safePadX = 1200.0 * 0.065;
+  const safePadX = WidgetDimensions.baseWidth * 0.065;
   final safePadY = h * 0.055;
   const contentW = w - safePadX * 2;
 
@@ -125,16 +145,13 @@ Future<void> _renderWidgetToPng() async {
   final calTop = h - safePadY - calHeight;
   const calNumSize = contentW * 0.063;
   const calLetterSize = contentW * 0.030;
-  const calCardRadius = 12.0;
-  const pillRadius = 8.0;
-  const cellPad = 9.0;
 
   final dateTop = h * 0.18;
 
   final tp = TextPainter(textDirection: ui.TextDirection.ltr);
 
   // Date — top-right, aligned with TextClock
-  final dateStr = DateFormat('dd/MM/yyyy', locale).format(now);
+  final dateStr = DateFormat(AppFormats.dateShort, locale).format(now);
   tp.text = TextSpan(
     text: dateStr,
     style: TextStyle(
@@ -148,7 +165,7 @@ Future<void> _renderWidgetToPng() async {
   tp.paint(canvas, Offset(w - safePadX - w * 0.05 - tp.width, dateTop));
 
   // Day name — opacity 0.70, bigger
-  final dayName = DateFormat('EEEE', locale).format(now);
+  final dayName = DateFormat(AppFormats.weekdayFull, locale).format(now);
   tp.text = TextSpan(
     text: dayName,
     style: TextStyle(
@@ -170,7 +187,7 @@ Future<void> _renderWidgetToPng() async {
   // Calendar strip
   final monday = now.subtract(Duration(days: now.weekday - 1));
   final shortLabels = <String>[];
-  final dayFmt = DateFormat('EE', locale);
+  final dayFmt = DateFormat(AppFormats.weekdayShort, locale);
   for (var i = 0; i < 7; i++) {
     shortLabels.add(dayFmt.format(monday.add(Duration(days: i))));
   }
@@ -185,15 +202,15 @@ Future<void> _renderWidgetToPng() async {
     final cx = safePadX + cellWidth * i;
     final dayNum = monday.add(Duration(days: i)).day;
 
-    // Glass card — #2C2C2E background, with cellPad each side
+    // Glass card — calendarBg background, with cellPad each side
     final cardRect = RRect.fromLTRBR(
-      cx + cellPad,
+      cx + WidgetDimensions.cellPad,
       calTop,
-      cx + cellWidth - cellPad,
+      cx + cellWidth - WidgetDimensions.cellPad,
       calTop + calHeight,
-      const Radius.circular(calCardRadius),
+      const Radius.circular(WidgetDimensions.calCardRadius),
     );
-    cardPaint.color = const Color(0x1A2C2C2E);
+    cardPaint.color = WidgetColors.calendarBg;
     canvas.drawRRect(cardRect, cardPaint);
 
     final dayText = dayNum.toString();
@@ -218,7 +235,7 @@ Future<void> _renderWidgetToPng() async {
           width: pillW,
           height: pillH,
         ),
-        const Radius.circular(pillRadius),
+        const Radius.circular(WidgetDimensions.pillRadius),
       );
       canvas.drawRRect(pillRect, Paint()..color = Colors.white);
     } else {
@@ -265,9 +282,13 @@ Future<void> _renderWidgetToPng() async {
   );
   final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-  await HomeWidget.saveFile('widget_png', pngBytes, extension: 'png');
+  await HomeWidget.saveFile(
+    HomeWidgetKeys.widgetPng,
+    pngBytes,
+    extension: 'png',
+  );
   await HomeWidget.updateWidget(
-    qualifiedAndroidName: 'com.gosayram.ztime_widget.CustomClockWidgetProvider',
+    qualifiedAndroidName: AndroidConstants.widgetProvider,
   );
 
   image.dispose();
@@ -282,7 +303,7 @@ void main() async {
 
   // Init slang: load saved locale or fall back to device locale
   final prefs = await SharedPreferences.getInstance();
-  final localeIndex = prefs.getInt('app_locale') ?? 0;
+  final localeIndex = prefs.getInt(PrefKeys.appLocale) ?? 0;
   if (localeIndex == 0) {
     await LocaleSettings.useDeviceLocale();
   } else {
@@ -296,9 +317,9 @@ void main() async {
 
   await Workmanager().initialize(callbackDispatcher);
   await Workmanager().registerPeriodicTask(
-    'ztime-widget-id',
-    _workTask,
-    frequency: const Duration(minutes: 15),
+    HomeWidgetKeys.workTaskId,
+    HomeWidgetKeys.workTask,
+    frequency: AppDurations.workmanagerFrequency,
     constraints: Constraints(networkType: NetworkType.notRequired),
   );
 

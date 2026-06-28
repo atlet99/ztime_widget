@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:ztime_widget/core/constants/android_constants.dart';
 import 'package:ztime_widget/core/theme/app_theme.dart';
 import 'package:ztime_widget/features/clock/presentation/controllers/clock_controller.dart';
 import 'package:ztime_widget/features/clock/presentation/pages/clock_page.dart';
@@ -17,9 +18,7 @@ class ZTimeApp extends ConsumerStatefulWidget {
 
 class _ZTimeAppState extends ConsumerState<ZTimeApp>
     with WidgetsBindingObserver {
-  static const _channel = MethodChannel(
-    'com.gosayram.ztime_widget/date_change',
-  );
+  static const _channel = MethodChannel(AndroidConstants.methodChannel);
 
   @override
   void initState() {

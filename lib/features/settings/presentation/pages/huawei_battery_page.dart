@@ -2,7 +2,11 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:ztime_widget/core/app_constants.dart';
+import 'package:ztime_widget/core/constants/pref_keys.dart';
 import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/i18n/strings.g.dart';
@@ -68,7 +72,7 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
             onTap: () async {
               await LocaleSettings.useDeviceLocale();
               final prefs = await SharedPreferences.getInstance();
-              await prefs.setInt('app_locale', 0);
+              await prefs.setInt(PrefKeys.appLocale, 0);
             },
           ),
           ...AppLocale.values.map((locale) {
@@ -82,7 +86,7 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
                 await LocaleSettings.setLocale(locale);
                 final index = AppLocale.values.indexOf(locale);
                 final prefs = await SharedPreferences.getInstance();
-                await prefs.setInt('app_locale', index + 1);
+                await prefs.setInt(PrefKeys.appLocale, index + 1);
               },
             );
           }),
@@ -209,6 +213,58 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
               ),
             ),
           ),
+          const SizedBox(height: 32),
+          const Divider(color: Colors.white12),
+          const SizedBox(height: 16),
+          // About
+          Text(
+            context.t.about,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.t.aboutDesc,
+            style: const TextStyle(fontSize: 13, color: AppColors.textDim),
+          ),
+          const SizedBox(height: 12),
+          FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) {
+              final version = snapshot.data?.version ?? '';
+              return Text(
+                context.t.version(version: version),
+                style: const TextStyle(fontSize: 13, color: AppColors.textDim),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: OutlinedButton(
+              onPressed: () => launchUrl(Uri.parse(AppConstants.githubUrl)),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.textPrimary,
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.code, size: 18),
+                  const SizedBox(width: 8),
+                  Text(context.t.viewOnGithub),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );

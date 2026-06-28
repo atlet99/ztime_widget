@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ztime_widget/core/constants/formats.dart';
+import 'package:ztime_widget/core/constants/pref_keys.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/core/widget/widget_constants.dart';
@@ -24,7 +26,7 @@ class WidgetLayout extends StatefulWidget {
 
 class _WidgetLayoutState extends State<WidgetLayout> {
   final double _canvasW = WidgetDimensions.baseWidth;
-  double _canvasH = 600.0;
+  double _canvasH = WidgetDimensions.defaultCanvasHeight;
 
   @override
   void initState() {
@@ -34,10 +36,13 @@ class _WidgetLayoutState extends State<WidgetLayout> {
 
   Future<void> _loadDimensions() async {
     final prefs = await SharedPreferences.getInstance();
-    final widgetW = prefs.getInt('widget_width') ?? 400;
-    final widgetH = prefs.getInt('widget_height') ?? 200;
+    final widgetW = prefs.getInt(PrefKeys.widgetWidth) ?? 400;
+    final widgetH = prefs.getInt(PrefKeys.widgetHeight) ?? 200;
     final aspect = widgetW / widgetH;
-    final h = (WidgetDimensions.baseWidth / aspect).clamp(400.0, 1800.0);
+    final h = (WidgetDimensions.baseWidth / aspect).clamp(
+      WidgetDimensions.minHeight,
+      WidgetDimensions.maxHeight,
+    );
     if (mounted) {
       setState(() {
         _canvasH = h;
@@ -66,8 +71,8 @@ class _WidgetLayoutState extends State<WidgetLayout> {
     final calHeight = h * 0.32;
     final calNumSize = contentW * 0.063;
     final calLetterSize = contentW * 0.030;
-    const calCardRadius = 12.0;
-    const pillRadius = 8.0;
+    const calCardRadius = WidgetDimensions.calCardRadius;
+    const pillRadius = WidgetDimensions.pillRadius;
 
     final dateTop = h * 0.18;
 
@@ -87,7 +92,7 @@ class _WidgetLayoutState extends State<WidgetLayout> {
             ),
             const Positioned.fill(
               child: DecoratedBox(
-                decoration: BoxDecoration(color: Color(0x8C1C1C1E)),
+                decoration: BoxDecoration(color: WidgetColors.darkOverlay),
               ),
             ),
             Positioned(
@@ -116,7 +121,7 @@ class _WidgetLayoutState extends State<WidgetLayout> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    DateFormat('dd/MM/yyyy', locale).format(now),
+                    DateFormat(AppFormats.dateShort, locale).format(now),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.85),
                       fontSize: dateFontSize,
@@ -126,7 +131,7 @@ class _WidgetLayoutState extends State<WidgetLayout> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    DateFormat('EEEE', locale).format(now),
+                    DateFormat(AppFormats.weekdayFull, locale).format(now),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.70),
                       fontSize: dayNameSize,
@@ -152,7 +157,7 @@ class _WidgetLayoutState extends State<WidgetLayout> {
                         padding: const EdgeInsets.symmetric(horizontal: 9.0),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(0x1A2C2C2E),
+                            color: WidgetColors.calendarBg,
                             borderRadius: BorderRadius.circular(calCardRadius),
                           ),
                           child: Column(

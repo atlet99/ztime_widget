@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:ztime_widget/core/constants/durations.dart';
 
 part 'clock_controller.g.dart';
 
@@ -18,7 +19,7 @@ class ClockSeconds extends _$ClockSeconds {
 
   void _startTimer() {
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+    _timer = Timer.periodic(AppDurations.clockTick, (_) {
       state = DateTime.now();
     });
   }
@@ -51,7 +52,7 @@ class ClockMinutes extends _$ClockMinutes {
     final initialDelay = Duration(seconds: 60 - now.second);
     _timer = Timer(initialDelay, () {
       state = DateTime.now();
-      _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      _timer = Timer.periodic(AppDurations.minuteTick, (_) {
         state = DateTime.now();
       });
     });

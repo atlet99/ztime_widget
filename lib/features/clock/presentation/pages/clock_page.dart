@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ztime_widget/core/constants/durations.dart';
+import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/core/widget/widget_layout.dart';
@@ -32,7 +34,7 @@ class _ClockPageState extends ConsumerState<ClockPage> {
   void _scheduleWidgetRender(GlassStyle glassStyle) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Wait for new glass texture to load before capturing
-      await Future<void>.delayed(const Duration(milliseconds: 400));
+      await Future<void>.delayed(AppDurations.renderDelay);
       if (!mounted) return;
       final boundary =
           _widgetKey.currentContext?.findRenderObject()
@@ -88,7 +90,7 @@ class _ClockPageState extends ConsumerState<ClockPage> {
             child: IconButton(
               icon: const Icon(
                 Icons.settings,
-                color: Color(0x66FFFFFF),
+                color: AppColors.textDim,
                 size: 22,
               ),
               onPressed: () {
