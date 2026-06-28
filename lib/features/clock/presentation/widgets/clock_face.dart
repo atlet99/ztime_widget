@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:ztime_widget/core/constants/formats.dart';
+import 'package:ztime_widget/core/device/launcher_capabilities.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/core/widget/widget_constants.dart';
@@ -400,10 +403,20 @@ class ClockFace extends StatelessWidget {
   }
 
   Widget _darkOverlay() {
-    return const Positioned.fill(
-      child: DecoratedBox(
-        decoration: BoxDecoration(color: WidgetColors.darkOverlay),
-      ),
+    final support = LauncherCapabilities.current.transparencySupport;
+    return Positioned.fill(
+      child: switch (support) {
+        TransparencySupport.full => BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+        TransparencySupport.partial => Container(
+          color: Colors.black.withValues(alpha: 0.30),
+        ),
+        TransparencySupport.none => const DecoratedBox(
+          decoration: BoxDecoration(color: WidgetColors.darkOverlay),
+        ),
+      },
     );
   }
 

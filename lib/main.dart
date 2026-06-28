@@ -14,6 +14,7 @@ import 'package:ztime_widget/core/constants/durations.dart';
 import 'package:ztime_widget/core/constants/formats.dart';
 import 'package:ztime_widget/core/constants/home_widget_keys.dart';
 import 'package:ztime_widget/core/constants/pref_keys.dart';
+import 'package:ztime_widget/core/device/launcher_capabilities.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/core/widget/widget_constants.dart';
 import 'package:ztime_widget/i18n/strings.g.dart';
@@ -107,8 +108,14 @@ Future<void> _renderWidgetToPng() async {
     canvas.drawColor(WidgetColors.background, BlendMode.src);
   }
 
-  // Dark overlay
-  final overlayPaint = Paint()..color = WidgetColors.darkOverlay;
+  // Dark overlay — adaptive based on device transparency support
+  final capabilities = await LauncherCapabilities.detect();
+  final overlayAlpha = switch (capabilities.transparencySupport) {
+    TransparencySupport.full => 0x14, // light overlay, blur handled by launcher
+    TransparencySupport.partial => 0x4D, // 30% black
+    TransparencySupport.none => 0x8C, // 55% black (original)
+  };
+  final overlayPaint = Paint()..color = Color(overlayAlpha << 24 | 0x1C1C1E);
   canvas.drawRect(Rect.fromLTWH(0, 0, w, h), overlayPaint);
 
   // Top highlight line
@@ -297,9 +304,11 @@ Future<void> _renderWidgetToPng() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Init date formatting + detect device transparency support
   await Future.wait([
     initializeDateFormatting('ru', null),
     initializeDateFormatting('en', null),
+    LauncherCapabilities.detect(),
   ]);
 
   // Init slang: load saved locale or fall back to device locale
