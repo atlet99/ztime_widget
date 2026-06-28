@@ -1,4 +1,4 @@
-.PHONY: help get gen clean format fix analyze lint test slang-analyze check-all fix-all build build-split build-debug build-aab run release
+.PHONY: help get gen clean format fix analyze lint test slang-analyze check-all fix-all build build-split build-debug build-aab run release changelog bump release
 
 APP_NAME := ztime_widget
 
@@ -52,4 +52,29 @@ build-aab: ## Build release AAB (for Play Store)
 run: ## Run on connected device
 	flutter run
 
-release: check-all build-split ## Full check + split release build
+# === Version Management ===
+
+changelog: ## Generate CHANGELOG.md from git history
+	git-cliff --output CHANGELOG.md
+	prettier --write CHANGELOG.md
+
+bump: ## Bump version from commits + update pubspec.yaml
+	@NEW_VERSION=$$(git-cliff --bumped-version 2>/dev/null | tr -d 'v'); \
+	if [ -z "$$NEW_VERSION" ]; then \
+		echo "No version bump needed"; \
+		exit 0; \
+	fi; \
+	CURRENT_VERSION=$$(grep 'version:' pubspec.yaml | head -1 | awk '{print $$2}' | cut -d'+' -f1); \
+	BUILD_NUM=$$(grep 'version:' pubspec.yaml | head -1 | awk '{print $$2}' | cut -d'+' -f2); \
+	NEW_BUILD=$$$$(($$$${BUILD_NUM:-0} + 1)); \
+	echo "Bumping $$CURRENT_VERSION → $$NEW_VERSION+$$NEW_BUILD"; \
+	sed -i '' "s/version: .*/version: $$NEW_VERSION+$$NEW_BUILD/" pubspec.yaml; \
+	git add pubspec.yaml; \
+	git commit -m "chore(release): prepare for v$$NEW_VERSION"; \
+	git tag -a "v$$NEW_VERSION" -m "Release v$$NEW_VERSION"; \
+	echo "Tagged v$$NEW_VERSION"
+
+release: changelog ## Full release: changelog + bump + tag
+	@$(MAKE) bump
+	@echo ""
+	@echo "Release complete! Push with: git push && git push --tags"
