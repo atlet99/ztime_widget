@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:ztime_widget/core/constants/android_constants.dart';
 import 'package:ztime_widget/core/theme/app_theme.dart';
@@ -90,18 +92,40 @@ class _ZTimeAppState extends ConsumerState<ZTimeApp>
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: t.appTitle,
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark,
-      locale: TranslationProvider.of(context).flutterLocale,
-      supportedLocales: AppLocaleUtils.supportedLocales,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: const ClockPage(),
+    return ScreenUtilInit(
+      designSize: const Size(360, 690),
+      minTextAdapt: true,
+      splitScreenMode: false,
+      builder: (context, child) {
+        return MaterialApp(
+          title: t.appTitle,
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.dark,
+          locale: TranslationProvider.of(context).flutterLocale,
+          supportedLocales: AppLocaleUtils.supportedLocales,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          builder: (context, child) {
+            return ResponsiveBreakpoints.builder(
+              child: child!,
+              breakpoints: const [
+                Breakpoint(start: 0, end: 600, name: MOBILE),
+                Breakpoint(start: 601, end: 1024, name: TABLET),
+                Breakpoint(start: 1025, end: double.infinity, name: DESKTOP),
+              ],
+              breakpointsLandscape: const [
+                Breakpoint(start: 0, end: 480, name: MOBILE),
+                Breakpoint(start: 481, end: 1024, name: TABLET),
+                Breakpoint(start: 1025, end: double.infinity, name: DESKTOP),
+              ],
+            );
+          },
+          home: const ClockPage(),
+        );
+      },
     );
   }
 }

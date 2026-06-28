@@ -1,16 +1,27 @@
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:ztime_widget/core/constants/formats.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/core/widget/widget_constants.dart';
 
 /// In-app full-screen clock face.
-/// Apple-style 3-zone hard-anchor layout.
+/// Adaptive layout using ResponsiveBreakpoints + ScreenUtil.
+///
+/// Portrait:
 ///   Top bar:    Time (Thin, w100) + Date (Regular, w400), baseline-aligned
-///   Spring:     Empty space (~45-50% height)
-///   Bottom bar: Calendar strip, fixed height, anchored to bottom
-///   Safe area:  6.5% horizontal, 5.5% vertical
+///   Spring:     Empty space
+///   Bottom bar: Calendar strip, tappable cells → open that date in calendar
+///
+/// Landscape (phone):
+///   Left:       Time (large) + Date below
+///   Right:      Calendar strip (vertical, compact)
+///
+/// Safe area: 6.5% horizontal, 5.5% vertical
 class ClockFace extends StatelessWidget {
   const ClockFace({
     super.key,
@@ -23,215 +34,397 @@ class ClockFace extends StatelessWidget {
   final String locale;
   final GlassStyle glassStyle;
 
+  void _openCalendarForDate(DateTime date) async {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
+    final intent = AndroidIntent(
+      action: 'android.intent.action.VIEW',
+      data: 'content://com.android.calendar/time',
+      arguments: <String, dynamic>{
+        'beginTime': start.millisecondsSinceEpoch,
+        'endTime': end.millisecondsSinceEpoch,
+        'allDay': true,
+      },
+      flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
+    );
+    if (await intent.canResolveActivity() == true) {
+      await intent.launch();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final w = constraints.maxWidth;
         final h = constraints.maxHeight;
-        final padding = MediaQuery.of(context).padding;
+        final padding = MediaQuery.paddingOf(context);
 
-        // Center content for tablets
-        final maxW = w < 480 ? w : 480.0;
-        final sidePad = (w - maxW) / 2;
+        // ResponsiveBreakpoints — logical breakpoint checks
+        final rb = ResponsiveBreakpoints.of(context);
+        final isMobile = rb.isMobile;
+        final isTablet = rb.isTablet;
 
-        // Rule 3: Safe area — 6.5% horizontal, 5.5% vertical
-        final safePadX = maxW * 0.065;
-        final safePadY = padding.top + 16.0;
+        final isLandscape = w > h;
+        if (isLandscape && h < 500) {
+          return _buildLandscape(w, h, padding, isMobile);
+        }
+        return _buildPortrait(w, h, padding, isMobile, isTablet);
+      },
+    );
+  }
 
-        // Rule 1: Top bar
-        final timeSize = maxW * 0.24;
-        final dateFontSize = maxW * 0.036;
-        final dayNameSize = maxW * 0.030;
+  /// Portrait layout — time + date top, calendar bottom.
+  Widget _buildPortrait(
+    double w,
+    double h,
+    EdgeInsets padding,
+    bool isMobile,
+    bool isTablet,
+  ) {
+    // ScreenUtil: safe area padding via .w and .h
+    final safePadX = 24.w;
+    final safePadY = padding.top + 16.h;
 
-        // Rule 2: Calendar strip — fixed height
-        final calHeight = h * 0.15;
-        final calNumSize = maxW * 0.038;
-        final calLetterSize = maxW * 0.026;
-        const calCardRadius = WidgetDimensions.calCardRadius;
-        const pillRadius = WidgetDimensions.pillRadius;
+    // ResponsiveBreakpoints + ScreenUtil: font sizes scale with screen
+    // .sp auto-scales by screen width (designSize width = 360)
+    final timeSize = isMobile ? 86.sp : (isTablet ? 120.sp : 160.sp);
+    final dateFontSize = isMobile ? 13.sp : (isTablet ? 18.sp : 24.sp);
+    final dayNameSize = isMobile ? 11.sp : (isTablet ? 15.sp : 20.sp);
 
-        final shortLabels = AppDateUtils.getWeekdayLabelsShort(locale);
-        final today = time.weekday - 1;
-        final monday = time.subtract(Duration(days: time.weekday - 1));
+    // Calendar strip — height scales with screen
+    final calHeight = h * 0.15;
+    final cellPad = 10.w;
+    final calNumSize = isMobile ? 14.sp : (isTablet ? 20.sp : 28.sp);
+    final calLetterSize = isMobile ? 10.sp : (isTablet ? 14.sp : 18.sp);
 
-        return Stack(
-          children: [
-            // Glass texture background
-            Positioned.fill(
-              child: Image.asset(
-                glassStyle.appPath,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-              ),
-            ),
+    final shortLabels = AppDateUtils.getWeekdayLabelsShort(locale);
+    final today = time.weekday - 1;
+    final monday = time.subtract(Duration(days: time.weekday - 1));
 
-            // Dark overlay
-            const Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: WidgetColors.darkOverlay),
-              ),
-            ),
+    return Stack(
+      children: [
+        _glassBackground(),
+        _darkOverlay(),
+        _highlightLine(),
 
-            // Top highlight line
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: WidgetDimensions.highlightLineHeight,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.35),
-                      Colors.white.withValues(alpha: 0.0),
-                    ],
-                  ),
+        // Top bar — Time + Date, baseline-aligned
+        Positioned(
+          top: safePadY,
+          left: safePadX,
+          right: safePadX,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: timeSize,
+                  fontWeight: FontWeight.w100,
+                  letterSpacing: 0.09,
+                  height: 0.85,
                 ),
               ),
-            ),
-
-            // Rule 1: Top bar — Time + Date, baseline-aligned
-            Positioned(
-              top: safePadY,
-              left: sidePad + safePadX,
-              right: sidePad + safePadX,
-              child: Row(
+              const Spacer(),
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Time — Thin/Ultralight, weight 100, letterSpacing 0.09
                   Text(
-                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+                    DateFormat(AppFormats.dateShort, locale).format(time),
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: timeSize,
-                      fontWeight: FontWeight.w100,
-                      letterSpacing: 0.09,
-                      height: 0.85,
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontSize: dateFontSize,
+                      fontWeight: FontWeight.w400,
+                      height: 1.2,
                     ),
                   ),
-
-                  const Spacer(),
-
-                  // Date — Regular weight 400, opacity 0.85
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        DateFormat(AppFormats.dateShort, locale).format(time),
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontSize: dateFontSize,
-                          fontWeight: FontWeight.w400,
-                          height: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        DateFormat(AppFormats.weekdayFull, locale).format(time),
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.70),
-                          fontSize: dayNameSize,
-                          fontWeight: FontWeight.w400,
-                          height: 1.2,
-                        ),
-                      ),
-                    ],
+                  SizedBox(height: 4.h),
+                  Text(
+                    DateFormat(AppFormats.weekdayFull, locale).format(time),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.70),
+                      fontSize: dayNameSize,
+                      fontWeight: FontWeight.w400,
+                      height: 1.2,
+                    ),
                   ),
                 ],
               ),
-            ),
+            ],
+          ),
+        ),
 
-            // Rule 2: Bottom bar — Calendar strip, fixed height, anchored bottom
-            Positioned(
-              bottom: safePadY,
-              left: sidePad + safePadX,
-              right: sidePad + safePadX,
-              child: SizedBox(
-                height: calHeight,
-                child: Row(
-                  children: List.generate(7, (i) {
-                    final dayNum = monday.add(Duration(days: i)).day;
-                    final isToday = i == today;
+        // Bottom bar — Calendar strip, tappable cells
+        Positioned(
+          bottom: safePadY,
+          left: safePadX,
+          right: safePadX,
+          child: SizedBox(
+            height: calHeight,
+            child: Row(
+              children: List.generate(7, (i) {
+                final dayDate = monday.add(Duration(days: i));
+                final dayNum = dayDate.day;
+                final isToday = i == today;
 
-                    return Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: WidgetColors.calendarBg,
-                            borderRadius: BorderRadius.circular(calCardRadius),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Active day: pill with white bg + black text
-                              isToday
-                                  ? IntrinsicWidth(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            pillRadius,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          dayNum.toString(),
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: WidgetColors.textActive,
-                                            fontSize: calNumSize,
-                                            fontWeight: FontWeight.w500,
-                                            height: 1.1,
-                                          ),
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => _openCalendarForDate(dayDate),
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: cellPad),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: WidgetColors.calendarBg,
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            isToday
+                                ? IntrinsicWidth(
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 6.w,
+                                        vertical: 2.h,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(
+                                          8.r,
                                         ),
                                       ),
-                                    )
-                                  : Text(
-                                      dayNum.toString(),
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.55,
+                                      child: Text(
+                                        dayNum.toString(),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: WidgetColors.textActive,
+                                          fontSize: calNumSize,
+                                          fontWeight: FontWeight.w500,
+                                          height: 1.1,
                                         ),
-                                        fontSize: calNumSize,
-                                        fontWeight: FontWeight.w500,
-                                        height: 1.1,
                                       ),
                                     ),
-                              const SizedBox(height: 2),
-                              // Day letters: opacity 0.35, Regular weight
-                              Text(
-                                shortLabels[i],
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: isToday
-                                      ? Colors.white.withValues(alpha: 0.70)
-                                      : Colors.white.withValues(alpha: 0.35),
-                                  fontSize: calLetterSize,
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.1,
-                                ),
+                                  )
+                                : Text(
+                                    dayNum.toString(),
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.55,
+                                      ),
+                                      fontSize: calNumSize,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.1,
+                                    ),
+                                  ),
+                            SizedBox(height: 3.h),
+                            Text(
+                              shortLabels[i],
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: isToday
+                                    ? Colors.white.withValues(alpha: 0.70)
+                                    : Colors.white.withValues(alpha: 0.35),
+                                fontSize: calLetterSize,
+                                fontWeight: FontWeight.w400,
+                                height: 1.1,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  }),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Landscape layout — time + date left, calendar right.
+  /// Used when height < 500 (phone in landscape).
+  Widget _buildLandscape(
+    double w,
+    double h,
+    EdgeInsets padding,
+    bool isMobile,
+  ) {
+    final safePadX = 16.w;
+    final safePadY = padding.top + 8.h;
+
+    // Left column: time + date (55% width)
+    final leftW = w * 0.55;
+    final timeSize = isMobile ? 56.sp : 80.sp;
+    final dateFontSize = isMobile ? 11.sp : 16.sp;
+    final dayNameSize = isMobile ? 9.sp : 13.sp;
+
+    // Right column: calendar strip (vertical)
+    final rightX = w * 0.58;
+    final rightW = w - rightX - safePadX;
+    final cellPad = 8.w;
+    final calNumSize = isMobile ? 11.sp : 16.sp;
+
+    final shortLabels = AppDateUtils.getWeekdayLabelsShort(locale);
+    final today = time.weekday - 1;
+    final monday = time.subtract(Duration(days: time.weekday - 1));
+
+    return Stack(
+      children: [
+        _glassBackground(),
+        _darkOverlay(),
+        _highlightLine(),
+
+        // Left: Time + Date
+        Positioned(
+          top: safePadY + h * 0.05,
+          left: safePadX,
+          width: leftW,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: timeSize,
+                  fontWeight: FontWeight.w100,
+                  letterSpacing: 0.09,
+                  height: 0.85,
                 ),
               ),
-            ),
-          ],
-        );
-      },
+              SizedBox(height: 10.h),
+              Text(
+                DateFormat(AppFormats.dateShort, locale).format(time),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontSize: dateFontSize,
+                  fontWeight: FontWeight.w400,
+                  height: 1.2,
+                ),
+              ),
+              SizedBox(height: 3.h),
+              Text(
+                DateFormat(AppFormats.weekdayFull, locale).format(time),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.70),
+                  fontSize: dayNameSize,
+                  fontWeight: FontWeight.w400,
+                  height: 1.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Right: Calendar strip (vertical)
+        Positioned(
+          top: safePadY,
+          right: safePadX,
+          width: rightW,
+          bottom: safePadY,
+          child: Column(
+            children: List.generate(7, (i) {
+              final dayDate = monday.add(Duration(days: i));
+              final dayNum = dayDate.day;
+              final isToday = i == today;
+
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => _openCalendarForDate(dayDate),
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: cellPad,
+                      vertical: 2.h,
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: WidgetColors.calendarBg,
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (isToday)
+                            Container(
+                              width: 6.r,
+                              height: 6.r,
+                              margin: EdgeInsets.only(right: 6.w),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          Text(
+                            '$dayNum ${shortLabels[i]}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: isToday
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.55),
+                              fontSize: calNumSize,
+                              fontWeight: isToday
+                                  ? FontWeight.w500
+                                  : FontWeight.w400,
+                              height: 1.1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _glassBackground() {
+    return Positioned.fill(
+      child: Image.asset(
+        glassStyle.appPath,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+      ),
+    );
+  }
+
+  Widget _darkOverlay() {
+    return const Positioned.fill(
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: WidgetColors.darkOverlay),
+      ),
+    );
+  }
+
+  Widget _highlightLine() {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: WidgetDimensions.highlightLineHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white.withValues(alpha: 0.35),
+              Colors.white.withValues(alpha: 0.0),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ztime_widget/core/constants/durations.dart';
 import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
@@ -33,7 +34,6 @@ class _ClockPageState extends ConsumerState<ClockPage> {
 
   void _scheduleWidgetRender(GlassStyle glassStyle) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Wait for new glass texture to load before capturing
       await Future<void>.delayed(AppDurations.renderDelay);
       if (!mounted) return;
       final boundary =
@@ -43,7 +43,6 @@ class _ClockPageState extends ConsumerState<ClockPage> {
     });
   }
 
-  /// Force re-render of widget PNG (called on resume when date/locale/glass changed).
   void _forceWidgetRender(String date, String locale, String glass) {
     _lastRenderDate = date;
     _lastRenderLocale = locale;
@@ -58,7 +57,6 @@ class _ClockPageState extends ConsumerState<ClockPage> {
     final glassStyle = ref.watch(glassStyleProvider);
     final timeLabel = AppDateUtils.formatTime(time, locale);
 
-    // Use Case 2+3+4+5: Re-render widget if date, locale, or glass style changed
     final currentDate = '${time.year}-${time.month}-${time.day}';
     final currentGlass = glassStyle.assetKey;
     if (currentDate != _lastRenderDate ||
@@ -67,7 +65,7 @@ class _ClockPageState extends ConsumerState<ClockPage> {
       _forceWidgetRender(currentDate, locale, currentGlass);
     }
 
-    final top = MediaQuery.of(context).padding.top;
+    final padding = MediaQuery.paddingOf(context);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -84,15 +82,12 @@ class _ClockPageState extends ConsumerState<ClockPage> {
             ),
           ),
 
+          // Settings button — screenutil-scaled position
           Positioned(
-            top: top + 12,
-            left: 16,
+            top: padding.top + 12.h,
+            left: padding.left + 16.w,
             child: IconButton(
-              icon: const Icon(
-                Icons.settings,
-                color: AppColors.textDim,
-                size: 22,
-              ),
+              icon: Icon(Icons.settings, color: AppColors.textDim, size: 22.r),
               onPressed: () {
                 Navigator.of(context).push<void>(
                   MaterialPageRoute<void>(

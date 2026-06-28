@@ -135,6 +135,7 @@ Future<void> _renderWidgetToPng() async {
   const safePadX = WidgetDimensions.baseWidth * 0.065;
   final safePadY = h * 0.055;
   const contentW = w - safePadX * 2;
+  const cellPad = contentW * WidgetDimensions.cellPadRatio;
 
   // Date typography (time is handled by native TextClock)
   const dateFontSize = contentW * 0.065;
@@ -204,9 +205,9 @@ Future<void> _renderWidgetToPng() async {
 
     // Glass card — calendarBg background, with cellPad each side
     final cardRect = RRect.fromLTRBR(
-      cx + WidgetDimensions.cellPad,
+      cx + cellPad,
       calTop,
-      cx + cellWidth - WidgetDimensions.cellPad,
+      cx + cellWidth - cellPad,
       calTop + calHeight,
       const Radius.circular(WidgetDimensions.calCardRadius),
     );

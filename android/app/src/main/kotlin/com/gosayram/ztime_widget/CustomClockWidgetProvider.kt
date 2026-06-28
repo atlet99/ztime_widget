@@ -68,10 +68,20 @@ class CustomClockWidgetProvider : HomeWidgetProvider() {
                 Log.w("ZTimeWidget", "Dynamic sizing failed", e)
             }
 
-            // Calendar tap → open system calendar
+            // Calendar tap → open system calendar at today's date
             try {
+                val todayStart = java.util.Calendar.getInstance().apply {
+                    set(java.util.Calendar.HOUR_OF_DAY, 0)
+                    set(java.util.Calendar.MINUTE, 0)
+                    set(java.util.Calendar.SECOND, 0)
+                    set(java.util.Calendar.MILLISECOND, 0)
+                }.timeInMillis
+
                 val calendarIntent = Intent(Intent.ACTION_VIEW).apply {
                     data = CalendarContract.CONTENT_URI
+                    putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, todayStart)
+                    putExtra(CalendarContract.EXTRA_EVENT_END_TIME, todayStart + 86400000)
+                    putExtra(CalendarContract.EXTRA_ALL_DAY, true)
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 val pendingIntent = PendingIntent.getActivity(

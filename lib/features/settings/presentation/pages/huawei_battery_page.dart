@@ -2,6 +2,7 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -53,18 +54,18 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
         title: Text(context.t.settings),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24.r),
         children: [
           // Language selector
           Text(
             context.t.language,
-            style: const TextStyle(
-              fontSize: 20,
+            style: TextStyle(
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           // "System" option (useDeviceLocale)
           _buildLocaleOption(
             context,
@@ -91,36 +92,36 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
               },
             );
           }),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           const Divider(color: Colors.white12),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           // Widget glass style
           Text(
             context.t.widgetBgStyle,
-            style: const TextStyle(
-              fontSize: 20,
+            style: TextStyle(
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             context.t.chooseGlassTexture,
-            style: const TextStyle(fontSize: 13, color: AppColors.textDim),
+            style: TextStyle(fontSize: 13.sp, color: AppColors.textDim),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           ...GlassStyle.values.map((style) {
             final isSelected = currentStyle == style;
             final label = _glassLabel(context, style);
             return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: EdgeInsets.only(bottom: 12.h),
               child: GestureDetector(
                 onTap: () =>
                     ref.read(glassStyleProvider.notifier).setStyle(style),
                 child: Container(
-                  height: 80,
+                  height: 80.h,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(16.r),
                     border: Border.all(
                       color: isSelected
                           ? AppColors.accent
@@ -134,31 +135,31 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16.r),
                       color: isSelected
                           ? AppColors.accent.withValues(alpha: 0.15)
                           : Colors.black.withValues(alpha: 0.3),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
                     child: Row(
                       children: [
                         if (isSelected)
-                          const Icon(
+                          Icon(
                             Icons.check_circle,
                             color: AppColors.accent,
-                            size: 22,
+                            size: 22.r,
                           )
                         else
                           Icon(
                             Icons.circle_outlined,
                             color: Colors.white.withValues(alpha: 0.3),
-                            size: 22,
+                            size: 22.r,
                           ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12.w),
                         Text(
                           label,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                             color: isSelected
                                 ? Colors.white
@@ -172,100 +173,97 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
               ),
             );
           }),
-          const SizedBox(height: 32),
+          SizedBox(height: 32.h),
           const Divider(color: Colors.white12),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Text(
             context.t.batteryOptimization,
-            style: const TextStyle(
-              fontSize: 20,
+            style: TextStyle(
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             context.t.batteryOptDesc,
-            style: const TextStyle(
-              fontSize: 13,
+            style: TextStyle(
+              fontSize: 13.sp,
               color: AppColors.textDim,
               height: 1.5,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           SizedBox(
             width: double.infinity,
-            height: 48,
+            height: 48.h,
             child: ElevatedButton(
               onPressed: _openBatterySettings,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accent,
                 foregroundColor: Colors.black,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
               ),
               child: Text(
                 context.t.openBatterySettings,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: 32.h),
           const Divider(color: Colors.white12),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           // About
           Text(
             context.t.about,
-            style: const TextStyle(
-              fontSize: 20,
+            style: TextStyle(
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             context.t.aboutDesc,
-            style: const TextStyle(fontSize: 13, color: AppColors.textDim),
+            style: TextStyle(fontSize: 13.sp, color: AppColors.textDim),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           FutureBuilder<PackageInfo>(
             future: PackageInfo.fromPlatform(),
             builder: (context, snapshot) {
               final version = snapshot.data?.version ?? '';
               return Text(
                 context.t.version(version: version),
-                style: const TextStyle(fontSize: 13, color: AppColors.textDim),
+                style: TextStyle(fontSize: 13.sp, color: AppColors.textDim),
               );
             },
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           SizedBox(
             width: double.infinity,
-            height: 48,
+            height: 48.h,
             child: OutlinedButton(
               onPressed: () => launchUrl(Uri.parse(AppConstants.githubUrl)),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
                 side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.code, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.code, size: 18.r),
+                  SizedBox(width: 8.w),
                   Text(context.t.viewOnGithub),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
         ],
       ),
     );
@@ -278,13 +276,13 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
     required VoidCallback onTap,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: 8.h),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: isSelected
                   ? AppColors.accent
@@ -298,22 +296,18 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
           child: Row(
             children: [
               if (isSelected)
-                const Icon(
-                  Icons.check_circle,
-                  color: AppColors.accent,
-                  size: 20,
-                )
+                Icon(Icons.check_circle, color: AppColors.accent, size: 20.r)
               else
                 Icon(
                   Icons.circle_outlined,
                   color: Colors.white.withValues(alpha: 0.3),
-                  size: 20,
+                  size: 20.r,
                 ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 15.sp,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   color: isSelected
                       ? Colors.white

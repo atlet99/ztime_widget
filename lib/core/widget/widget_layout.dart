@@ -64,6 +64,7 @@ class _WidgetLayoutState extends State<WidgetLayout> {
     final safePadX = w * 0.065;
     final safePadY = h * 0.055;
     final contentW = w - safePadX * 2;
+    final cellPad = contentW * WidgetDimensions.cellPadRatio;
 
     final dateFontSize = contentW * 0.065;
     final dayNameSize = contentW * 0.045;
@@ -71,8 +72,6 @@ class _WidgetLayoutState extends State<WidgetLayout> {
     final calHeight = h * 0.32;
     final calNumSize = contentW * 0.063;
     final calLetterSize = contentW * 0.030;
-    const calCardRadius = WidgetDimensions.calCardRadius;
-    const pillRadius = WidgetDimensions.pillRadius;
 
     final dateTop = h * 0.18;
 
@@ -154,11 +153,13 @@ class _WidgetLayoutState extends State<WidgetLayout> {
                     final isToday = i == today;
                     return Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 9.0),
+                        padding: EdgeInsets.symmetric(horizontal: cellPad),
                         child: Container(
                           decoration: BoxDecoration(
                             color: WidgetColors.calendarBg,
-                            borderRadius: BorderRadius.circular(calCardRadius),
+                            borderRadius: BorderRadius.circular(
+                              WidgetDimensions.calCardRadius,
+                            ),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -173,7 +174,7 @@ class _WidgetLayoutState extends State<WidgetLayout> {
                                         decoration: BoxDecoration(
                                           color: Colors.white,
                                           borderRadius: BorderRadius.circular(
-                                            pillRadius,
+                                            WidgetDimensions.pillRadius,
                                           ),
                                         ),
                                         child: Text(

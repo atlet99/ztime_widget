@@ -34,7 +34,7 @@ class WidgetDimensions {
 
   static const calCardRadius = 12.0;
   static const pillRadius = 8.0;
-  static const cellPad = 9.0;
+  static const cellPadRatio = 0.008;
   static const highlightLineHeight = 1.5;
 
   /// Compute canvas height matching widget aspect ratio.

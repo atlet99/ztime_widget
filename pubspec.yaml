@@ -20,6 +20,10 @@ dependencies:
   slang: ^4.16.0
   slang_flutter: ^4.16.0
 
+  # Responsive / Adaptive
+  responsive_framework: ^1.5.1
+  flutter_screenutil: ^5.9.3
+
   # Date
   intl: ^0.20.2
 
