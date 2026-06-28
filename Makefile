@@ -1,4 +1,4 @@
-.PHONY: help get gen clean format fix analyze lint test slang-analyze check-all fix-all build build-split build-debug build-aab run release changelog bump release
+.PHONY: help get gen clean format fix analyze lint test slang-analyze check-all fix-all build build-split build-debug build-aab run release changelog bump release _update_changelog
 
 APP_NAME := ztime_widget
 
@@ -40,19 +40,22 @@ fix-all: format fix analyze ## Format + Fix + Analyze
 
 build: build-split ## Alias for build-split
 
-build-split: ## Build split APKs per ABI (arm64, arm, x86_64)
+build-split: _update_changelog ## Build split APKs per ABI (arm64, arm, x86_64)
 	flutter build apk --split-per-abi --release
 
-build-debug: ## Build debug APK (universal)
+build-debug: _update_changelog ## Build debug APK (universal)
 	flutter build apk --debug
 
-build-aab: ## Build release AAB (for Play Store)
+build-aab: _update_changelog ## Build release AAB (for Play Store)
 	flutter build appbundle --release
 
 run: ## Run on connected device
 	flutter run
 
 # === Version Management ===
+
+_update_changelog: ## Regenerate CHANGELOG.md (internal, called by build targets)
+	@git-cliff --output CHANGELOG.md 2>/dev/null || true
 
 changelog: ## Generate CHANGELOG.md from git history
 	git-cliff --output CHANGELOG.md

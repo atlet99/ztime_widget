@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [FEATURE] - add core constants and refactor widget rendering; - ([6319583](https://github.com/atlet99/ztime_widget/commit/63195830c0c1dd912c0276b13e8d3cc8e32bce36))
 - [FEATURE] - implement responsive adaptive UI with dynamic sizing; - ([9de1670](https://github.com/atlet99/ztime_widget/commit/9de16702607aeabd5d534cd5026c31e7af3c5cc5))
 - [FEATURE] - add adaptive glass with launcher capability detection; - ([074a1e1](https://github.com/atlet99/ztime_widget/commit/074a1e157448891c24acee221e5d0381f87292ad))
+- [INIT] - initial project setup with base config; - ([6aa2fe3](https://github.com/atlet99/ztime_widget/commit/6aa2fe3216c35a0e32abe22cbca785f63bf16f21))
 
 ### Refactor
 
