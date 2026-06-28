@@ -78,7 +78,7 @@ class ClockFace extends StatelessWidget {
               top: 0,
               left: 0,
               right: 0,
-              height: 1.5,
+              height: WidgetDimensions.highlightLineHeight,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(

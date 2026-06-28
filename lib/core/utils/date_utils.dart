@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:ztime_widget/core/constants/formats.dart';
 
 class AppDateUtils {
   AppDateUtils._();
@@ -11,25 +12,25 @@ class AppDateUtils {
   }
 
   static String formatFullDate(DateTime date, String locale) {
-    final fullDate = _get('yMMMMd', locale);
-    final weekday = _get('EEEE', locale);
+    final fullDate = _get(AppFormats.dateFull, locale);
+    final weekday = _get(AppFormats.weekdayFull, locale);
     return '${fullDate.format(date)} (${weekday.format(date)})';
   }
 
   static String formatTime(DateTime date, String locale) =>
-      _get('Hm', locale).format(date);
+      _get(AppFormats.time24h, locale).format(date);
 
   static List<String> getWeekdayLabels(String locale) {
     final now = DateTime.now();
     final monday = now.subtract(Duration(days: now.weekday - 1));
-    final fmt = _get('E', locale);
+    final fmt = _get(AppFormats.weekdayLabel, locale);
     return List.generate(7, (i) => fmt.format(monday.add(Duration(days: i))));
   }
 
   static List<String> getWeekdayLabelsShort(String locale) {
     final now = DateTime.now();
     final monday = now.subtract(Duration(days: now.weekday - 1));
-    final fmt = _get('EE', locale);
+    final fmt = _get(AppFormats.weekdayShort, locale);
     return List.generate(7, (i) => fmt.format(monday.add(Duration(days: i))));
   }
 }

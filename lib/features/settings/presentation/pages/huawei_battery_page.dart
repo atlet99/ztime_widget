@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ztime_widget/core/app_constants.dart';
+import 'package:ztime_widget/core/constants/android_constants.dart';
 import 'package:ztime_widget/core/constants/pref_keys.dart';
 import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
@@ -328,7 +329,7 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
 
   Future<void> _openBatterySettings() async {
     const intent = AndroidIntent(
-      action: 'android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS',
+      action: AndroidConstants.batterySettingsAction,
       flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
     );
     try {
