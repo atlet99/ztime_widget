@@ -6,6 +6,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:ztime_widget/core/theme/app_theme.dart';
 import 'package:ztime_widget/features/clock/presentation/controllers/clock_controller.dart';
 import 'package:ztime_widget/features/clock/presentation/pages/clock_page.dart';
+import 'package:ztime_widget/i18n/strings.g.dart';
 
 class ZTimeApp extends ConsumerStatefulWidget {
   const ZTimeApp({super.key});
@@ -37,11 +38,9 @@ class _ZTimeAppState extends ConsumerState<ZTimeApp>
     super.dispose();
   }
 
-  /// Listen for day-change signals from Kotlin BroadcastReceiver.
   void _setupDateChannel() {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'onDayChanged') {
-        // Force clock rebuild → triggers widget PNG re-render in ClockPage
         ref.read(clockSecondsProvider.notifier).resume();
       }
     });
@@ -93,16 +92,16 @@ class _ZTimeAppState extends ConsumerState<ZTimeApp>
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ZTime',
+      title: t.appTitle,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
-      locale: const Locale('ru', 'RU'),
+      locale: TranslationProvider.of(context).flutterLocale,
+      supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('ru', 'RU'), Locale('en', 'US')],
       home: const ClockPage(),
     );
   }

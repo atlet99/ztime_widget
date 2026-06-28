@@ -1,0 +1,17 @@
+{
+  "appTitle": "ZTime",
+  "settings": "Settings",
+  "language": "Language",
+  "langSystem": "System",
+  "langRu": "Russian",
+  "langEn": "English",
+  "widgetBgStyle": "Widget Background Style",
+  "chooseGlassTexture": "Choose a glass texture for the widget background",
+  "coldGlass": "Cold Glass",
+  "icyBlue": "Icy Blue",
+  "warmMilk": "Warm Milk",
+  "batteryOptimization": "Battery Optimization",
+  "batteryOptDesc": "For the widget to work correctly on Huawei Nova 5T, disable battery optimization for ZTime.",
+  "openBatterySettings": "Open Battery Settings",
+  "timeCurrent": "Current time: $time"
+}

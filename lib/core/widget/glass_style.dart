@@ -2,12 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum GlassStyle {
-  coldGlass('Холодное стекло', 'hol_stek'),
-  icyBlue('Ледяной голубой', 'led_gol'),
-  warmMilk('Тёплое молоко', 'tepl_mol');
+  coldGlass('cold_glass', 'hol_stek'),
+  icyBlue('icy_blue', 'led_gol'),
+  warmMilk('warm_milk', 'tepl_mol');
 
-  const GlassStyle(this.label, this.assetKey);
-  final String label;
+  const GlassStyle(this.labelKey, this.assetKey);
+  final String labelKey;
   final String assetKey;
 
   String get widgetPath => 'assets/glass/${assetKey}_widget.png';
@@ -33,7 +33,6 @@ class GlassStyleNotifier extends Notifier<GlassStyle> {
   }
 }
 
-final glassStyleProvider =
-    NotifierProvider<GlassStyleNotifier, GlassStyle>(
+final glassStyleProvider = NotifierProvider<GlassStyleNotifier, GlassStyle>(
   GlassStyleNotifier.new,
 );

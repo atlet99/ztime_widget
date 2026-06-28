@@ -23,21 +23,26 @@ class CustomClockWidgetProvider : HomeWidgetProvider() {
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.custom_clock_widget)
 
-            // Dynamic font size + margins based on widget size
+            // Get actual widget dimensions
             try {
                 val options = appWidgetManager.getAppWidgetOptions(widgetId)
                 val minW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 400)
                 val minH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 200)
 
-                // fontSize = 15% of width
-                val fontSizePx = (minW * 0.15f).coerceIn(40f, 120f)
+                // Save dimensions for Dart renderer
+                val editor = widgetData.edit()
+                editor.putInt("widget_width", minW)
+                editor.putInt("widget_height", minH)
+                editor.apply()
 
-                // marginStart = 5% of width (shifted left)
+                // Dynamic font size based on width
+                val fontSizePx = (minW * 0.15f).coerceIn(30f, 120f)
+
+                // Dynamic margins: 5% horizontal, 5.5% vertical
                 val marginStartPx = (minW * 0.05f).toInt()
-                // marginTop = 5.5% of height (safe area)
                 val marginTopPx = (minH * 0.055f).toInt()
 
-                // setTextSize via reflection (API 31+)
+                // setTextSize via reflection
                 val setTextSize = RemoteViews::class.java.getMethod(
                     "setTextSize",
                     Int::class.javaPrimitiveType,
@@ -58,11 +63,9 @@ class CustomClockWidgetProvider : HomeWidgetProvider() {
                     val absolute = 1
                     setViewLayoutMargin.invoke(views, R.id.native_time, 0, marginStartPx.toFloat(), absolute)
                     setViewLayoutMargin.invoke(views, R.id.native_time, 1, marginTopPx.toFloat(), absolute)
-                } catch (_: Exception) {
-                    // API < 31, margins from XML defaults
-                }
+                } catch (_: Exception) {}
             } catch (e: Exception) {
-                Log.w("ZTimeWidget", "Dynamic sizing failed, using XML defaults", e)
+                Log.w("ZTimeWidget", "Dynamic sizing failed", e)
             }
 
             // Calendar tap → open system calendar
@@ -72,9 +75,7 @@ class CustomClockWidgetProvider : HomeWidgetProvider() {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 val pendingIntent = PendingIntent.getActivity(
-                    context,
-                    0,
-                    calendarIntent,
+                    context, 0, calendarIntent,
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                 )
                 views.setOnClickPendingIntent(R.id.widget_image, pendingIntent)
@@ -85,23 +86,25 @@ class CustomClockWidgetProvider : HomeWidgetProvider() {
             // Load Flutter-rendered background
             val filePath = widgetData.getString("widget_png", null)
             if (filePath == null) {
-                Log.w("ZTimeWidget", "No widget_png path in SharedPreferences")
+                Log.w("ZTimeWidget", "No widget_png path")
             } else {
                 try {
                     val file = File(filePath)
                     if (!file.exists()) {
-                        Log.w("ZTimeWidget", "PNG file not found: $filePath")
+                        Log.w("ZTimeWidget", "PNG not found: $filePath")
                     } else {
                         val bitmap = BitmapFactory.decodeFile(filePath)
                         if (bitmap == null) {
-                            Log.e("ZTimeWidget", "BitmapFactory.decodeFile returned null for: $filePath")
+                            Log.e("ZTimeWidget", "decodeFile null: $filePath")
                         } else {
                             views.setImageViewBitmap(R.id.widget_image, bitmap)
-                            Log.d("ZTimeWidget", "Loaded PNG ${bitmap.width}x${bitmap.height}")
+                            val wPx = bitmap.width
+                            val hPx = bitmap.height
+                            Log.d("ZTimeWidget", "PNG ${wPx}x${hPx}")
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("ZTimeWidget", "Failed to load widget image", e)
+                    Log.e("ZTimeWidget", "Load image failed", e)
                 }
             }
 

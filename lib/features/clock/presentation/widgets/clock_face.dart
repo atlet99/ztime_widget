@@ -47,8 +47,8 @@ class ClockFace extends StatelessWidget {
         final calHeight = h * 0.15;
         final calNumSize = maxW * 0.038;
         final calLetterSize = maxW * 0.026;
-        final calCardRadius = 12.0;
-        final pillRadius = 8.0;
+        const calCardRadius = 12.0;
+        const pillRadius = 8.0;
 
         final shortLabels = AppDateUtils.getWeekdayLabelsShort(locale);
         final today = time.weekday - 1;
@@ -66,11 +66,9 @@ class ClockFace extends StatelessWidget {
             ),
 
             // Dark overlay
-            Positioned.fill(
+            const Positioned.fill(
               child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: const Color(0x8C1C1C1E),
-                ),
+                decoration: BoxDecoration(color: Color(0x8C1C1C1E)),
               ),
             ),
 
@@ -164,8 +162,7 @@ class ClockFace extends StatelessWidget {
                         child: Container(
                           decoration: BoxDecoration(
                             color: const Color(0x1A2C2C2E),
-                            borderRadius:
-                                BorderRadius.circular(calCardRadius),
+                            borderRadius: BorderRadius.circular(calCardRadius),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -180,8 +177,9 @@ class ClockFace extends StatelessWidget {
                                         ),
                                         decoration: BoxDecoration(
                                           color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(pillRadius),
+                                          borderRadius: BorderRadius.circular(
+                                            pillRadius,
+                                          ),
                                         ),
                                         child: Text(
                                           dayNum.toString(),
@@ -199,8 +197,9 @@ class ClockFace extends StatelessWidget {
                                       dayNum.toString(),
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.55),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.55,
+                                        ),
                                         fontSize: calNumSize,
                                         fontWeight: FontWeight.w500,
                                         height: 1.1,
@@ -214,8 +213,7 @@ class ClockFace extends StatelessWidget {
                                 style: TextStyle(
                                   color: isToday
                                       ? Colors.white.withValues(alpha: 0.70)
-                                      : Colors.white
-                                          .withValues(alpha: 0.35),
+                                      : Colors.white.withValues(alpha: 0.35),
                                   fontSize: calLetterSize,
                                   fontWeight: FontWeight.w400,
                                   height: 1.1,

@@ -1,0 +1,8 @@
+input_directory: lib/i18n
+output_file_name: strings.g.dart
+base_locale: en
+fallback_strategy: base_locale
+flutter_integration: true
+translate_var: t
+string_interpolation: dart
+flat_map: false

@@ -8,11 +8,9 @@
         android:id="@+id/widget_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY"
+        android:scaleType="fitCenter"
         android:filter="true" />
 
-    <!-- Time: sans-serif-medium bold, margins set dynamically by Kotlin.
-         Fallback: marginStart=50dp, marginTop=12dp. -->
     <TextClock
         android:id="@+id/native_time"
         android:layout_width="wrap_content"

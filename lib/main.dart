@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:workmanager/workmanager.dart';
 import 'package:ztime_widget/app.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/core/widget/widget_constants.dart';
+import 'package:ztime_widget/i18n/strings.g.dart';
 
 const _workTask = 'ztime_widget_refresh';
 
@@ -33,12 +33,26 @@ Future<GlassStyle> _loadGlassStyle() async {
   return GlassStyle.coldGlass;
 }
 
-Future<ui.Image> _loadAssetImage(String assetPath) async {
+/// Reads the saved locale preference (0=system, 1=ru, 2=en).
+/// Returns the language code string.
+Future<String> _loadLocaleCode() async {
+  final prefs = await SharedPreferences.getInstance();
+  final index = prefs.getInt('app_locale') ?? 0;
+  final localeEnum =
+      AppLocale.values[index.clamp(0, AppLocale.values.length - 1)];
+  return localeEnum.languageCode;
+}
+
+Future<ui.Image> _loadAssetImage(
+  String assetPath,
+  int targetW,
+  int targetH,
+) async {
   final data = await rootBundle.load(assetPath);
   final codec = await ui.instantiateImageCodec(
     data.buffer.asUint8List(),
-    targetWidth: WidgetDimensions.width.toInt(),
-    targetHeight: WidgetDimensions.height.toInt(),
+    targetWidth: targetW,
+    targetHeight: targetH,
   );
   final frame = await codec.getNextFrame();
   return frame.image;
@@ -52,22 +66,32 @@ Future<void> _renderWidgetToPng() async {
   ]);
 
   final glassStyle = await _loadGlassStyle();
+  final locale = await _loadLocaleCode();
 
-  const w = WidgetDimensions.width;
-  const h = WidgetDimensions.height;
+  final prefs = await SharedPreferences.getInstance();
+  final widgetW = prefs.getInt('widget_width') ?? 400;
+  final widgetH = prefs.getInt('widget_height') ?? 200;
+
+  final aspect = widgetW / widgetH;
+  const w = 1200.0;
+  final h = (w / aspect).clamp(400.0, 1800.0);
+
   final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder, Offset.zero & const Size(w, h));
+  final canvas = Canvas(recorder, Offset.zero & Size(w, h));
 
   final now = DateTime.now();
-  const locale = 'ru';
 
   // Load and paint glass texture background
   try {
-    final bgImage = await _loadAssetImage(glassStyle.widgetPath);
+    final bgImage = await _loadAssetImage(
+      glassStyle.widgetPath,
+      w.toInt(),
+      h.toInt(),
+    );
     canvas.drawImageRect(
       bgImage,
       Rect.fromLTWH(0, 0, bgImage.width.toDouble(), bgImage.height.toDouble()),
-      const Rect.fromLTWH(0, 0, w, h),
+      Rect.fromLTWH(0, 0, w, h),
       Paint()..filterQuality = FilterQuality.high,
     );
     bgImage.dispose();
@@ -75,41 +99,36 @@ Future<void> _renderWidgetToPng() async {
     canvas.drawColor(WidgetColors.background, BlendMode.src);
   }
 
-  // Dark overlay for text readability
+  // Dark overlay
   final overlayPaint = Paint()..color = const Color(0x8C1C1C1E);
-  canvas.drawRect(const Rect.fromLTWH(0, 0, w, h), overlayPaint);
+  canvas.drawRect(Rect.fromLTWH(0, 0, w, h), overlayPaint);
 
-  // Top highlight line — glass reflection
+  // Top highlight line
   final highlightPaint = Paint()
-    ..shader = ui.Gradient.linear(
-      const Offset(0, 0),
-      const Offset(0, 1.5),
-      [
-        Colors.white.withValues(alpha: 0.35),
-        Colors.white.withValues(alpha: 0.0),
-      ],
-    );
-  canvas.drawRect(const Rect.fromLTWH(0, 0, w, 1.5), highlightPaint);
+    ..shader = ui.Gradient.linear(const Offset(0, 0), const Offset(0, 1.5), [
+      Colors.white.withValues(alpha: 0.35),
+      Colors.white.withValues(alpha: 0.0),
+    ]);
+  canvas.drawRect(const Rect.fromLTWH(0, 0, 1200.0, 1.5), highlightPaint);
 
-  // Safe area — 6.5% horizontal, 5.5% vertical
-  final safePadX = w * 0.065;
+  // All proportions are percentage-based — adapts to any aspect ratio
+  const safePadX = 1200.0 * 0.065;
   final safePadY = h * 0.055;
-  final contentW = w - safePadX * 2;
+  const contentW = w - safePadX * 2;
 
   // Date typography (time is handled by native TextClock)
-  final dateFontSize = contentW * 0.065;
-  final dayNameSize = contentW * 0.045;
+  const dateFontSize = contentW * 0.065;
+  const dayNameSize = contentW * 0.045;
 
   // Calendar strip — tight to time, minimal gap
   final calHeight = h * 0.32;
   final calTop = h - safePadY - calHeight;
-  final calNumSize = contentW * 0.063; // +20% bigger numbers
-  final calLetterSize = contentW * 0.030;
-  final calCardRadius = 12.0;
-  final pillRadius = 8.0;
-  final cellPad = 9.0;
+  const calNumSize = contentW * 0.063;
+  const calLetterSize = contentW * 0.030;
+  const calCardRadius = 12.0;
+  const pillRadius = 8.0;
+  const cellPad = 9.0;
 
-  // Align date with TextClock baseline — slightly lower
   final dateTop = h * 0.18;
 
   final tp = TextPainter(textDirection: ui.TextDirection.ltr);
@@ -140,7 +159,13 @@ Future<void> _renderWidgetToPng() async {
     ),
   );
   tp.layout();
-  tp.paint(canvas, Offset(w - safePadX - w * 0.05 - tp.width, dateTop + dateFontSize * 1.1 + 4));
+  tp.paint(
+    canvas,
+    Offset(
+      w - safePadX - w * 0.05 - tp.width,
+      dateTop + dateFontSize * 1.1 + 4,
+    ),
+  );
 
   // Calendar strip
   final monday = now.subtract(Duration(days: now.weekday - 1));
@@ -150,8 +175,8 @@ Future<void> _renderWidgetToPng() async {
     shortLabels.add(dayFmt.format(monday.add(Duration(days: i))));
   }
   final todayIndex = now.weekday - 1;
-  final calWidth = contentW;
-  final cellWidth = calWidth / 7;
+  const calWidth = contentW;
+  const cellWidth = calWidth / 7;
 
   final cardPaint = Paint();
 
@@ -166,7 +191,7 @@ Future<void> _renderWidgetToPng() async {
       calTop,
       cx + cellWidth - cellPad,
       calTop + calHeight,
-      Radius.circular(calCardRadius),
+      const Radius.circular(calCardRadius),
     );
     cardPaint.color = const Color(0x1A2C2C2E);
     canvas.drawRRect(cardRect, cardPaint);
@@ -174,10 +199,9 @@ Future<void> _renderWidgetToPng() async {
     final dayText = dayNum.toString();
 
     if (isToday) {
-      // Active day: white pill, black text
       tp.text = TextSpan(
         text: dayText,
-        style: TextStyle(
+        style: const TextStyle(
           color: WidgetColors.textActive,
           fontSize: calNumSize,
           fontWeight: FontWeight.w400,
@@ -194,7 +218,7 @@ Future<void> _renderWidgetToPng() async {
           width: pillW,
           height: pillH,
         ),
-        Radius.circular(pillRadius),
+        const Radius.circular(pillRadius),
       );
       canvas.drawRRect(pillRect, Paint()..color = Colors.white);
     } else {
@@ -256,6 +280,17 @@ void main() async {
     initializeDateFormatting('en', null),
   ]);
 
+  // Init slang: load saved locale or fall back to device locale
+  final prefs = await SharedPreferences.getInstance();
+  final localeIndex = prefs.getInt('app_locale') ?? 0;
+  if (localeIndex == 0) {
+    await LocaleSettings.useDeviceLocale();
+  } else {
+    final localeEnum =
+        AppLocale.values[localeIndex.clamp(0, AppLocale.values.length - 1)];
+    await LocaleSettings.setLocale(localeEnum);
+  }
+
   // Generate widget PNG immediately on startup
   await _renderWidgetToPng();
 
@@ -267,5 +302,5 @@ void main() async {
     constraints: Constraints(networkType: NetworkType.notRequired),
   );
 
-  runApp(const ProviderScope(child: ZTimeApp()));
+  runApp(TranslationProvider(child: const ProviderScope(child: ZTimeApp())));
 }

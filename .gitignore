@@ -42,3 +42,7 @@ app.*.symbols
 
 #Kotlin
 .kotlin
+
+# Slang generated analysis
+lib/i18n/_missing_translations.json
+lib/i18n/_unused_translations.json

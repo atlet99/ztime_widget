@@ -8,6 +8,7 @@ import 'package:ztime_widget/core/widget/widget_renderer.dart';
 import 'package:ztime_widget/features/clock/presentation/controllers/clock_controller.dart';
 import 'package:ztime_widget/features/clock/presentation/widgets/clock_face.dart';
 import 'package:ztime_widget/features/settings/presentation/pages/huawei_battery_page.dart';
+import 'package:ztime_widget/i18n/strings.g.dart';
 
 class ClockPage extends ConsumerStatefulWidget {
   const ClockPage({super.key});
@@ -41,11 +42,7 @@ class _ClockPageState extends ConsumerState<ClockPage> {
   }
 
   /// Force re-render of widget PNG (called on resume when date/locale/glass changed).
-  void _forceWidgetRender(
-    String date,
-    String locale,
-    String glass,
-  ) {
+  void _forceWidgetRender(String date, String locale, String glass) {
     _lastRenderDate = date;
     _lastRenderLocale = locale;
     _lastRenderGlass = glass;
@@ -75,10 +72,14 @@ class _ClockPageState extends ConsumerState<ClockPage> {
       body: Stack(
         children: [
           Semantics(
-            label: 'Текущее время: $timeLabel',
+            label: context.t.timeCurrent(time: timeLabel),
             liveRegion: true,
             excludeSemantics: true,
-            child: ClockFace(time: time, locale: locale, glassStyle: glassStyle),
+            child: ClockFace(
+              time: time,
+              locale: locale,
+              glassStyle: glassStyle,
+            ),
           ),
 
           Positioned(
@@ -106,10 +107,7 @@ class _ClockPageState extends ConsumerState<ClockPage> {
             maintainSize: true,
             maintainAnimation: true,
             maintainState: true,
-            child: WidgetLayout(
-              renderKey: _widgetKey,
-              glassStyle: glassStyle,
-            ),
+            child: WidgetLayout(renderKey: _widgetKey, glassStyle: glassStyle),
           ),
         ],
       ),

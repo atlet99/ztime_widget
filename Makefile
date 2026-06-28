@@ -1,4 +1,4 @@
-.PHONY: help get gen clean format fix analyze test check-all fix-all build build-split build-debug build-aab run release
+.PHONY: help get gen clean format fix analyze lint test slang-analyze check-all fix-all build build-split build-debug build-aab run release
 
 APP_NAME := ztime_widget
 
@@ -8,15 +8,16 @@ help: ## Show this help
 get: ## flutter pub get
 	flutter pub get
 
-gen: ## Run code generation (build_runner)
-	dart run build_runner build
+gen: ## Run code generation (build_runner + slang)
+	dart run build_runner build -d
+	dart run slang
 
 clean: ## Clean build cache
 	flutter clean
 	flutter pub get
 
-format: ## dart format all files
-	dart format lib/ test/
+format: ## dart format (exit if unformatted)
+	dart format --set-exit-if-changed lib/ test/
 
 fix: ## dart fix --apply
 	dart fix --apply
@@ -24,10 +25,16 @@ fix: ## dart fix --apply
 analyze: ## flutter analyze
 	flutter analyze
 
+lint: ## Check hardcoded strings
+	dart hack/check_hardcoded_strings.dart lib/
+
 test: ## Run tests
 	flutter test
 
-check-all: format analyze test ## Format + Analyze + Test
+slang-analyze: ## Check translations (missing/unused keys, full source scan)
+	dart run slang analyze --full
+
+check-all: format analyze lint slang-analyze test ## Format + Analyze + Lint + Slang + Test
 
 fix-all: format fix analyze ## Format + Fix + Analyze
 

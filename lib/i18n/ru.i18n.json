@@ -1,0 +1,17 @@
+{
+  "appTitle": "ZTime",
+  "settings": "Настройки",
+  "language": "Язык",
+  "langSystem": "Системный",
+  "langRu": "Русский",
+  "langEn": "Английский",
+  "widgetBgStyle": "Стиль фона виджета",
+  "chooseGlassTexture": "Выберите текстуру стекла для фона виджета",
+  "coldGlass": "Холодное стекло",
+  "icyBlue": "Ледяной голубой",
+  "warmMilk": "Тёплое молоко",
+  "batteryOptimization": "Оптимизация батареи",
+  "batteryOptDesc": "Для корректной работы виджета на Huawei Nova 5T необходимо отключить оптимизацию батареи для ZTime.",
+  "openBatterySettings": "Открыть настройки батареи",
+  "timeCurrent": "Текущее время: $time"
+}
