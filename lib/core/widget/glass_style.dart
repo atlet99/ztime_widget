@@ -1,6 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ztime_widget/core/constants/pref_keys.dart';
+
+part 'glass_style.g.dart';
 
 enum GlassStyle {
   coldGlass('cold_glass', 'hol_stek'),
@@ -15,11 +17,15 @@ enum GlassStyle {
   String get appPath => 'assets/glass/${assetKey}_app.png';
 }
 
-class GlassStyleNotifier extends Notifier<GlassStyle> {
+@Riverpod(keepAlive: true)
+class GlassStyleNotifier extends _$GlassStyleNotifier {
   @override
-  GlassStyle build() => GlassStyle.coldGlass;
+  GlassStyle build() {
+    _loadFromPrefs();
+    return GlassStyle.coldGlass;
+  }
 
-  void load() async {
+  Future<void> _loadFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final index = prefs.getInt(PrefKeys.glassStyle) ?? 0;
     if (index < GlassStyle.values.length) {
@@ -27,13 +33,9 @@ class GlassStyleNotifier extends Notifier<GlassStyle> {
     }
   }
 
-  void setStyle(GlassStyle style) async {
+  Future<void> setStyle(GlassStyle style) async {
     state = style;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(PrefKeys.glassStyle, style.index);
   }
 }
-
-final glassStyleProvider = NotifierProvider<GlassStyleNotifier, GlassStyle>(
-  GlassStyleNotifier.new,
-);

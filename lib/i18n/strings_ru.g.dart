@@ -44,8 +44,11 @@ class TranslationsRu extends Translations with BaseTranslations<AppLocale, Trans
 	@override String get coldGlass => 'Холодное стекло';
 	@override String get icyBlue => 'Ледяной голубой';
 	@override String get warmMilk => 'Тёплое молоко';
+	@override String get addWidget => 'Добавить виджет';
+	@override String get addWidgetDesc => 'Разместите виджет часов на главном экране';
 	@override String get batteryOptimization => 'Оптимизация батареи';
 	@override String get batteryOptDesc => 'Для корректной работы виджета на Huawei Nova 5T необходимо отключить оптимизацию батареи для ZTime.';
+	@override String get batteryOptDescGeneric => 'Для надёжного обновления виджета рекомендуется отключить оптимизацию батареи для ZTime.';
 	@override String get openBatterySettings => 'Открыть настройки батареи';
 	@override String timeCurrent({required Object time}) => 'Текущее время: ${time}';
 	@override String get about => 'О приложении';

@@ -22,12 +22,6 @@ class _ClockPageState extends ConsumerState<ClockPage> {
   String _lastRenderLocale = '';
   String _lastRenderGlass = '';
 
-  @override
-  void initState() {
-    super.initState();
-    ref.read(glassStyleProvider.notifier).load();
-  }
-
   void _forceWidgetRender(String date, String locale, String glass) {
     _lastRenderDate = date;
     _lastRenderLocale = locale;
@@ -37,17 +31,18 @@ class _ClockPageState extends ConsumerState<ClockPage> {
 
   @override
   Widget build(BuildContext context) {
-    final time = ref.watch(clockSecondsProvider);
+    // select() — ClockPage only rebuilds when the DATE changes, not every second
+    final dateStr = ref.watch(
+      clockSecondsProvider.select((t) => '${t.year}-${t.month}-${t.day}'),
+    );
     final locale = Localizations.localeOf(context).toLanguageTag();
     final glassStyle = ref.watch(glassStyleProvider);
-    final timeLabel = AppDateUtils.formatTime(time, locale);
 
-    final currentDate = '${time.year}-${time.month}-${time.day}';
     final currentGlass = glassStyle.assetKey;
-    if (currentDate != _lastRenderDate ||
+    if (dateStr != _lastRenderDate ||
         locale != _lastRenderLocale ||
         currentGlass != _lastRenderGlass) {
-      _forceWidgetRender(currentDate, locale, currentGlass);
+      _forceWidgetRender(dateStr, locale, currentGlass);
     }
 
     final padding = MediaQuery.paddingOf(context);
@@ -56,18 +51,25 @@ class _ClockPageState extends ConsumerState<ClockPage> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          Semantics(
-            label: context.t.timeCurrent(time: timeLabel),
-            liveRegion: true,
-            excludeSemantics: true,
-            child: ClockFace(
-              time: time,
-              locale: locale,
-              glassStyle: glassStyle,
-            ),
+          // Consumer — only this subtree rebuilds every second
+          Consumer(
+            builder: (context, ref, _) {
+              final time = ref.watch(clockSecondsProvider);
+              final timeLabel = AppDateUtils.formatTime(time, locale);
+              return Semantics(
+                label: context.t.timeCurrent(time: timeLabel),
+                liveRegion: true,
+                excludeSemantics: true,
+                child: ClockFace(
+                  time: time,
+                  locale: locale,
+                  glassStyle: glassStyle,
+                ),
+              );
+            },
           ),
 
-          // Settings button
+          // Settings button — does NOT rebuild every second
           Positioned(
             top: padding.top + 12.h,
             left: padding.left + 16.w,

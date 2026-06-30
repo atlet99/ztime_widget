@@ -69,11 +69,20 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en: 'Warm Milk'
 	String get warmMilk => 'Warm Milk';
 
+	/// en: 'Add Widget'
+	String get addWidget => 'Add Widget';
+
+	/// en: 'Place the clock widget on your home screen'
+	String get addWidgetDesc => 'Place the clock widget on your home screen';
+
 	/// en: 'Battery Optimization'
 	String get batteryOptimization => 'Battery Optimization';
 
 	/// en: 'For the widget to work correctly on Huawei Nova 5T, disable battery optimization for ZTime.'
 	String get batteryOptDesc => 'For the widget to work correctly on Huawei Nova 5T, disable battery optimization for ZTime.';
+
+	/// en: 'For the widget to update reliably, consider disabling battery optimization for ZTime.'
+	String get batteryOptDescGeneric => 'For the widget to update reliably, consider disabling battery optimization for ZTime.';
 
 	/// en: 'Open Battery Settings'
 	String get openBatterySettings => 'Open Battery Settings';

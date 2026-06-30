@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
@@ -15,6 +16,9 @@ import 'package:ztime_widget/i18n/strings.g.dart';
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     if (task == HomeWidgetKeys.workTask) {
+      // Skip if no widget is placed on home screen
+      final installed = await HomeWidget.getInstalledWidgets();
+      if (installed.isEmpty) return true;
       await WidgetPngRenderer.render();
       return true;
     }
@@ -44,13 +48,19 @@ void main() async {
   // Generate widget PNG immediately on startup
   await WidgetPngRenderer.render();
 
-  await Workmanager().initialize(callbackDispatcher);
-  await Workmanager().registerPeriodicTask(
-    HomeWidgetKeys.workTaskId,
-    HomeWidgetKeys.workTask,
-    frequency: AppDurations.workmanagerFrequency,
-    constraints: Constraints(networkType: NetworkType.notRequired),
-  );
+  // Register WorkManager only if widget is placed (battery saver)
+  final installedWidgets = await HomeWidget.getInstalledWidgets();
+  if (installedWidgets.isNotEmpty) {
+    await Workmanager().initialize(callbackDispatcher);
+    await Workmanager().registerPeriodicTask(
+      HomeWidgetKeys.workTaskId,
+      HomeWidgetKeys.workTask,
+      frequency: AppDurations.workmanagerFrequency,
+      constraints: Constraints(networkType: NetworkType.notRequired),
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+      tag: HomeWidgetKeys.workTask,
+    );
+  }
 
   runApp(TranslationProvider(child: const ProviderScope(child: ZTimeApp())));
 }

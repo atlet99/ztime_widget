@@ -44,7 +44,7 @@ final class ClockSecondsProvider
   }
 }
 
-String _$clockSecondsHash() => r'818f4fdf65d87b298f95e8e99aa975823fe929b1';
+String _$clockSecondsHash() => r'f5debc4a89b68c174c95a518bc17334b89c432f9';
 
 /// Ticks once per second for clock hands and digital display.
 
@@ -102,7 +102,7 @@ final class ClockMinutesProvider
   }
 }
 
-String _$clockMinutesHash() => r'229874a5dd958f677dc4e8b7c1542a7fad1f2779';
+String _$clockMinutesHash() => r'30e0e30b9aaf8af165874585fa34db9405c33f80';
 
 /// Ticks once per minute for date and weekday row (saves battery).
 

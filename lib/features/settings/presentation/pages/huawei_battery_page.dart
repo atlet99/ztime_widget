@@ -3,6 +3,7 @@ import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,6 +22,28 @@ class HuaweiBatteryPage extends ConsumerStatefulWidget {
 }
 
 class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
+  String? _installerStore;
+  bool _pinSupported = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInstallerInfo();
+  }
+
+  Future<void> _loadInstallerInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    final supported = await HomeWidget.isRequestPinWidgetSupported();
+    if (mounted) {
+      setState(() {
+        _installerStore = info.installerStore;
+        _pinSupported = supported ?? false;
+      });
+    }
+  }
+
+  bool get _isHuaweiInstall => _installerStore == 'com.huawei.appmarket';
+
   String _glassLabel(BuildContext context, GlassStyle style) {
     switch (style) {
       case GlassStyle.coldGlass:
@@ -66,11 +89,10 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
             ),
           ),
           SizedBox(height: 12.h),
-          // "System" option (useDeviceLocale)
           _buildLocaleOption(
             context,
             label: context.t.langSystem,
-            isSelected: false, // system is not a saved AppLocale
+            isSelected: false,
             onTap: () async {
               await LocaleSettings.useDeviceLocale();
               final prefs = await SharedPreferences.getInstance();
@@ -95,6 +117,7 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
           SizedBox(height: 24.h),
           const Divider(color: Colors.white12),
           SizedBox(height: 16.h),
+
           // Widget glass style
           Text(
             context.t.widgetBgStyle,
@@ -176,6 +199,52 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
           SizedBox(height: 32.h),
           const Divider(color: Colors.white12),
           SizedBox(height: 16.h),
+
+          // Add widget to home screen (Android 26+ pinning)
+          if (_pinSupported) ...[
+            Text(
+              context.t.addWidget,
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              context.t.addWidgetDesc,
+              style: TextStyle(fontSize: 13.sp, color: AppColors.textDim),
+            ),
+            SizedBox(height: 16.h),
+            SizedBox(
+              width: double.infinity,
+              height: 48.h,
+              child: ElevatedButton(
+                onPressed: () => HomeWidget.requestPinWidget(
+                  qualifiedAndroidName: AndroidConstants.widgetProvider,
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+                child: Text(
+                  context.t.addWidget,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 32.h),
+            const Divider(color: Colors.white12),
+            SizedBox(height: 16.h),
+          ],
+
+          // Battery optimization — adaptive based on installer store
           Text(
             context.t.batteryOptimization,
             style: TextStyle(
@@ -186,7 +255,9 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
           ),
           SizedBox(height: 8.h),
           Text(
-            context.t.batteryOptDesc,
+            _isHuaweiInstall
+                ? context.t.batteryOptDesc
+                : context.t.batteryOptDescGeneric,
             style: TextStyle(
               fontSize: 13.sp,
               color: AppColors.textDim,
@@ -215,6 +286,7 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
           SizedBox(height: 32.h),
           const Divider(color: Colors.white12),
           SizedBox(height: 16.h),
+
           // About
           Text(
             context.t.about,
