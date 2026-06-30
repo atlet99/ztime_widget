@@ -70,8 +70,8 @@ class ClockFace extends StatelessWidget {
         final isTablet = rb.isTablet;
 
         final isLandscape = w > h;
-        if (isLandscape && h < 500) {
-          return _buildLandscape(w, h, padding, isMobile);
+        if (isLandscape && h < 700) {
+          return _buildLandscape(w, h, padding, isMobile, isTablet);
         }
         return _buildPortrait(w, h, padding, isMobile, isTablet);
       },
@@ -86,20 +86,20 @@ class ClockFace extends StatelessWidget {
     bool isMobile,
     bool isTablet,
   ) {
-    // ScreenUtil: safe area padding via .w and .h
     final safePadX = 24.w;
     final safePadY = padding.top + 16.h;
 
     // AutoSizeText: time fills available space, auto-scales for any device
     final timeHeight = h * 0.14;
-    final dateFontSize = isMobile ? 13.sp : (isTablet ? 18.sp : 24.sp);
-    final dayNameSize = isMobile ? 11.sp : (isTablet ? 15.sp : 20.sp);
+    final timeFontSize = h * 0.12;
+    final dateFontSize = isMobile ? 13.sp : (isTablet ? 16.sp : 24.sp);
+    final dayNameSize = isMobile ? 11.sp : (isTablet ? 13.sp : 20.sp);
 
-    // Calendar strip — height scales with screen
-    final calHeight = h * 0.15;
+    // Calendar strip — capped so it doesn't dominate on tablets
+    final calHeight = h * 0.12 < 110 ? h * 0.12 : 110.0;
     final cellPad = 10.w;
-    final calNumSize = isMobile ? 14.sp : (isTablet ? 20.sp : 28.sp);
-    final calLetterSize = isMobile ? 10.sp : (isTablet ? 14.sp : 18.sp);
+    final calNumSize = isMobile ? 14.sp : (isTablet ? 16.sp : 28.sp);
+    final calLetterSize = isMobile ? 10.sp : (isTablet ? 11.sp : 18.sp);
 
     final shortLabels = AppDateUtils.getWeekdayLabelsShort(locale);
     final today = time.weekday - 1;
@@ -128,8 +128,9 @@ class ClockFace extends StatelessWidget {
                   maxLines: 1,
                   minFontSize: 30,
                   stepGranularity: 2,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
+                    fontSize: timeFontSize,
                     fontWeight: FontWeight.w100,
                     letterSpacing: 0.09,
                     height: 0.85,
@@ -258,12 +259,13 @@ class ClockFace extends StatelessWidget {
   }
 
   /// Landscape layout — time + date left, calendar right.
-  /// Used when height < 500 (phone in landscape).
+  /// Used when height < 700 (phone in landscape).
   Widget _buildLandscape(
     double w,
     double h,
     EdgeInsets padding,
     bool isMobile,
+    bool isTablet,
   ) {
     final safePadX = 16.w;
     final safePadY = padding.top + 8.h;
@@ -271,14 +273,15 @@ class ClockFace extends StatelessWidget {
     // Left column: time + date (55% width)
     final leftW = w * 0.55;
     final timeHeight = h * 0.30;
-    final dateFontSize = isMobile ? 11.sp : 16.sp;
-    final dayNameSize = isMobile ? 9.sp : 13.sp;
+    final timeFontSize = h * 0.28;
+    final dateFontSize = isMobile ? 11.sp : (isTablet ? 14.sp : 16.sp);
+    final dayNameSize = isMobile ? 9.sp : (isTablet ? 11.sp : 13.sp);
 
     // Right column: calendar strip (vertical)
     final rightX = w * 0.58;
     final rightW = w - rightX - safePadX;
     final cellPad = 8.w;
-    final calNumSize = isMobile ? 11.sp : 16.sp;
+    final calNumSize = isMobile ? 11.sp : (isTablet ? 13.sp : 16.sp);
 
     final shortLabels = AppDateUtils.getWeekdayLabelsShort(locale);
     final today = time.weekday - 1;
@@ -308,8 +311,9 @@ class ClockFace extends StatelessWidget {
                   maxLines: 1,
                   minFontSize: 24,
                   stepGranularity: 2,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
+                    fontSize: timeFontSize,
                     fontWeight: FontWeight.w100,
                     letterSpacing: 0.09,
                     height: 0.85,
