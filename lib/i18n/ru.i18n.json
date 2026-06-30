@@ -20,5 +20,7 @@
   "about": "О приложении",
   "aboutDesc": "ZTime Widget — пользовательский виджет часов для Android.",
   "version": "Версия $version",
-  "viewOnGithub": "Открыть на GitHub"
+  "viewOnGithub": "Открыть на GitHub",
+  "calendar": "Календарь",
+  "monthFormat": "Месяц"
 }

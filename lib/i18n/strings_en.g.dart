@@ -101,4 +101,10 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'View on GitHub'
 	String get viewOnGithub => 'View on GitHub';
+
+	/// en: 'Calendar'
+	String get calendar => 'Calendar';
+
+	/// en: 'Month'
+	String get monthFormat => 'Month';
 }

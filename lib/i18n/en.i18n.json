@@ -20,5 +20,7 @@
   "about": "About",
   "aboutDesc": "ZTime Widget — custom clock widget for Android.",
   "version": "Version $version",
-  "viewOnGithub": "View on GitHub"
+  "viewOnGithub": "View on GitHub",
+  "calendar": "Calendar",
+  "monthFormat": "Month"
 }

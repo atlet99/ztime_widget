@@ -5,6 +5,7 @@ import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/core/widget/widget_png_renderer.dart';
+import 'package:ztime_widget/features/calendar/presentation/pages/calendar_page.dart';
 import 'package:ztime_widget/features/clock/presentation/controllers/clock_controller.dart';
 import 'package:ztime_widget/features/clock/presentation/widgets/clock_face.dart';
 import 'package:ztime_widget/features/settings/presentation/pages/huawei_battery_page.dart';
@@ -80,6 +81,24 @@ class _ClockPageState extends ConsumerState<ClockPage> {
                   MaterialPageRoute<void>(
                     builder: (_) => const HuaweiBatteryPage(),
                   ),
+                );
+              },
+            ),
+          ),
+
+          // Calendar button
+          Positioned(
+            top: padding.top + 12.h,
+            right: padding.right + 16.w,
+            child: IconButton(
+              icon: Icon(
+                Icons.calendar_month,
+                color: AppColors.textDim,
+                size: 22.r,
+              ),
+              onPressed: () {
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(builder: (_) => const CalendarPage()),
                 );
               },
             ),

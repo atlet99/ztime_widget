@@ -55,4 +55,6 @@ class TranslationsRu extends Translations with BaseTranslations<AppLocale, Trans
 	@override String get aboutDesc => 'ZTime Widget — пользовательский виджет часов для Android.';
 	@override String version({required Object version}) => 'Версия ${version}';
 	@override String get viewOnGithub => 'Открыть на GitHub';
+	@override String get calendar => 'Календарь';
+	@override String get monthFormat => 'Месяц';
 }
