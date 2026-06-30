@@ -448,37 +448,52 @@ class ClockFace extends StatelessWidget {
   }
 
   // ─── NEON GLOW TIME ───────────────────────────────────────────────
+  // 3 layers: blurred backdrop, stroke outline, filled top with gradient mask
 
   Widget _buildGlowingTime(
     String timeStr,
     double fontSize, {
     required double minFontSize,
   }) {
-    return ShaderMask(
-      shaderCallback: (bounds) => const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Colors.white, Colors.white, Colors.white60],
-        stops: [0.0, 0.6, 1.0],
-      ).createShader(bounds),
-      blendMode: BlendMode.dstIn,
-      child: Stack(
-        alignment: Alignment.centerLeft,
-        children: [
-          // Bloom layer — blurred blue copy for ambient glow on background
-          ImageFiltered(
-            imageFilter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Text(
-              timeStr,
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF81D4FA).withValues(alpha: 0.6),
-              ),
+    return Stack(
+      alignment: Alignment.centerLeft,
+      children: [
+        // Layer 1: blurred blue ambient glow on background
+        ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: Text(
+            timeStr,
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xCCB3E5FC),
             ),
           ),
-          // Sharp text with multi-layer shadow glow
-          AutoSizeText(
+        ),
+
+        // Layer 2: stroke outline — always visible, thin white contour
+        Text(
+          timeStr,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w700,
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.6
+              ..color = Colors.white,
+          ),
+        ),
+
+        // Layer 3: filled top half only (gradient mask cuts off bottom)
+        ShaderMask(
+          blendMode: BlendMode.dstIn,
+          shaderCallback: (bounds) => const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.white, Colors.transparent],
+            stops: [0.0, 0.45, 0.75],
+          ).createShader(bounds),
+          child: AutoSizeText(
             timeStr,
             maxLines: 1,
             minFontSize: minFontSize,
@@ -490,21 +505,14 @@ class ClockFace extends StatelessWidget {
               color: Colors.white,
               letterSpacing: 0.04,
               height: 0.85,
-              shadows: [
-                // Inner bright — gives line thickness
-                Shadow(
-                  color: Colors.white.withValues(alpha: 0.85),
-                  blurRadius: 6,
-                ),
-                // Medium bluish glow — screen-like halo
-                const Shadow(color: Color(0xFFB3E5FC), blurRadius: 20),
-                // Outer diffuse — ambient bleed
-                const Shadow(color: Color(0xFF81D4FA), blurRadius: 45),
+              shadows: const [
+                Shadow(color: Colors.white, blurRadius: 6),
+                Shadow(color: Color(0xFF81D4FA), blurRadius: 18),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
