@@ -5,14 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Refactor
+- Improve cliff settings ([c192b21](https://github.com/atlet99/ztime_widget/commit/c192b21cce16b373422ff1b9b63da2586252c871))
+- Bump CHANGELOG ([f906be2](https://github.com/atlet99/ztime_widget/commit/f906be28a839fbb8f45011aa53898357cf268bcf))
 ## [1.0.1] - 2026-06-30
 
 ### Bug Fixes
-
 - Fix clock page re-rendering on date or locale changes ([b99cbd2](https://github.com/atlet99/ztime_widget/commit/b99cbd2f65ab76284345172c7849afd656ca2d42))
 
 ### Features
-
 - Scaffold project structure ([eead36c](https://github.com/atlet99/ztime_widget/commit/eead36cb27ae8a8a7f7d9de04971bde197f7d333))
 - Implement color theming system ([3c6af45](https://github.com/atlet99/ztime_widget/commit/3c6af454354a98e0697ccfe0ac2b2536bd433a8b))
 - Implement clock widget with immersive mode and wakelock ([9e9a282](https://github.com/atlet99/ztime_widget/commit/9e9a282f784d2833436ad1b36d98a433dbcac2f2))
@@ -43,16 +46,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add calendar page, i18n strings and navigation ([928574d](https://github.com/atlet99/ztime_widget/commit/928574da3084551aea73b2d9d32fd32cdcea53d2))
 
 ### Miscellaneous Tasks
-
 - Update Makefile version bump logic and changelog generation ([d3cd1a3](https://github.com/atlet99/ztime_widget/commit/d3cd1a3dfd3b154b8fd0550f66f87c23a2d44dd0))
 
 ### Refactor
-
 - Update clock widget layout to golden canvas 1200x600 ([f39471d](https://github.com/atlet99/ztime_widget/commit/f39471ddfe468ce5f444b04451cae6bd985041e6))
 - Rendering layout and constants ([46696aa](https://github.com/atlet99/ztime_widget/commit/46696aa7dbbfa1bba02a88c42bb23bdc54f4a0e7))
 - Replace ConstraintLayout with FrameLayout in custom clock widget ([2106728](https://github.com/atlet99/ztime_widget/commit/2106728fb09b39c1ca781131dfc7cb6436928116))
 - Use AppFormats and WidgetDimensions constants ([992f2c8](https://github.com/atlet99/ztime_widget/commit/992f2c88b85c7c26cd495ecf5618d3bad9b817cb))
-- Bump CHANGELOG and add \_update_changelog target to Makefile ([706e6ba](https://github.com/atlet99/ztime_widget/commit/706e6ba63a84ed59d8b1bb3c4c382dced0e07750))
+- Bump CHANGELOG and add _update_changelog target to Makefile ([706e6ba](https://github.com/atlet99/ztime_widget/commit/706e6ba63a84ed59d8b1bb3c4c382dced0e07750))
 - Bump CHANGELOG, version and add widget PNG renderer ([e5c3fac](https://github.com/atlet99/ztime_widget/commit/e5c3fac010282135a92020c307953f19b597bec3))
 - Remove layout and renderer, update constants comment ([a6497fc](https://github.com/atlet99/ztime_widget/commit/a6497fc0ac8c8e737fad24cfa408d8aa22a529b2))
 - Bump version and update changelog ([c3372b7](https://github.com/atlet99/ztime_widget/commit/c3372b7fb9e45e667456a13c8f45327414486259))
