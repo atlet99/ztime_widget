@@ -16,8 +16,11 @@ clean: ## Clean build cache
 	flutter clean
 	flutter pub get
 
-format: ## dart format (exit if unformatted)
+format-check: ## dart format (exit if unformatted)
 	dart format --set-exit-if-changed lib/ test/
+
+format:
+	dart format lib/ test/
 
 fix: ## dart fix --apply
 	dart fix --apply
@@ -34,7 +37,7 @@ test: ## Run tests
 slang-analyze: ## Check translations (missing/unused keys, full source scan)
 	dart run slang analyze --full
 
-check-all: format analyze lint slang-analyze test ## Format + Analyze + Lint + Slang + Test
+check-all: format-check analyze lint slang-analyze test ## Format + Analyze + Lint + Slang + Test
 
 fix-all: format fix analyze ## Format + Fix + Analyze
 

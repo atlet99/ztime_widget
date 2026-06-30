@@ -11,6 +11,7 @@ import 'package:ztime_widget/core/constants/android_constants.dart';
 import 'package:ztime_widget/core/constants/pref_keys.dart';
 import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
+import 'package:ztime_widget/core/widget/widget_png_renderer.dart';
 import 'package:ztime_widget/i18n/strings.g.dart';
 
 /// Settings page — 100% layout-based sizing.
@@ -125,6 +126,7 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
                       await LocaleSettings.useDeviceLocale();
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.setInt(PrefKeys.appLocale, 0);
+                      WidgetPngRenderer.render();
                     },
                   ),
                   ...AppLocale.values.map((locale) {
@@ -142,6 +144,7 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
                         final index = AppLocale.values.indexOf(locale);
                         final prefs = await SharedPreferences.getInstance();
                         await prefs.setInt(PrefKeys.appLocale, index + 1);
+                        WidgetPngRenderer.render();
                       },
                     );
                   }),

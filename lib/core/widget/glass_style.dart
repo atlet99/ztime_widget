@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ztime_widget/core/constants/pref_keys.dart';
+import 'package:ztime_widget/core/widget/widget_png_renderer.dart';
 
 part 'glass_style.g.dart';
 
@@ -37,5 +38,7 @@ class GlassStyleNotifier extends _$GlassStyleNotifier {
     state = style;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(PrefKeys.glassStyle, style.index);
+    // Re-render widget PNG with new glass texture
+    WidgetPngRenderer.render();
   }
 }
