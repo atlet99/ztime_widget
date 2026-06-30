@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ztime_widget/core/constants/pref_keys.dart';
 
 /// Shared constants for widget rendering.
-/// Used by both WidgetLayout (widget PNG) and ClockFace (in-app display).
+/// Used by WidgetPngRenderer (widget PNG) and ClockFace (in-app display).
 class WidgetColors {
   WidgetColors._();
 
