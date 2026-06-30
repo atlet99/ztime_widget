@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:ztime_widget/core/constants/durations.dart';
 import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/utils/date_utils.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
-import 'package:ztime_widget/core/widget/widget_layout.dart';
-import 'package:ztime_widget/core/widget/widget_renderer.dart';
+import 'package:ztime_widget/core/widget/widget_png_renderer.dart';
 import 'package:ztime_widget/features/clock/presentation/controllers/clock_controller.dart';
 import 'package:ztime_widget/features/clock/presentation/widgets/clock_face.dart';
 import 'package:ztime_widget/features/settings/presentation/pages/huawei_battery_page.dart';
@@ -21,7 +18,6 @@ class ClockPage extends ConsumerStatefulWidget {
 }
 
 class _ClockPageState extends ConsumerState<ClockPage> {
-  final _widgetKey = GlobalKey();
   String _lastRenderDate = '';
   String _lastRenderLocale = '';
   String _lastRenderGlass = '';
@@ -32,22 +28,11 @@ class _ClockPageState extends ConsumerState<ClockPage> {
     ref.read(glassStyleProvider.notifier).load();
   }
 
-  void _scheduleWidgetRender(GlassStyle glassStyle) {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future<void>.delayed(AppDurations.renderDelay);
-      if (!mounted) return;
-      final boundary =
-          _widgetKey.currentContext?.findRenderObject()
-              as RenderRepaintBoundary?;
-      WidgetRenderer.renderFrom(boundary);
-    });
-  }
-
   void _forceWidgetRender(String date, String locale, String glass) {
     _lastRenderDate = date;
     _lastRenderLocale = locale;
     _lastRenderGlass = glass;
-    _scheduleWidgetRender(ref.read(glassStyleProvider));
+    WidgetPngRenderer.render();
   }
 
   @override
@@ -82,7 +67,7 @@ class _ClockPageState extends ConsumerState<ClockPage> {
             ),
           ),
 
-          // Settings button — screenutil-scaled position
+          // Settings button
           Positioned(
             top: padding.top + 12.h,
             left: padding.left + 16.w,
@@ -96,15 +81,6 @@ class _ClockPageState extends ConsumerState<ClockPage> {
                 );
               },
             ),
-          ),
-
-          // Widget layout (invisible, only used for PNG rendering)
-          Visibility(
-            visible: false,
-            maintainSize: true,
-            maintainAnimation: true,
-            maintainState: true,
-            child: WidgetLayout(renderKey: _widgetKey, glassStyle: glassStyle),
           ),
         ],
       ),

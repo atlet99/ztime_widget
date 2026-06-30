@@ -40,6 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [FEATURE] - add adaptive glass with launcher capability detection; - ([074a1e1](https://github.com/atlet99/ztime_widget/commit/074a1e157448891c24acee221e5d0381f87292ad))
 - [INIT] - initial project setup with base config; - ([6aa2fe3](https://github.com/atlet99/ztime_widget/commit/6aa2fe3216c35a0e32abe22cbca785f63bf16f21))
 
+### Miscellaneous Tasks
+
+- [CI] - update Makefile version bump logic and changelog generation; - ([d3cd1a3](https://github.com/atlet99/ztime_widget/commit/d3cd1a3dfd3b154b8fd0550f66f87c23a2d44dd0))
+
 ### Refactor
 
 - [REFACTOR] - update clock widget layout to golden canvas 1200x600; - ([f39471d](https://github.com/atlet99/ztime_widget/commit/f39471ddfe468ce5f444b04451cae6bd985041e6))

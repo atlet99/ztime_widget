@@ -80,150 +80,153 @@ class _WidgetLayoutState extends State<WidgetLayout> {
       child: SizedBox(
         width: w,
         height: h,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Image.asset(
-                widget.glassStyle.widgetPath,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular((w * 0.035).clamp(24.0, 56.0)),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  widget.glassStyle.widgetPath,
+                  fit: BoxFit.cover,
+                  gaplessPlayback: true,
+                ),
               ),
-            ),
-            const Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: WidgetColors.darkOverlay),
+              const Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: WidgetColors.darkOverlay),
+                ),
               ),
-            ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: WidgetDimensions.highlightLineHeight,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.35),
-                      Colors.white.withValues(alpha: 0.0),
-                    ],
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: WidgetDimensions.highlightLineHeight,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.35),
+                        Colors.white.withValues(alpha: 0.0),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Positioned(
-              top: dateTop,
-              right: safePadX + w * 0.05,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    DateFormat(AppFormats.dateShort, locale).format(now),
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontSize: dateFontSize,
-                      fontWeight: FontWeight.w400,
-                      height: 1.1,
+              Positioned(
+                top: dateTop,
+                right: safePadX + w * 0.05,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      DateFormat(AppFormats.dateShort, locale).format(now),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: dateFontSize,
+                        fontWeight: FontWeight.w400,
+                        height: 1.1,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    DateFormat(AppFormats.weekdayFull, locale).format(now),
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.70),
-                      fontSize: dayNameSize,
-                      fontWeight: FontWeight.w400,
-                      height: 1.1,
+                    const SizedBox(height: 4),
+                    Text(
+                      DateFormat(AppFormats.weekdayFull, locale).format(now),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.70),
+                        fontSize: dayNameSize,
+                        fontWeight: FontWeight.w400,
+                        height: 1.1,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Positioned(
-              bottom: safePadY,
-              left: safePadX,
-              right: safePadX,
-              child: SizedBox(
-                height: calHeight,
-                child: Row(
-                  children: List.generate(7, (i) {
-                    final dayNum = monday.add(Duration(days: i)).day;
-                    final isToday = i == today;
-                    return Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: cellPad),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: WidgetColors.calendarBg,
-                            borderRadius: BorderRadius.circular(
-                              WidgetDimensions.calCardRadius,
+              Positioned(
+                bottom: safePadY,
+                left: safePadX,
+                right: safePadX,
+                child: SizedBox(
+                  height: calHeight,
+                  child: Row(
+                    children: List.generate(7, (i) {
+                      final dayNum = monday.add(Duration(days: i)).day;
+                      final isToday = i == today;
+                      return Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: cellPad),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: WidgetColors.calendarBg,
+                              borderRadius: BorderRadius.circular(
+                                WidgetDimensions.calCardRadius,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                isToday
+                                    ? IntrinsicWidth(
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 3,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                              WidgetDimensions.pillRadius,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            dayNum.toString(),
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: WidgetColors.textActive,
+                                              fontSize: calNumSize,
+                                              fontWeight: FontWeight.w400,
+                                              height: 1.1,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Text(
+                                        dayNum.toString(),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.55,
+                                          ),
+                                          fontSize: calNumSize,
+                                          fontWeight: FontWeight.w400,
+                                          height: 1.1,
+                                        ),
+                                      ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  shortLabels[i],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: isToday
+                                        ? Colors.white.withValues(alpha: 0.70)
+                                        : Colors.white.withValues(alpha: 0.35),
+                                    fontSize: calLetterSize,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.1,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              isToday
-                                  ? IntrinsicWidth(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 3,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            WidgetDimensions.pillRadius,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          dayNum.toString(),
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: WidgetColors.textActive,
-                                            fontSize: calNumSize,
-                                            fontWeight: FontWeight.w400,
-                                            height: 1.1,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : Text(
-                                      dayNum.toString(),
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.55,
-                                        ),
-                                        fontSize: calNumSize,
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.1,
-                                      ),
-                                    ),
-                              const SizedBox(height: 4),
-                              Text(
-                                shortLabels[i],
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: isToday
-                                      ? Colors.white.withValues(alpha: 0.70)
-                                      : Colors.white.withValues(alpha: 0.35),
-                                  fontSize: calLetterSize,
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.1,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    }),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
