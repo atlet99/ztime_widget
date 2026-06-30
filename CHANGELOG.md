@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [FEATURE] - implement responsive adaptive UI with dynamic sizing; - ([9de1670](https://github.com/atlet99/ztime_widget/commit/9de16702607aeabd5d534cd5026c31e7af3c5cc5))
 - [FEATURE] - add adaptive glass with launcher capability detection; - ([074a1e1](https://github.com/atlet99/ztime_widget/commit/074a1e157448891c24acee221e5d0381f87292ad))
 - [INIT] - initial project setup with base config; - ([6aa2fe3](https://github.com/atlet99/ztime_widget/commit/6aa2fe3216c35a0e32abe22cbca785f63bf16f21))
+- [FEATURE] - add home screen widget and battery optimization handling; - ([2202df2](https://github.com/atlet99/ztime_widget/commit/2202df27d74d48e562458c961117579b10cc24ec))
+- [FEATURE] - add calendar page, i18n strings and navigation; - ([928574d](https://github.com/atlet99/ztime_widget/commit/928574da3084551aea73b2d9d32fd32cdcea53d2))
 
 ### Miscellaneous Tasks
 

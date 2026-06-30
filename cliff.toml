@@ -81,6 +81,6 @@ topo_order = false
 sort_commits = "oldest"
 
 [bump]
-# Force patch bump on every build — commit type is ignored for versioning
-bump_type = "patch"
+features_always_bump_minor = true
+breaking_always_bump_major = true
 initial_tag = "v1.0.0"

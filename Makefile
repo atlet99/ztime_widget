@@ -1,4 +1,4 @@
-.PHONY: help get gen clean format fix analyze lint test slang-analyze check-all fix-all build build-split build-debug build-aab run release changelog bump release _update_changelog _update_version
+.PHONY: help get gen clean format fix analyze lint test slang-analyze check-all fix-all build build-split build-debug build-aab run release changelog bump bump-patch bump-minor bump-major _update_changelog _update_version
 
 APP_NAME := ztime_widget
 
@@ -52,50 +52,60 @@ build-aab: _update_version _update_changelog ## Build release AAB (for Play Stor
 run: ## Run on connected device
 	flutter run
 
-# === Version Management ===
+# === Version Management (SemVer 2.0.0) ===
 
 _update_changelog: ## Regenerate CHANGELOG.md (internal, called by build targets)
 	@git-cliff --output CHANGELOG.md 2>/dev/null || true
 
-_update_version: ## Bump patch + build number in pubspec.yaml (internal)
-	@NEW_VER=$$(awk 'BEGIN{ \
-		getline l<"pubspec.yaml"; \
-		gsub(/version: /,"",l); \
-		n=split(l,s,"+"); \
-		v=s[1]; b=s[2]; \
-		n=split(v,d,"."); \
-		p=d[3]+1; t=""; \
-		c="git tag -l v* 2>/dev/null | head -1"; c|getline t; close(c); \
-		nv="1.0."p; \
-		if(t!=""){ \
-			c="git-cliff --bumped-version 2>/dev/null | tr -d v"; c|getline g; close(c); \
-			if(g!=""&&g!=v) nv=g \
-		}; print nv \
-	}'); \
-	BUILD=$$(git rev-list --count $$(git tag -l 'v*' 2>/dev/null | head -1)..HEAD 2>/dev/null); \
-	[ -z "$$BUILD" ] || [ "$$BUILD" -eq 0 ] && BUILD=1; \
-	CUR=$$(grep 'version:' pubspec.yaml | head -1 | awk '{print $$2}'); \
-	echo "Version: $$CUR → $$NEW_VER+$$BUILD"; \
-	awk -v nv="$$NEW_VER" -v nb="$$BUILD" '{ \
-		gsub(/version: .*/,"version: "nv"+"nb); \
-	}1' pubspec.yaml > pubspec.yaml.tmp && mv pubspec.yaml.tmp pubspec.yaml
+_update_version: ## Bump patch version in pubspec.yaml (internal, called by builds)
+	@CUR=$$(grep 'version:' pubspec.yaml | head -1 | awk '{print $$2}'); \
+	NEW_VER=$$(awk -v v="$$CUR" 'BEGIN{split(v,d,".");d[3]++;print d[1]"."d[2]"."d[3]}'); \
+	echo "Version: $$CUR → $$NEW_VER"; \
+	sed -i '' "s/version: .*/version: $$NEW_VER/" pubspec.yaml
 
 changelog: ## Generate CHANGELOG.md from git history
 	git-cliff --output CHANGELOG.md
 	prettier --write CHANGELOG.md
 
-bump: ## Bump version, commit + tag for release
-	@VERSION=$$(grep 'version:' pubspec.yaml | head -1 | awk '{print $$2}' | cut -d'+' -f1); \
-	BUILD=$$(grep 'version:' pubspec.yaml | head -1 | awk '{print $$2}' | cut -d'+' -f2); \
-	echo "Tagging v$$VERSION (build $$BUILD)"; \
+# X.Y.Z → X.Y.Z+1 (bug fixes)
+bump-patch: ## SemVer patch bump + commit + tag
+	@CUR=$$(grep 'version:' pubspec.yaml | head -1 | awk '{print $$2}'); \
+	NEW_VER=$$(awk -v v="$$CUR" 'BEGIN{split(v,d,".");d[3]++;print d[1]"."d[2]"."d[3]}'); \
+	sed -i '' "s/version: .*/version: $$NEW_VER/" pubspec.yaml; \
+	echo "v$$CUR → v$$NEW_VER"; \
 	git add pubspec.yaml CHANGELOG.md; \
-	git commit -m "chore(release): v$$VERSION+$$BUILD" --allow-empty; \
-	git tag -a "v$$VERSION" -m "Release v$$VERSION (build $$BUILD)"; \
-	echo "Tagged v$$VERSION"
+	git commit -m "chore(release): v$$NEW_VER" --allow-empty; \
+	git tag -a "v$$NEW_VER" -m "Release v$$NEW_VER"; \
+	echo "Tagged v$$NEW_VER"
 
-release: ## Full release: check + changelog + version + tag
+# X.Y.Z → X.(Y+1).0 (new features, patch resets)
+bump-minor: ## SemVer minor bump + commit + tag
+	@CUR=$$(grep 'version:' pubspec.yaml | head -1 | awk '{print $$2}'); \
+	NEW_VER=$$(awk -v v="$$CUR" 'BEGIN{split(v,d,".");d[2]++;d[3]=0;print d[1]"."d[2]"."d[3]}'); \
+	sed -i '' "s/version: .*/version: $$NEW_VER/" pubspec.yaml; \
+	echo "v$$CUR → v$$NEW_VER"; \
+	git add pubspec.yaml CHANGELOG.md; \
+	git commit -m "chore(release): v$$NEW_VER" --allow-empty; \
+	git tag -a "v$$NEW_VER" -m "Release v$$NEW_VER"; \
+	echo "Tagged v$$NEW_VER"
+
+# X.Y.Z → (X+1).0.0 (breaking changes, minor+patch reset)
+bump-major: ## SemVer major bump + commit + tag
+	@CUR=$$(grep 'version:' pubspec.yaml | head -1 | awk '{print $$2}'); \
+	NEW_VER=$$(awk -v v="$$CUR" 'BEGIN{split(v,d,".");d[1]++;d[2]=0;d[3]=0;print d[1]"."d[2]"."d[3]}'); \
+	sed -i '' "s/version: .*/version: $$NEW_VER/" pubspec.yaml; \
+	echo "v$$CUR → v$$NEW_VER"; \
+	git add pubspec.yaml CHANGELOG.md; \
+	git commit -m "chore(release): v$$NEW_VER" --allow-empty; \
+	git tag -a "v$$NEW_VER" -m "Release v$$NEW_VER"; \
+	echo "Tagged v$$NEW_VER"
+
+# Alias — default to patch
+bump: bump-patch ## Alias for bump-patch
+
+release: ## Full release: check + changelog + patch bump
 	@$(MAKE) check-all
 	@$(MAKE) changelog
-	@$(MAKE) bump
+	@$(MAKE) bump-patch
 	@echo ""
 	@echo "Release done! Push: git push && git push --tags"
