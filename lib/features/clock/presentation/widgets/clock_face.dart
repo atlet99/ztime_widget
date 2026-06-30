@@ -85,11 +85,27 @@ class ClockFace extends StatelessWidget {
 
         if (isLandscape) {
           return _buildLandscape(
-            w, h, padding, safePadX, safePadY, shortLabels, today, monday, timeStr,
+            w,
+            h,
+            padding,
+            safePadX,
+            safePadY,
+            shortLabels,
+            today,
+            monday,
+            timeStr,
           );
         }
         return _buildPortrait(
-          w, h, padding, safePadX, safePadY, shortLabels, today, monday, timeStr,
+          w,
+          h,
+          padding,
+          safePadX,
+          safePadY,
+          shortLabels,
+          today,
+          monday,
+          timeStr,
         );
       },
     );
@@ -165,7 +181,10 @@ class ClockFace extends StatelessWidget {
                         ),
                         SizedBox(height: h * 0.005),
                         Text(
-                          DateFormat(AppFormats.weekdayFull, locale).format(time),
+                          DateFormat(
+                            AppFormats.weekdayFull,
+                            locale,
+                          ).format(time),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.70),
                             fontSize: dayNameSize,
@@ -199,11 +218,15 @@ class ClockFace extends StatelessWidget {
                         onTap: () => _openCalendarForDate(dayDate),
                         behavior: HitTestBehavior.opaque,
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: safePadX * 0.5),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: safePadX * 0.5,
+                          ),
                           child: Container(
                             decoration: BoxDecoration(
                               color: WidgetColors.calendarBg,
-                              borderRadius: BorderRadius.circular(calHeight * 0.12),
+                              borderRadius: BorderRadius.circular(
+                                calHeight * 0.12,
+                              ),
                             ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -237,7 +260,9 @@ class ClockFace extends StatelessWidget {
                                         dayNum.toString(),
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
-                                          color: Colors.white.withValues(alpha: 0.55),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.55,
+                                          ),
                                           fontSize: calNumSize,
                                           fontWeight: FontWeight.w500,
                                           height: 1.1,
@@ -317,11 +342,7 @@ class ClockFace extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Time with neon glow
-                    _buildGlowingTime(
-                      timeStr,
-                      timeFontSize,
-                      minFontSize: 20,
-                    ),
+                    _buildGlowingTime(timeStr, timeFontSize, minFontSize: 20),
                     SizedBox(height: h * 0.02),
                     Text(
                       DateFormat(AppFormats.dateShort, locale).format(time),
@@ -385,7 +406,9 @@ class ClockFace extends StatelessWidget {
                                   Container(
                                     width: h * 0.012,
                                     height: h * 0.012,
-                                    margin: EdgeInsets.only(right: safePadX * 0.4),
+                                    margin: EdgeInsets.only(
+                                      right: safePadX * 0.4,
+                                    ),
                                     decoration: const BoxDecoration(
                                       color: Colors.white,
                                       shape: BoxShape.circle,
@@ -399,8 +422,9 @@ class ClockFace extends StatelessWidget {
                                         ? Colors.white
                                         : Colors.white.withValues(alpha: 0.55),
                                     fontSize: calNumSize,
-                                    fontWeight:
-                                        isToday ? FontWeight.w500 : FontWeight.w400,
+                                    fontWeight: isToday
+                                        ? FontWeight.w500
+                                        : FontWeight.w400,
                                     height: 1.1,
                                   ),
                                 ),
@@ -430,38 +454,31 @@ class ClockFace extends StatelessWidget {
     double fontSize, {
     required double minFontSize,
   }) {
-    return Stack(
-      alignment: Alignment.centerLeft,
-      children: [
-        // Bloom layer — blurred copy behind for diffuse glow
-        ImageFiltered(
-          imageFilter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Text(
-            timeStr,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.w600,
-              color: Colors.white.withValues(alpha: 0.7),
+    return ShaderMask(
+      shaderCallback: (bounds) => const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Colors.white, Colors.white, Colors.white60],
+        stops: [0.0, 0.6, 1.0],
+      ).createShader(bounds),
+      blendMode: BlendMode.dstIn,
+      child: Stack(
+        alignment: Alignment.centerLeft,
+        children: [
+          // Bloom layer — blurred blue copy for ambient glow on background
+          ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Text(
+              timeStr,
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF81D4FA).withValues(alpha: 0.6),
+              ),
             ),
           ),
-        ),
-        // Sharp text with gradient fade + shadow glow
-        ShaderMask(
-          shaderCallback: (bounds) {
-            return const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.white,
-                Colors.white,
-                Colors.white70,
-                Colors.white24,
-              ],
-              stops: [0.0, 0.55, 0.8, 1.0],
-            ).createShader(bounds);
-          },
-          blendMode: BlendMode.modulate,
-          child: AutoSizeText(
+          // Sharp text with multi-layer shadow glow
+          AutoSizeText(
             timeStr,
             maxLines: 1,
             minFontSize: minFontSize,
@@ -469,31 +486,25 @@ class ClockFace extends StatelessWidget {
             stepGranularity: 1,
             style: TextStyle(
               fontSize: fontSize,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: Colors.white,
               letterSpacing: 0.04,
               height: 0.85,
               shadows: [
-                // Inner bright glow
+                // Inner bright — gives line thickness
                 Shadow(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  blurRadius: 8,
+                  color: Colors.white.withValues(alpha: 0.85),
+                  blurRadius: 6,
                 ),
-                // Outer soft glow (bluish)
-                Shadow(
-                  color: Colors.lightBlueAccent.withValues(alpha: 0.6),
-                  blurRadius: 30,
-                ),
-                // Wide diffuse glow
-                Shadow(
-                  color: Colors.lightBlueAccent.withValues(alpha: 0.3),
-                  blurRadius: 60,
-                ),
+                // Medium bluish glow — screen-like halo
+                const Shadow(color: Color(0xFFB3E5FC), blurRadius: 20),
+                // Outer diffuse — ambient bleed
+                const Shadow(color: Color(0xFF81D4FA), blurRadius: 45),
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

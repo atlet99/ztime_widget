@@ -2,7 +2,6 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +13,8 @@ import 'package:ztime_widget/core/theme/app_colors.dart';
 import 'package:ztime_widget/core/widget/glass_style.dart';
 import 'package:ztime_widget/i18n/strings.g.dart';
 
+/// Settings page — 100% layout-based sizing.
+/// On tablets, content is constrained to max 600px width.
 class HuaweiBatteryPage extends ConsumerStatefulWidget {
   const HuaweiBatteryPage({super.key});
 
@@ -76,285 +77,297 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
         foregroundColor: AppColors.textPrimary,
         title: Text(context.t.settings),
       ),
-      body: ListView(
-        padding: EdgeInsets.all(24.r),
-        children: [
-          // Language selector
-          Text(
-            context.t.language,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 12.h),
-          _buildLocaleOption(
-            context,
-            label: context.t.langSystem,
-            isSelected: false,
-            onTap: () async {
-              await LocaleSettings.useDeviceLocale();
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setInt(PrefKeys.appLocale, 0);
-            },
-          ),
-          ...AppLocale.values.map((locale) {
-            final isSelected = locale == currentLocale;
-            final label = _localeLabel(context, locale);
-            return _buildLocaleOption(
-              context,
-              label: label,
-              isSelected: isSelected,
-              onTap: () async {
-                await LocaleSettings.setLocale(locale);
-                final index = AppLocale.values.indexOf(locale);
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setInt(PrefKeys.appLocale, index + 1);
-              },
-            );
-          }),
-          SizedBox(height: 24.h),
-          const Divider(color: Colors.white12),
-          SizedBox(height: 16.h),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          final contentW = w > 600 ? 600.0 : w;
+          final padX = w * 0.06;
 
-          // Widget glass style
-          Text(
-            context.t.widgetBgStyle,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            context.t.chooseGlassTexture,
-            style: TextStyle(fontSize: 13.sp, color: AppColors.textDim),
-          ),
-          SizedBox(height: 16.h),
-          ...GlassStyle.values.map((style) {
-            final isSelected = currentStyle == style;
-            final label = _glassLabel(context, style);
-            return Padding(
-              padding: EdgeInsets.only(bottom: 12.h),
-              child: GestureDetector(
-                onTap: () =>
-                    ref.read(glassStyleProvider.notifier).setStyle(style),
-                child: Container(
-                  height: 80.h,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: isSelected
-                          ? AppColors.accent
-                          : Colors.white.withValues(alpha: 0.15),
-                      width: isSelected ? 2.5 : 1.0,
-                    ),
-                    image: DecorationImage(
-                      image: AssetImage(style.widgetPath),
-                      fit: BoxFit.cover,
+          // Font sizes as percentage of content width
+          const sectionTitlePct = 0.05;
+          const bodyTextPct = 0.035;
+          const smallTextPct = 0.032;
+          const iconPct = 0.05;
+          final sectionTitle = contentW * sectionTitlePct;
+          final bodyText = contentW * bodyTextPct;
+          final smallText = contentW * smallTextPct;
+          final iconSize = contentW * iconPct;
+          const btnHeight = 48.0;
+          const glassCardH = 72.0;
+          const borderRadius = 12.0;
+          const gap = 12.0;
+          const bigGap = 24.0;
+
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: ListView(
+                padding: EdgeInsets.symmetric(horizontal: padX, vertical: 16),
+                children: [
+                  // ── Language ──
+                  Text(
+                    context.t.language,
+                    style: TextStyle(
+                      fontSize: sectionTitle,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16.r),
-                      color: isSelected
-                          ? AppColors.accent.withValues(alpha: 0.15)
-                          : Colors.black.withValues(alpha: 0.3),
+                  const SizedBox(height: gap),
+                  _buildLocaleOption(
+                    context,
+                    bodyText: bodyText,
+                    iconSize: iconSize,
+                    borderRadius: borderRadius,
+                    label: context.t.langSystem,
+                    isSelected: false,
+                    onTap: () async {
+                      await LocaleSettings.useDeviceLocale();
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setInt(PrefKeys.appLocale, 0);
+                    },
+                  ),
+                  ...AppLocale.values.map((locale) {
+                    final isSelected = locale == currentLocale;
+                    final label = _localeLabel(context, locale);
+                    return _buildLocaleOption(
+                      context,
+                      bodyText: bodyText,
+                      iconSize: iconSize,
+                      borderRadius: borderRadius,
+                      label: label,
+                      isSelected: isSelected,
+                      onTap: () async {
+                        await LocaleSettings.setLocale(locale);
+                        final index = AppLocale.values.indexOf(locale);
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setInt(PrefKeys.appLocale, index + 1);
+                      },
+                    );
+                  }),
+                  const SizedBox(height: bigGap),
+                  const Divider(color: Colors.white12),
+                  const SizedBox(height: gap),
+
+                  // ── Widget glass style ──
+                  Text(
+                    context.t.widgetBgStyle,
+                    style: TextStyle(
+                      fontSize: sectionTitle,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: Row(
-                      children: [
-                        if (isSelected)
-                          Icon(
-                            Icons.check_circle,
-                            color: AppColors.accent,
-                            size: 22.r,
-                          )
-                        else
-                          Icon(
-                            Icons.circle_outlined,
-                            color: Colors.white.withValues(alpha: 0.3),
-                            size: 22.r,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    context.t.chooseGlassTexture,
+                    style: TextStyle(
+                      fontSize: smallText,
+                      color: AppColors.textDim,
+                    ),
+                  ),
+                  const SizedBox(height: gap),
+                  ...GlassStyle.values.map((style) {
+                    final isSelected = currentStyle == style;
+                    final label = _glassLabel(context, style);
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: GestureDetector(
+                        onTap: () => ref
+                            .read(glassStyleProvider.notifier)
+                            .setStyle(style),
+                        child: Container(
+                          height: glassCardH,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(borderRadius),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.accent
+                                  : Colors.white.withValues(alpha: 0.15),
+                              width: isSelected ? 2.5 : 1.0,
+                            ),
+                            image: DecorationImage(
+                              image: AssetImage(style.widgetPath),
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                        SizedBox(width: 12.w),
-                        Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: isSelected
-                                ? Colors.white
-                                : Colors.white.withValues(alpha: 0.7),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(borderRadius),
+                              color: isSelected
+                                  ? AppColors.accent.withValues(alpha: 0.15)
+                                  : Colors.black.withValues(alpha: 0.3),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: padX * 0.6,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isSelected
+                                      ? Icons.check_circle
+                                      : Icons.circle_outlined,
+                                  color: isSelected
+                                      ? AppColors.accent
+                                      : Colors.white.withValues(alpha: 0.3),
+                                  size: iconSize,
+                                ),
+                                const SizedBox(width: gap),
+                                Text(
+                                  label,
+                                  style: TextStyle(
+                                    fontSize: bodyText,
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.white.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ],
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: bigGap),
+                  const Divider(color: Colors.white12),
+                  const SizedBox(height: gap),
+
+                  // ── Add widget ──
+                  if (_pinSupported) ...[
+                    Text(
+                      context.t.addWidget,
+                      style: TextStyle(
+                        fontSize: sectionTitle,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      context.t.addWidgetDesc,
+                      style: TextStyle(
+                        fontSize: smallText,
+                        color: AppColors.textDim,
+                      ),
+                    ),
+                    const SizedBox(height: gap),
+                    _buildActionButton(
+                      label: context.t.addWidget,
+                      fontSize: bodyText,
+                      height: btnHeight,
+                      borderRadius: borderRadius,
+                      onPressed: () => HomeWidget.requestPinWidget(
+                        qualifiedAndroidName: AndroidConstants.widgetProvider,
+                      ),
+                    ),
+                    const SizedBox(height: bigGap),
+                    const Divider(color: Colors.white12),
+                    const SizedBox(height: gap),
+                  ],
+
+                  // ── Battery optimization ──
+                  Text(
+                    context.t.batteryOptimization,
+                    style: TextStyle(
+                      fontSize: sectionTitle,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                ),
-              ),
-            );
-          }),
-          SizedBox(height: 32.h),
-          const Divider(color: Colors.white12),
-          SizedBox(height: 16.h),
-
-          // Add widget to home screen (Android 26+ pinning)
-          if (_pinSupported) ...[
-            Text(
-              context.t.addWidget,
-              style: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              context.t.addWidgetDesc,
-              style: TextStyle(fontSize: 13.sp, color: AppColors.textDim),
-            ),
-            SizedBox(height: 16.h),
-            SizedBox(
-              width: double.infinity,
-              height: 48.h,
-              child: ElevatedButton(
-                onPressed: () => HomeWidget.requestPinWidget(
-                  qualifiedAndroidName: AndroidConstants.widgetProvider,
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
+                  const SizedBox(height: 6),
+                  Text(
+                    _isHuaweiInstall
+                        ? context.t.batteryOptDesc
+                        : context.t.batteryOptDescGeneric,
+                    style: TextStyle(
+                      fontSize: smallText,
+                      color: AppColors.textDim,
+                      height: 1.5,
+                    ),
                   ),
-                ),
-                child: Text(
-                  context.t.addWidget,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: gap),
+                  _buildActionButton(
+                    label: context.t.openBatterySettings,
+                    fontSize: bodyText,
+                    height: btnHeight,
+                    borderRadius: borderRadius,
+                    onPressed: _openBatterySettings,
                   ),
-                ),
-              ),
-            ),
-            SizedBox(height: 32.h),
-            const Divider(color: Colors.white12),
-            SizedBox(height: 16.h),
-          ],
+                  const SizedBox(height: bigGap),
+                  const Divider(color: Colors.white12),
+                  const SizedBox(height: gap),
 
-          // Battery optimization — adaptive based on installer store
-          Text(
-            context.t.batteryOptimization,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            _isHuaweiInstall
-                ? context.t.batteryOptDesc
-                : context.t.batteryOptDescGeneric,
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: AppColors.textDim,
-              height: 1.5,
-            ),
-          ),
-          SizedBox(height: 16.h),
-          SizedBox(
-            width: double.infinity,
-            height: 48.h,
-            child: ElevatedButton(
-              onPressed: _openBatterySettings,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-              ),
-              child: Text(
-                context.t.openBatterySettings,
-                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          SizedBox(height: 32.h),
-          const Divider(color: Colors.white12),
-          SizedBox(height: 16.h),
-
-          // About
-          Text(
-            context.t.about,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            context.t.aboutDesc,
-            style: TextStyle(fontSize: 13.sp, color: AppColors.textDim),
-          ),
-          SizedBox(height: 12.h),
-          FutureBuilder<PackageInfo>(
-            future: PackageInfo.fromPlatform(),
-            builder: (context, snapshot) {
-              final version = snapshot.data?.version ?? '';
-              return Text(
-                context.t.version(version: version),
-                style: TextStyle(fontSize: 13.sp, color: AppColors.textDim),
-              );
-            },
-          ),
-          SizedBox(height: 16.h),
-          SizedBox(
-            width: double.infinity,
-            height: 48.h,
-            child: OutlinedButton(
-              onPressed: () => launchUrl(Uri.parse(AppConstants.githubUrl)),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.code, size: 18.r),
-                  SizedBox(width: 8.w),
-                  Text(context.t.viewOnGithub),
+                  // ── About ──
+                  Text(
+                    context.t.about,
+                    style: TextStyle(
+                      fontSize: sectionTitle,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    context.t.aboutDesc,
+                    style: TextStyle(
+                      fontSize: smallText,
+                      color: AppColors.textDim,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  FutureBuilder<PackageInfo>(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snapshot) {
+                      final version = snapshot.data?.version ?? '';
+                      return Text(
+                        context.t.version(version: version),
+                        style: TextStyle(
+                          fontSize: smallText,
+                          color: AppColors.textDim,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: gap),
+                  _buildOutlineButton(
+                    label: context.t.viewOnGithub,
+                    fontSize: bodyText,
+                    height: btnHeight,
+                    borderRadius: borderRadius,
+                    onPressed: () =>
+                        launchUrl(Uri.parse(AppConstants.githubUrl)),
+                  ),
+                  const SizedBox(height: bigGap),
                 ],
               ),
             ),
-          ),
-          SizedBox(height: 24.h),
-        ],
+          );
+        },
       ),
     );
   }
 
+  // ── Locale option ──
+
   Widget _buildLocaleOption(
     BuildContext context, {
+    required double bodyText,
+    required double iconSize,
+    required double borderRadius,
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
+      padding: const EdgeInsets.only(bottom: 6),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(borderRadius),
             border: Border.all(
               color: isSelected
                   ? AppColors.accent
@@ -367,19 +380,18 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
           ),
           child: Row(
             children: [
-              if (isSelected)
-                Icon(Icons.check_circle, color: AppColors.accent, size: 20.r)
-              else
-                Icon(
-                  Icons.circle_outlined,
-                  color: Colors.white.withValues(alpha: 0.3),
-                  size: 20.r,
-                ),
-              SizedBox(width: 12.w),
+              Icon(
+                isSelected ? Icons.check_circle : Icons.circle_outlined,
+                color: isSelected
+                    ? AppColors.accent
+                    : Colors.white.withValues(alpha: 0.3),
+                size: iconSize,
+              ),
+              const SizedBox(width: 12),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 15.sp,
+                  fontSize: bodyText,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   color: isSelected
                       ? Colors.white
@@ -388,6 +400,68 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // ── Primary action button ──
+
+  Widget _buildActionButton({
+    required String label,
+    required double fontSize,
+    required double height,
+    required double borderRadius,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: height,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.accent,
+          foregroundColor: Colors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  // ── Outline button ──
+
+  Widget _buildOutlineButton({
+    required String label,
+    required double fontSize,
+    required double height,
+    required double borderRadius,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: height,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.textPrimary,
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.code, size: fontSize),
+            const SizedBox(width: 8),
+            Text(label, style: TextStyle(fontSize: fontSize)),
+          ],
         ),
       ),
     );
