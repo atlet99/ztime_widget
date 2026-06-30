@@ -109,18 +109,23 @@ class _ZTimeAppState extends ConsumerState<ZTimeApp>
             GlobalCupertinoLocalizations.delegate,
           ],
           builder: (context, child) {
-            return ResponsiveBreakpoints.builder(
-              child: child!,
-              breakpoints: const [
-                Breakpoint(start: 0, end: 600, name: MOBILE),
-                Breakpoint(start: 601, end: 1024, name: TABLET),
-                Breakpoint(start: 1025, end: double.infinity, name: DESKTOP),
-              ],
-              breakpointsLandscape: const [
-                Breakpoint(start: 0, end: 480, name: MOBILE),
-                Breakpoint(start: 481, end: 1024, name: TABLET),
-                Breakpoint(start: 1025, end: double.infinity, name: DESKTOP),
-              ],
+            // Lock system text-scale so clock doesn't balloon
+            final mq = MediaQuery.of(context);
+            return MediaQuery(
+              data: mq.copyWith(textScaler: const TextScaler.linear(1.0)),
+              child: ResponsiveBreakpoints.builder(
+                child: child!,
+                breakpoints: const [
+                  Breakpoint(start: 0, end: 600, name: MOBILE),
+                  Breakpoint(start: 601, end: 1024, name: TABLET),
+                  Breakpoint(start: 1025, end: double.infinity, name: DESKTOP),
+                ],
+                breakpointsLandscape: const [
+                  Breakpoint(start: 0, end: 480, name: MOBILE),
+                  Breakpoint(start: 481, end: 1024, name: TABLET),
+                  Breakpoint(start: 1025, end: double.infinity, name: DESKTOP),
+                ],
+              ),
             );
           },
           home: const ClockPage(),

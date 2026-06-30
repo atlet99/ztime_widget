@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve cliff settings ([c192b21](https://github.com/atlet99/ztime_widget/commit/c192b21cce16b373422ff1b9b63da2586252c871))
 - Bump CHANGELOG ([f906be2](https://github.com/atlet99/ztime_widget/commit/f906be28a839fbb8f45011aa53898357cf268bcf))
 - Bump CHANGELOG ([0d1e14e](https://github.com/atlet99/ztime_widget/commit/0d1e14eeb8085638afb12b6df4385ceecf732341))
+- Bump CHANGELOG and update version links ([a4e7bb5](https://github.com/atlet99/ztime_widget/commit/a4e7bb5adcd87537ca534e45ae355e811275c354))
 ## [1.0.1](https://github.com/atlet99/ztime_widget/releases/tag/v1.0.1) - 2026-06-30
 
 ### Bug Fixes

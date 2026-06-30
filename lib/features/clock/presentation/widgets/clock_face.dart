@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -89,9 +90,8 @@ class ClockFace extends StatelessWidget {
     final safePadX = 24.w;
     final safePadY = padding.top + 16.h;
 
-    // ResponsiveBreakpoints + ScreenUtil: font sizes scale with screen
-    // .sp auto-scales by screen width (designSize width = 360)
-    final timeSize = isMobile ? 86.sp : (isTablet ? 120.sp : 160.sp);
+    // AutoSizeText: time fills available space, auto-scales for any device
+    final timeHeight = h * 0.14;
     final dateFontSize = isMobile ? 13.sp : (isTablet ? 18.sp : 24.sp);
     final dayNameSize = isMobile ? 11.sp : (isTablet ? 15.sp : 20.sp);
 
@@ -104,6 +104,8 @@ class ClockFace extends StatelessWidget {
     final shortLabels = AppDateUtils.getWeekdayLabelsShort(locale);
     final today = time.weekday - 1;
     final monday = time.subtract(Duration(days: time.weekday - 1));
+    final timeStr =
+        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
     return Stack(
       children: [
@@ -119,14 +121,19 @@ class ClockFace extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: timeSize,
-                  fontWeight: FontWeight.w100,
-                  letterSpacing: 0.09,
-                  height: 0.85,
+              SizedBox(
+                height: timeHeight,
+                child: AutoSizeText(
+                  timeStr,
+                  maxLines: 1,
+                  minFontSize: 30,
+                  stepGranularity: 2,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w100,
+                    letterSpacing: 0.09,
+                    height: 0.85,
+                  ),
                 ),
               ),
               const Spacer(),
@@ -263,7 +270,7 @@ class ClockFace extends StatelessWidget {
 
     // Left column: time + date (55% width)
     final leftW = w * 0.55;
-    final timeSize = isMobile ? 56.sp : 80.sp;
+    final timeHeight = h * 0.30;
     final dateFontSize = isMobile ? 11.sp : 16.sp;
     final dayNameSize = isMobile ? 9.sp : 13.sp;
 
@@ -276,6 +283,8 @@ class ClockFace extends StatelessWidget {
     final shortLabels = AppDateUtils.getWeekdayLabelsShort(locale);
     final today = time.weekday - 1;
     final monday = time.subtract(Duration(days: time.weekday - 1));
+    final timeStr =
+        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
     return Stack(
       children: [
@@ -292,14 +301,19 @@ class ClockFace extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: timeSize,
-                  fontWeight: FontWeight.w100,
-                  letterSpacing: 0.09,
-                  height: 0.85,
+              SizedBox(
+                height: timeHeight,
+                child: AutoSizeText(
+                  timeStr,
+                  maxLines: 1,
+                  minFontSize: 24,
+                  stepGranularity: 2,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w100,
+                    letterSpacing: 0.09,
+                    height: 0.85,
+                  ),
                 ),
               ),
               SizedBox(height: 10.h),
