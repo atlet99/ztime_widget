@@ -38,16 +38,22 @@ check-all: format analyze lint slang-analyze test ## Format + Analyze + Lint + S
 
 fix-all: format fix analyze ## Format + Fix + Analyze
 
-build: build-split ## Alias for build-split
+build: build-tagged ## Alias for build-tagged
 
-build-split: _update_version _update_changelog ## Build split APKs per ABI (arm64, arm, x86_64)
+build-split: ## Build split APKs per ABI (no version bump)
 	flutter build apk --split-per-abi --release
 
-build-debug: _update_version _update_changelog ## Build debug APK (universal)
+build-release: ## Build release APK universal (no version bump)
+	flutter build apk --release
+
+build-debug: ## Build debug APK (no version bump)
 	flutter build apk --debug
 
-build-aab: _update_version _update_changelog ## Build release AAB (for Play Store)
+build-aab: ## Build release AAB (no version bump)
 	flutter build appbundle --release
+
+build-tagged: _update_version _update_changelog ## Build split APKs per ABI + bump version + changelog
+	flutter build apk --split-per-abi --release
 
 run: ## Run on connected device
 	flutter run
