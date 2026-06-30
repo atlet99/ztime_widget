@@ -5,12 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased](https://github.com/atlet99/ztime_widget/compare/v1.0.1...HEAD)
 
 ### Refactor
 - Improve cliff settings ([c192b21](https://github.com/atlet99/ztime_widget/commit/c192b21cce16b373422ff1b9b63da2586252c871))
 - Bump CHANGELOG ([f906be2](https://github.com/atlet99/ztime_widget/commit/f906be28a839fbb8f45011aa53898357cf268bcf))
-## [1.0.1] - 2026-06-30
+- Bump CHANGELOG ([0d1e14e](https://github.com/atlet99/ztime_widget/commit/0d1e14eeb8085638afb12b6df4385ceecf732341))
+## [1.0.1](https://github.com/atlet99/ztime_widget/releases/tag/v1.0.1) - 2026-06-30
 
 ### Bug Fixes
 - Fix clock page re-rendering on date or locale changes ([b99cbd2](https://github.com/atlet99/ztime_widget/commit/b99cbd2f65ab76284345172c7849afd656ca2d42))
