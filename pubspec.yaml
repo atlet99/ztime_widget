@@ -1,7 +1,7 @@
 name: ztime_widget
 description: "ZTime Widget — custom clock with analog face, digital display and Russian localization."
 publish_to: 'none'
-version: 1.0.2
+version: 1.0.3
 
 environment:
   sdk: ^3.12.2
