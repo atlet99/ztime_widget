@@ -212,83 +212,89 @@ class ClockFace extends StatelessWidget {
                     final isToday = i == today;
 
                     return Expanded(
-                      child: Semantics(
-                        label: DateFormat(
-                          'd MMMM, EEEE',
-                          locale,
-                        ).format(dayDate),
-                        button: true,
-                        child: GestureDetector(
-                          onTap: () => _openCalendarForDate(dayDate),
-                          behavior: HitTestBehavior.opaque,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: safePadX * 0.5,
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: WidgetColors.calendarBg,
-                                borderRadius: BorderRadius.circular(
-                                  calHeight * 0.12,
-                                ),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        child: Semantics(
+                          label: DateFormat(
+                            'd MMMM, EEEE',
+                            locale,
+                          ).format(dayDate),
+                          button: true,
+                          child: GestureDetector(
+                            onTap: () => _openCalendarForDate(dayDate),
+                            behavior: HitTestBehavior.opaque,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: safePadX * 0.5,
                               ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  isToday
-                                      ? IntrinsicWidth(
-                                          child: Container(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: calHeight * 0.08,
-                                              vertical: calHeight * 0.02,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                    calHeight * 0.1,
-                                                  ),
-                                            ),
-                                            child: Text(
-                                              dayNum.toString(),
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                color: WidgetColors.textActive,
-                                                fontSize: calNumSize,
-                                                fontWeight: FontWeight.w500,
-                                                height: 1.1,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: WidgetColors.calendarBg,
+                                  borderRadius: BorderRadius.circular(
+                                    calHeight * 0.12,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    isToday
+                                        ? IntrinsicWidth(
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: calHeight * 0.08,
+                                                vertical: calHeight * 0.02,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      calHeight * 0.1,
+                                                    ),
+                                              ),
+                                              child: Text(
+                                                dayNum.toString(),
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color:
+                                                      WidgetColors.textActive,
+                                                  fontSize: calNumSize,
+                                                  fontWeight: FontWeight.w500,
+                                                  height: 1.1,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        )
-                                      : Text(
-                                          dayNum.toString(),
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.55,
+                                          )
+                                        : Text(
+                                            dayNum.toString(),
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.55,
+                                              ),
+                                              fontSize: calNumSize,
+                                              fontWeight: FontWeight.w500,
+                                              height: 1.1,
                                             ),
-                                            fontSize: calNumSize,
-                                            fontWeight: FontWeight.w500,
-                                            height: 1.1,
                                           ),
-                                        ),
-                                  SizedBox(height: calHeight * 0.04),
-                                  Text(
-                                    shortLabels[i],
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: isToday
-                                          ? Colors.white.withValues(alpha: 0.70)
-                                          : Colors.white.withValues(
-                                              alpha: 0.35,
-                                            ),
-                                      fontSize: calLetterSize,
-                                      fontWeight: FontWeight.w400,
-                                      height: 1.1,
+                                    SizedBox(height: calHeight * 0.04),
+                                    Text(
+                                      shortLabels[i],
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: isToday
+                                            ? Colors.white.withValues(
+                                                alpha: 0.70,
+                                              )
+                                            : Colors.white.withValues(
+                                                alpha: 0.35,
+                                              ),
+                                        fontSize: calLetterSize,
+                                        fontWeight: FontWeight.w400,
+                                        height: 1.1,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -393,49 +399,63 @@ class ClockFace extends StatelessWidget {
                     final isToday = i == today;
 
                     return Expanded(
-                      child: GestureDetector(
-                        onTap: () => _openCalendarForDate(dayDate),
-                        behavior: HitTestBehavior.opaque,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: safePadX * 0.3,
-                            vertical: h * 0.004,
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: WidgetColors.calendarBg,
-                              borderRadius: BorderRadius.circular(h * 0.015),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (isToday)
-                                  Container(
-                                    width: h * 0.012,
-                                    height: h * 0.012,
-                                    margin: EdgeInsets.only(
-                                      right: safePadX * 0.4,
-                                    ),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                Text(
-                                  '$dayNum ${shortLabels[i]}',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: isToday
-                                        ? Colors.white
-                                        : Colors.white.withValues(alpha: 0.55),
-                                    fontSize: calNumSize,
-                                    fontWeight: isToday
-                                        ? FontWeight.w500
-                                        : FontWeight.w400,
-                                    height: 1.1,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        child: Semantics(
+                          label: DateFormat(
+                            'd MMMM, EEEE',
+                            locale,
+                          ).format(dayDate),
+                          button: true,
+                          child: GestureDetector(
+                            onTap: () => _openCalendarForDate(dayDate),
+                            behavior: HitTestBehavior.opaque,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: safePadX * 0.3,
+                                vertical: h * 0.004,
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: WidgetColors.calendarBg,
+                                  borderRadius: BorderRadius.circular(
+                                    h * 0.015,
                                   ),
                                 ),
-                              ],
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (isToday)
+                                      Container(
+                                        width: h * 0.012,
+                                        height: h * 0.012,
+                                        margin: EdgeInsets.only(
+                                          right: safePadX * 0.4,
+                                        ),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    Text(
+                                      '$dayNum ${shortLabels[i]}',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: isToday
+                                            ? Colors.white
+                                            : Colors.white.withValues(
+                                                alpha: 0.55,
+                                              ),
+                                        fontSize: calNumSize,
+                                        fontWeight: isToday
+                                            ? FontWeight.w500
+                                            : FontWeight.w400,
+                                        height: 1.1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ),

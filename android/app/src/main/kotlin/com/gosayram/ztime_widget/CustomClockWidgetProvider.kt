@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.provider.CalendarContract
 import android.util.Log
 import android.util.TypedValue
 import android.widget.RemoteViews
@@ -114,29 +113,21 @@ class CustomClockWidgetProvider : HomeWidgetProvider() {
             Log.w("ZTimeWidget", "Dynamic sizing failed", e)
         }
 
-        // Calendar tap → open system calendar at today's date
+        // Widget tap → open the app
         try {
-            val todayStart = java.util.Calendar.getInstance().apply {
-                set(java.util.Calendar.HOUR_OF_DAY, 0)
-                set(java.util.Calendar.MINUTE, 0)
-                set(java.util.Calendar.SECOND, 0)
-                set(java.util.Calendar.MILLISECOND, 0)
-            }.timeInMillis
-
-            val calendarIntent = Intent(Intent.ACTION_VIEW).apply {
-                data = CalendarContract.CONTENT_URI
-                putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, todayStart)
-                putExtra(CalendarContract.EXTRA_EVENT_END_TIME, todayStart + 86400000)
-                putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, true)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("from_widget", true)
             }
-            val pendingIntent = PendingIntent.getActivity(
-                context, 0, calendarIntent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            views.setOnClickPendingIntent(R.id.widget_image, pendingIntent)
+            if (launchIntent != null) {
+                val pendingIntent = PendingIntent.getActivity(
+                    context, 0, launchIntent,
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                )
+                views.setOnClickPendingIntent(R.id.widget_image, pendingIntent)
+            }
         } catch (e: Exception) {
-            Log.w("ZTimeWidget", "Calendar PendingIntent failed", e)
+            Log.w("ZTimeWidget", "Launch PendingIntent failed", e)
         }
 
         // Load Flutter-rendered background
