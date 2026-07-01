@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/atlet99/ztime_widget/compare/v1.0.1...HEAD)
+## [1.0.2](https://github.com/atlet99/ztime_widget/compare/v1.0.1...v1.0.2) - 2026-07-01
 
 ### Features
 - Adjust clock face layout for landscape tablets ([a63f98b](https://github.com/atlet99/ztime_widget/commit/a63f98b42df6e1d54cb1f5ad5c76ce8cfac900b4))
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update Makefile build targets for Flutter APK builds ([79070c8](https://github.com/atlet99/ztime_widget/commit/79070c89e9faf955ef3629f0d4215144dda54357))
 - Layout to flex-based adaptive design ([47f8a53](https://github.com/atlet99/ztime_widget/commit/47f8a53132b3e67274e207379ea9005c0b3fe79a))
 - Refactor clock face and battery page layouts ([bed648c](https://github.com/atlet99/ztime_widget/commit/bed648cf71cdcf03aaa230b0a33b16f62c12e800))
+- Bump CHANGELOG ([e326b9a](https://github.com/atlet99/ztime_widget/commit/e326b9ac485291cc8e8140be9eb5d8226fb9c13b))
 ## [1.0.1](https://github.com/atlet99/ztime_widget/releases/tag/v1.0.1) - 2026-06-30
 
 ### Bug Fixes
