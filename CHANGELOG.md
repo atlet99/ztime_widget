@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/atlet99/ztime_widget/compare/v1.0.2...HEAD)
+## [1.0.3](https://github.com/atlet99/ztime_widget/compare/v1.0.2...v1.0.3) - 2026-07-01
 
 ### Bug Fixes
 - Adjust alpha values and add await to render ([12368ed](https://github.com/atlet99/ztime_widget/commit/12368ed6b5c72b57f8a1ed2c4f86523cb34201bf))
@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update fontWeight to w600 in widget PNG renderer ([521d999](https://github.com/atlet99/ztime_widget/commit/521d999bb0baff2b7b7656bc35850ba4ec89c922))
 - Bump CHANGELOG and fix locale mapping in PNG renderer ([ed60d59](https://github.com/atlet99/ztime_widget/commit/ed60d592916f3e9f7557268e1a133b18c3af0dd2))
 - Update widget click to open the app ([5740c82](https://github.com/atlet99/ztime_widget/commit/5740c829c0a67011da64976b1b02ead9aab50fd0))
+- Bump CHANGELOG ([50b5066](https://github.com/atlet99/ztime_widget/commit/50b5066e175674afe9e86d8f859f41c27e7a51b8))
 ## [1.0.2](https://github.com/atlet99/ztime_widget/compare/v1.0.1...v1.0.2) - 2026-07-01
 
 ### Features
