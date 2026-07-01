@@ -127,38 +127,31 @@ class WidgetPngRenderer {
 
     final tp = TextPainter(textDirection: ui.TextDirection.ltr);
 
-    // Date — top-right
+    // Date — top-right (with glow)
     final dateStr = DateFormat(AppFormats.dateShort, locale).format(now);
-    tp.text = TextSpan(
-      text: dateStr,
-      style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.85),
-        fontSize: dateFontSize,
-        fontWeight: FontWeight.w400,
-        height: 1.1,
-      ),
-    );
-    tp.layout();
-    tp.paint(canvas, Offset(w - safePadX - w * 0.05 - tp.width, dateTop));
-
-    // Day name
-    final dayName = DateFormat(AppFormats.weekdayFull, locale).format(now);
-    tp.text = TextSpan(
-      text: dayName,
-      style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.70),
-        fontSize: dayNameSize,
-        fontWeight: FontWeight.w400,
-        height: 1.1,
-      ),
-    );
-    tp.layout();
-    tp.paint(
+    const dateX = w - safePadX - w * 0.05;
+    _paintGlowingText(
       canvas,
-      Offset(
-        w - safePadX - w * 0.05 - tp.width,
-        dateTop + dateFontSize * 1.1 + 4,
-      ),
+      tp,
+      text: dateStr,
+      x: dateX,
+      y: dateTop,
+      fontSize: dateFontSize,
+      fontWeight: FontWeight.w400,
+      rightAligned: true,
+    );
+
+    // Day name (with glow)
+    final dayName = DateFormat(AppFormats.weekdayFull, locale).format(now);
+    _paintGlowingText(
+      canvas,
+      tp,
+      text: dayName,
+      x: dateX,
+      y: dateTop + dateFontSize * 1.1 + 4,
+      fontSize: dayNameSize,
+      fontWeight: FontWeight.w400,
+      rightAligned: true,
     );
 
     // Calendar strip
@@ -267,6 +260,67 @@ class WidgetPngRenderer {
     );
 
     image.dispose();
+  }
+
+  /// Paints text with 3-layer glow: blurred backdrop, stroke outline, filled top.
+  static void _paintGlowingText(
+    ui.Canvas canvas,
+    TextPainter tp, {
+    required String text,
+    required double x,
+    required double y,
+    required double fontSize,
+    required FontWeight fontWeight,
+    bool rightAligned = false,
+  }) {
+    final style = TextStyle(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      height: 1.1,
+    );
+
+    // Layer 1: blurred blue backdrop
+    canvas.saveLayer(
+      null,
+      Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+    );
+    tp.text = TextSpan(
+      text: text,
+      style: style.copyWith(color: const Color(0xCCB3E5FC)),
+    );
+    tp.layout();
+    final dx1 = rightAligned ? x - tp.width : x;
+    tp.paint(canvas, Offset(dx1, y));
+    canvas.restore();
+
+    // Layer 2: stroke outline
+    tp.text = TextSpan(
+      text: text,
+      style: style.copyWith(
+        foreground: Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = fontSize * 0.02
+          ..color = Colors.white,
+      ),
+    );
+    tp.layout();
+    final dx2 = rightAligned ? x - tp.width : x;
+    tp.paint(canvas, Offset(dx2, y));
+
+    // Layer 3: filled top with shadow
+    tp.text = TextSpan(
+      text: text,
+      style: style.copyWith(
+        color: Colors.white,
+        shadows: [
+          Shadow(color: Colors.white, blurRadius: fontSize * 0.08),
+          const Shadow(color: Color(0xFF81D4FA), blurRadius: 12),
+        ],
+      ),
+    );
+    tp.layout();
+    final dx3 = rightAligned ? x - tp.width : x;
+    tp.paint(canvas, Offset(dx3, y));
   }
 
   static Future<GlassStyle> _loadGlassStyle() async {

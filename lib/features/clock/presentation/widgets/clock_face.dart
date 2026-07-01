@@ -1,8 +1,7 @@
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ztime_widget/core/constants/formats.dart';
@@ -125,7 +124,6 @@ class ClockFace extends StatelessWidget {
     String timeStr,
   ) {
     // Font sizes: percentage of h — works on any screen
-    final timeFontSize = h * 0.10;
     final dateFontSize = h * 0.022;
     final dayNameSize = h * 0.018;
 
@@ -156,11 +154,7 @@ class ClockFace extends StatelessWidget {
                     Expanded(
                       child: Align(
                         alignment: Alignment.bottomLeft,
-                        child: _buildGlowingTime(
-                          timeStr,
-                          timeFontSize,
-                          minFontSize: 30,
-                        ),
+                        child: _buildGlowingTime(timeStr),
                       ),
                     ),
 
@@ -314,7 +308,6 @@ class ClockFace extends StatelessWidget {
     String timeStr,
   ) {
     // Font sizes: percentage of h
-    final timeFontSize = h * 0.30;
     final dateFontSize = h * 0.065;
     final dayNameSize = h * 0.055;
 
@@ -342,7 +335,7 @@ class ClockFace extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Time with neon glow
-                    _buildGlowingTime(timeStr, timeFontSize, minFontSize: 20),
+                    _buildGlowingTime(timeStr),
                     SizedBox(height: h * 0.02),
                     Text(
                       DateFormat(AppFormats.dateShort, locale).format(time),
@@ -449,71 +442,102 @@ class ClockFace extends StatelessWidget {
 
   // ─── NEON GLOW TIME ───────────────────────────────────────────────
   // 3 layers: blurred backdrop, stroke outline, filled top with gradient mask
+  // All sizes derived from LayoutBuilder — no hardcoded fontSize.
 
-  Widget _buildGlowingTime(
-    String timeStr,
-    double fontSize, {
-    required double minFontSize,
-  }) {
-    return Stack(
-      alignment: Alignment.centerLeft,
-      children: [
-        // Layer 1: blurred blue ambient glow on background
-        ImageFiltered(
-          imageFilter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-          child: Text(
-            timeStr,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xCCB3E5FC),
-            ),
-          ),
-        ),
+  Widget _buildGlowingTime(String timeStr) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxW = constraints.maxWidth;
+        final fontSize = _fitFontSize(timeStr, maxW);
+        final sw = fontSize * 0.03;
 
-        // Layer 2: stroke outline — always visible, thin white contour
-        Text(
-          timeStr,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.w700,
-            foreground: Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 1.6
-              ..color = Colors.white,
-          ),
-        ),
+        final style = TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w700,
+          height: 1.0,
+        );
 
-        // Layer 3: filled top half only (gradient mask cuts off bottom)
-        ShaderMask(
-          blendMode: BlendMode.dstIn,
-          shaderCallback: (bounds) => const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.white, Colors.white, Colors.transparent],
-            stops: [0.0, 0.45, 0.75],
-          ).createShader(bounds),
-          child: AutoSizeText(
-            timeStr,
-            maxLines: 1,
-            minFontSize: minFontSize,
-            maxFontSize: fontSize,
-            stepGranularity: 1,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              letterSpacing: 0.04,
-              height: 0.85,
-              shadows: const [
-                Shadow(color: Colors.white, blurRadius: 6),
-                Shadow(color: Color(0xFF81D4FA), blurRadius: 18),
+        return SizedBox(
+          width: maxW,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Layer 1: blurred blue ambient glow
+                ImageFiltered(
+                  imageFilter: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                  child: Text(
+                    timeStr,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.visible,
+                    style: style.copyWith(color: const Color(0xCCB3E5FC)),
+                  ),
+                ),
+
+                // Layer 2: stroke outline
+                Text(
+                  timeStr,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.visible,
+                  style: style.copyWith(
+                    foreground: Paint()
+                      ..style = PaintingStyle.stroke
+                      ..strokeWidth = sw
+                      ..color = Colors.white,
+                  ),
+                ),
+
+                // Layer 3: filled top with gradient mask
+                ShaderMask(
+                  blendMode: BlendMode.dstIn,
+                  shaderCallback: (bounds) => const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.white, Colors.white, Colors.transparent],
+                    stops: [0.0, 0.45, 0.75],
+                  ).createShader(bounds),
+                  child: Text(
+                    timeStr,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.visible,
+                    style: style.copyWith(
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(color: Colors.white, blurRadius: fontSize * 0.1),
+                        const Shadow(color: Color(0xFF81D4FA), blurRadius: 18),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-        ),
-      ],
+        );
+      },
     );
+  }
+
+  double _fitFontSize(String text, double maxWidth) {
+    const weight = FontWeight.w700;
+    var size = maxWidth;
+    final painter = TextPainter(
+      textDirection: ui.TextDirection.ltr,
+      maxLines: 1,
+    );
+    do {
+      size -= 1;
+      painter.text = TextSpan(
+        text: text,
+        style: TextStyle(fontSize: size, fontWeight: weight),
+      );
+      painter.layout();
+    } while (painter.width > maxWidth && size > 1);
+    return size;
   }
 
   // ─── SHARED ────────────────────────────────────────────────────────
@@ -533,7 +557,7 @@ class ClockFace extends StatelessWidget {
     return Positioned.fill(
       child: switch (support) {
         TransparencySupport.full => BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Container(color: Colors.white.withValues(alpha: 0.08)),
         ),
         TransparencySupport.partial => Container(
