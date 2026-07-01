@@ -125,6 +125,23 @@ class WidgetPngRenderer {
 
     final dateTop = h * 0.18;
 
+    // Text scrims — radial gradients under text zones for contrast on light wallpapers
+    const scrimRadius =
+        WidgetDimensions.baseWidth * WidgetDimensions.scrimRadius;
+    final scrimPaint = Paint()
+      ..shader = ui.Gradient.radial(
+        Offset.zero,
+        scrimRadius,
+        [const Color(0x40000000), const Color(0x00000000)],
+        [0.0, 1.0],
+      );
+    canvas.drawCircle(Offset(w - safePadX, h * 0.22), scrimRadius, scrimPaint);
+    canvas.drawCircle(
+      Offset(w / 2, calTop + calHeight / 2),
+      scrimRadius,
+      scrimPaint,
+    );
+
     final tp = TextPainter(textDirection: ui.TextDirection.ltr);
 
     // Date — top-right (with glow)
@@ -206,7 +223,7 @@ class WidgetPngRenderer {
           ),
           const Radius.circular(WidgetDimensions.pillRadius),
         );
-        canvas.drawRRect(pillRect, Paint()..color = Colors.white);
+        canvas.drawRRect(pillRect, Paint()..color = WidgetColors.pillBg);
       } else {
         tp.text = TextSpan(
           text: dayText,

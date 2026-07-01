@@ -17,6 +17,10 @@ import 'package:ztime_widget/core/widget/widget_constants.dart';
 /// Adapts to any screen: phone portrait, phone landscape, tablet portrait,
 /// tablet landscape.
 ///
+/// Neon-blur (ImageFilter + ShaderMask) is in-app ONLY.
+/// RemoteViews does not support BackdropFilter — for the home screen widget,
+/// glass blur is baked into the static PNG via WidgetPngRenderer.
+///
 /// Portrait:
 ///   Column
 ///   ├── Safe padding
@@ -443,10 +447,12 @@ class ClockFace extends StatelessWidget {
   // ─── NEON GLOW TIME ───────────────────────────────────────────────
   // 3 layers: blurred backdrop, stroke outline, filled top with gradient mask
   // All sizes derived from LayoutBuilder — no hardcoded fontSize.
+  // Wrapped in RepaintBoundary — glow only repaints when time string changes.
 
   Widget _buildGlowingTime(String timeStr) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
+    return RepaintBoundary(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
         final maxW = constraints.maxWidth;
         final fontSize = _fitFontSize(timeStr, maxW);
         final sw = fontSize * 0.03;
