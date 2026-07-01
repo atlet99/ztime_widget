@@ -213,7 +213,7 @@ class WidgetPngRenderer {
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.70),
             fontSize: calNumSize,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w600,
             height: 1.1,
           ),
         );
@@ -232,7 +232,7 @@ class WidgetPngRenderer {
               ? Colors.white.withValues(alpha: 0.80)
               : Colors.white.withValues(alpha: 0.55),
           fontSize: calLetterSize,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w600,
           height: 1.1,
         ),
       );
