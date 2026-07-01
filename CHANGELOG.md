@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Features
 - Adjust clock face layout for landscape tablets ([a63f98b](https://github.com/atlet99/ztime_widget/commit/a63f98b42df6e1d54cb1f5ad5c76ce8cfac900b4))
 - Add PNG rendering for glass style and battery pages ([7d027eb](https://github.com/atlet99/ztime_widget/commit/7d027eb28ab01bef0474909de133a25a6a837c9c))
+- Add PNG rendering for glass style and battery pages ([6ae3a2d](https://github.com/atlet99/ztime_widget/commit/6ae3a2d5af0f3bb49c4966e0d4c8d46f0fbd3675))
 
 ### Refactor
 - Improve cliff settings ([c192b21](https://github.com/atlet99/ztime_widget/commit/c192b21cce16b373422ff1b9b63da2586252c871))
