@@ -126,7 +126,7 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
                       await LocaleSettings.useDeviceLocale();
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.setInt(PrefKeys.appLocale, 0);
-                      WidgetPngRenderer.render();
+                      await WidgetPngRenderer.render();
                     },
                   ),
                   ...AppLocale.values.map((locale) {
@@ -144,7 +144,7 @@ class _HuaweiBatteryPageState extends ConsumerState<HuaweiBatteryPage> {
                         final index = AppLocale.values.indexOf(locale);
                         final prefs = await SharedPreferences.getInstance();
                         await prefs.setInt(PrefKeys.appLocale, index + 1);
-                        WidgetPngRenderer.render();
+                        await WidgetPngRenderer.render();
                       },
                     );
                   }),

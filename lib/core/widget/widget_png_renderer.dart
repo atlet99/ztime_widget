@@ -121,7 +121,7 @@ class WidgetPngRenderer {
     final calHeight = h * 0.32;
     final calTop = h - safePadY - calHeight;
     const calNumSize = contentW * 0.063;
-    const calLetterSize = contentW * 0.030;
+    const calLetterSize = contentW * 0.038;
 
     final dateTop = h * 0.18;
 
@@ -190,7 +190,7 @@ class WidgetPngRenderer {
           style: const TextStyle(
             color: WidgetColors.textActive,
             fontSize: calNumSize,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w600,
             height: 1.1,
           ),
         );
@@ -211,7 +211,7 @@ class WidgetPngRenderer {
         tp.text = TextSpan(
           text: dayText,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.55),
+            color: Colors.white.withValues(alpha: 0.70),
             fontSize: calNumSize,
             fontWeight: FontWeight.w400,
             height: 1.1,
@@ -229,8 +229,8 @@ class WidgetPngRenderer {
         text: shortLabels[i],
         style: TextStyle(
           color: isToday
-              ? Colors.white.withValues(alpha: 0.70)
-              : Colors.white.withValues(alpha: 0.35),
+              ? Colors.white.withValues(alpha: 0.80)
+              : Colors.white.withValues(alpha: 0.55),
           fontSize: calLetterSize,
           fontWeight: FontWeight.w400,
           height: 1.1,
