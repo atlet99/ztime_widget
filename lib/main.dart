@@ -40,9 +40,9 @@ void main() async {
   if (localeIndex == 0) {
     await LocaleSettings.useDeviceLocale();
   } else if (localeIndex == 1) {
-    await LocaleSettings.setLocale(AppLocale.ru);
-  } else {
     await LocaleSettings.setLocale(AppLocale.en);
+  } else {
+    await LocaleSettings.setLocale(AppLocale.ru);
   }
 
   // Generate widget PNG immediately on startup

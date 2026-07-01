@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/atlet99/ztime_widget/compare/v1.0.2...HEAD)
 
+### Bug Fixes
+- Adjust alpha values and add await to render ([12368ed](https://github.com/atlet99/ztime_widget/commit/12368ed6b5c72b57f8a1ed2c4f86523cb34201bf))
+
 ### Refactor
 - Bump CHANGELOG ([b85e463](https://github.com/atlet99/ztime_widget/commit/b85e463b0a7a9ffea7011a297b5f068b525ae93e))
+- Bump CHANGELOG and version ([65b4670](https://github.com/atlet99/ztime_widget/commit/65b4670978999971c5d02f09b68a94fc30132217))
+- Update fontWeight to w600 in widget PNG renderer ([521d999](https://github.com/atlet99/ztime_widget/commit/521d999bb0baff2b7b7656bc35850ba4ec89c922))
 ## [1.0.2](https://github.com/atlet99/ztime_widget/compare/v1.0.1...v1.0.2) - 2026-07-01
 
 ### Features

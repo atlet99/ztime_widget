@@ -255,6 +255,10 @@ class WidgetPngRenderer {
       pngBytes,
       extension: 'png',
     );
+
+    // Small delay to ensure file is flushed to disk before widget reads it
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+
     await HomeWidget.updateWidget(
       qualifiedAndroidName: AndroidConstants.widgetProvider,
     );
@@ -330,7 +334,7 @@ class WidgetPngRenderer {
     return GlassStyle.coldGlass;
   }
 
-  /// Reads saved locale preference (0=system, 1=ru, 2=en).
+  /// Reads saved locale preference (0=system, 1=en, 2=ru).
   /// For system locale, detects from device.
   static Future<String> _loadLocaleCode() async {
     final prefs = await SharedPreferences.getInstance();
@@ -339,7 +343,7 @@ class WidgetPngRenderer {
       final deviceLang = ui.PlatformDispatcher.instance.locale.languageCode;
       return deviceLang == 'ru' ? 'ru' : 'en';
     }
-    return index == 1 ? 'ru' : 'en';
+    return index == 1 ? 'en' : 'ru';
   }
 
   static Future<ui.Image> _loadAssetImage(
