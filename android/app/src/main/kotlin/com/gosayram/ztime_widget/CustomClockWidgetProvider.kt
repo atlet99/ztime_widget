@@ -40,6 +40,8 @@ class CustomClockWidgetProvider : HomeWidgetProvider() {
                 editor.apply()
                 sp
             }
+        // PNG re-renders on next app launch with updated dimensions.
+        // TextClock + dynamic sizing adapts immediately via reflection.
         renderWidget(context, appWidgetManager, widgetId, widgetData)
     }
 

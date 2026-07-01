@@ -52,10 +52,14 @@ class _ClockPageState extends ConsumerState<ClockPage> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Consumer — only this subtree rebuilds every second
+          // Consumer — only this subtree rebuilds when time string changes (every minute)
           Consumer(
             builder: (context, ref, _) {
-              final time = ref.watch(clockSecondsProvider);
+              final time = ref.watch(
+                clockSecondsProvider.select(
+                  (t) => DateTime(t.year, t.month, t.day, t.hour, t.minute),
+                ),
+              );
               final timeLabel = AppDateUtils.formatTime(time, locale);
               return Semantics(
                 label: context.t.timeCurrent(time: timeLabel),

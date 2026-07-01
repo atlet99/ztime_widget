@@ -212,74 +212,84 @@ class ClockFace extends StatelessWidget {
                     final isToday = i == today;
 
                     return Expanded(
-                      child: GestureDetector(
-                        onTap: () => _openCalendarForDate(dayDate),
-                        behavior: HitTestBehavior.opaque,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: safePadX * 0.5,
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: WidgetColors.calendarBg,
-                              borderRadius: BorderRadius.circular(
-                                calHeight * 0.12,
-                              ),
+                      child: Semantics(
+                        label: DateFormat(
+                          'd MMMM, EEEE',
+                          locale,
+                        ).format(dayDate),
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () => _openCalendarForDate(dayDate),
+                          behavior: HitTestBehavior.opaque,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: safePadX * 0.5,
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                isToday
-                                    ? IntrinsicWidth(
-                                        child: Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: calHeight * 0.08,
-                                            vertical: calHeight * 0.02,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(
-                                              calHeight * 0.1,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            dayNum.toString(),
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: WidgetColors.textActive,
-                                              fontSize: calNumSize,
-                                              fontWeight: FontWeight.w500,
-                                              height: 1.1,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    : Text(
-                                        dayNum.toString(),
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.55,
-                                          ),
-                                          fontSize: calNumSize,
-                                          fontWeight: FontWeight.w500,
-                                          height: 1.1,
-                                        ),
-                                      ),
-                                SizedBox(height: calHeight * 0.04),
-                                Text(
-                                  shortLabels[i],
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: isToday
-                                        ? Colors.white.withValues(alpha: 0.70)
-                                        : Colors.white.withValues(alpha: 0.35),
-                                    fontSize: calLetterSize,
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.1,
-                                  ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: WidgetColors.calendarBg,
+                                borderRadius: BorderRadius.circular(
+                                  calHeight * 0.12,
                                 ),
-                              ],
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  isToday
+                                      ? IntrinsicWidth(
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: calHeight * 0.08,
+                                              vertical: calHeight * 0.02,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    calHeight * 0.1,
+                                                  ),
+                                            ),
+                                            child: Text(
+                                              dayNum.toString(),
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: WidgetColors.textActive,
+                                                fontSize: calNumSize,
+                                                fontWeight: FontWeight.w500,
+                                                height: 1.1,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      : Text(
+                                          dayNum.toString(),
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.55,
+                                            ),
+                                            fontSize: calNumSize,
+                                            fontWeight: FontWeight.w500,
+                                            height: 1.1,
+                                          ),
+                                        ),
+                                  SizedBox(height: calHeight * 0.04),
+                                  Text(
+                                    shortLabels[i],
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: isToday
+                                          ? Colors.white.withValues(alpha: 0.70)
+                                          : Colors.white.withValues(
+                                              alpha: 0.35,
+                                            ),
+                                      fontSize: calLetterSize,
+                                      fontWeight: FontWeight.w400,
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -453,78 +463,85 @@ class ClockFace extends StatelessWidget {
     return RepaintBoundary(
       child: LayoutBuilder(
         builder: (context, constraints) {
-        final maxW = constraints.maxWidth;
-        final fontSize = _fitFontSize(timeStr, maxW);
-        final sw = fontSize * 0.03;
+          final maxW = constraints.maxWidth;
+          final fontSize = _fitFontSize(timeStr, maxW);
+          final sw = fontSize * 0.03;
 
-        final style = TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w700,
-          height: 1.0,
-        );
+          final style = TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w700,
+            height: 1.0,
+          );
 
-        return SizedBox(
-          width: maxW,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Layer 1: blurred blue ambient glow
-                ImageFiltered(
-                  imageFilter: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                  child: Text(
-                    timeStr,
-                    maxLines: 1,
-                    softWrap: false,
-                    overflow: TextOverflow.visible,
-                    style: style.copyWith(color: const Color(0xCCB3E5FC)),
+          return SizedBox(
+            width: maxW,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Layer 1: blurred blue ambient glow
+                  ImageFiltered(
+                    imageFilter: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                    child: Text(
+                      timeStr,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.visible,
+                      style: style.copyWith(color: const Color(0xCCB3E5FC)),
+                    ),
                   ),
-                ),
 
-                // Layer 2: stroke outline
-                Text(
-                  timeStr,
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.visible,
-                  style: style.copyWith(
-                    foreground: Paint()
-                      ..style = PaintingStyle.stroke
-                      ..strokeWidth = sw
-                      ..color = Colors.white,
-                  ),
-                ),
-
-                // Layer 3: filled top with gradient mask
-                ShaderMask(
-                  blendMode: BlendMode.dstIn,
-                  shaderCallback: (bounds) => const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.white, Colors.white, Colors.transparent],
-                    stops: [0.0, 0.45, 0.75],
-                  ).createShader(bounds),
-                  child: Text(
+                  // Layer 2: stroke outline
+                  Text(
                     timeStr,
                     maxLines: 1,
                     softWrap: false,
                     overflow: TextOverflow.visible,
                     style: style.copyWith(
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(color: Colors.white, blurRadius: fontSize * 0.1),
-                        const Shadow(color: Color(0xFF81D4FA), blurRadius: 18),
-                      ],
+                      foreground: Paint()
+                        ..style = PaintingStyle.stroke
+                        ..strokeWidth = sw
+                        ..color = Colors.white,
                     ),
                   ),
-                ),
-              ],
+
+                  // Layer 3: filled top with gradient mask
+                  ShaderMask(
+                    blendMode: BlendMode.dstIn,
+                    shaderCallback: (bounds) => const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.white, Colors.white, Colors.transparent],
+                      stops: [0.0, 0.45, 0.75],
+                    ).createShader(bounds),
+                    child: Text(
+                      timeStr,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.visible,
+                      style: style.copyWith(
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.white,
+                            blurRadius: fontSize * 0.1,
+                          ),
+                          const Shadow(
+                            color: Color(0xFF81D4FA),
+                            blurRadius: 18,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
