@@ -10,10 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Bug Fixes
 - Adjust alpha values and add await to render ([12368ed](https://github.com/atlet99/ztime_widget/commit/12368ed6b5c72b57f8a1ed2c4f86523cb34201bf))
 
+### Features
+- Add neon blur support and update color palette ([1731729](https://github.com/atlet99/ztime_widget/commit/1731729357450919183d45819f3a0ec6d3be7312))
+- Improve clock face rendering with blur and minute precision ([891bf7c](https://github.com/atlet99/ztime_widget/commit/891bf7c6d1f791be47cf15dcc325985d69e804c7))
+
 ### Refactor
 - Bump CHANGELOG ([b85e463](https://github.com/atlet99/ztime_widget/commit/b85e463b0a7a9ffea7011a297b5f068b525ae93e))
 - Bump CHANGELOG and version ([65b4670](https://github.com/atlet99/ztime_widget/commit/65b4670978999971c5d02f09b68a94fc30132217))
 - Update fontWeight to w600 in widget PNG renderer ([521d999](https://github.com/atlet99/ztime_widget/commit/521d999bb0baff2b7b7656bc35850ba4ec89c922))
+- Bump CHANGELOG and fix locale mapping in PNG renderer ([ed60d59](https://github.com/atlet99/ztime_widget/commit/ed60d592916f3e9f7557268e1a133b18c3af0dd2))
+- Update widget click to open the app ([5740c82](https://github.com/atlet99/ztime_widget/commit/5740c829c0a67011da64976b1b02ead9aab50fd0))
 ## [1.0.2](https://github.com/atlet99/ztime_widget/compare/v1.0.1...v1.0.2) - 2026-07-01
 
 ### Features
